@@ -1,0 +1,21 @@
+﻿# Maven
+**/target/
+**/logs/
+
+# IDE
+.idea/
+.project
+.classpath
+.settings/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Java
+*.log
+
+# Docker
+**/.dockerignore
+**/build/
