@@ -19,3 +19,5 @@ Thumbs.db
 # Docker
 **/.dockerignore
 **/build/
+
+.serena
