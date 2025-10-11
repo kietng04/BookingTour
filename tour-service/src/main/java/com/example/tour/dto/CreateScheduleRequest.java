@@ -1,0 +1,24 @@
+package com.example.tour.dto;
+
+public class CreateScheduleRequest {
+    private Integer dayNumber;
+    private String scheduleDescription;
+
+    // Getters and Setters
+    public Integer getDayNumber() {
+        return dayNumber;
+    }
+
+    public void setDayNumber(Integer dayNumber) {
+        this.dayNumber = dayNumber;
+    }
+
+    public String getScheduleDescription() {
+        return scheduleDescription;
+    }
+
+    public void setScheduleDescription(String scheduleDescription) {
+        this.scheduleDescription = scheduleDescription;
+    }
+}
+
