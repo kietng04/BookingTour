@@ -16,6 +16,12 @@ spring:
           predicates:
             - Path=/api/users/**
           filters:
+            - StripPrefix=2
+        - id: tour-service
+          uri: lb://tour-service
+          predicates:
+            - Path=/api/tours/**
+          filters:
             - StripPrefix=1
 
 eureka:
