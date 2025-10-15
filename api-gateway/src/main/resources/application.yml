@@ -23,6 +23,18 @@ spring:
             - Path=/api/tours/**
           filters:
             - StripPrefix=1
+        - id: booking-service
+          uri: lb://booking-service
+          predicates:
+            - Path=/api/bookings/**
+          filters:
+            - StripPrefix=1
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - StripPrefix=1
 
 eureka:
   client:
