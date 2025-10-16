@@ -1,12 +1,24 @@
 package com.example.tour.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "tours")
 public class Tour {
 
@@ -51,31 +63,38 @@ public class Tour {
     private TourStatus status;
 
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<TourSchedule> schedules = new ArrayList<>();
-
+    
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<TourImage> images = new ArrayList<>();
 
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Departure> departures = new ArrayList<>();
 
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<TourDiscount> discounts = new ArrayList<>();
 
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<TourLog> logs = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         if (status == null) {
-            status = TourStatus.Active;
+            status = TourStatus.ACTIVE;
         }
     }
 
+
     public enum TourStatus {
-        Active, Unactive, Full, End
+        ACTIVE, UNACTIVE, FULL, END
     }
+
 
     // Getters and Setters
     public Long getId() {
