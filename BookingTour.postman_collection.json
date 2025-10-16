@@ -1,0 +1,106 @@
+{
+	"info": {
+		"_postman_id": "26db44f8-f40e-43fe-bd76-c4f1af8ee7f1",
+		"name": "BookingTour",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "39961844"
+	},
+	"item": [
+		{
+			"name": "OnlyFilter",
+			"item": [
+				{
+					"name": "RegionAndProvince",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/tours?regionId=1&provinceId=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tours"
+							],
+							"query": [
+								{
+									"key": "regionId",
+									"value": "1"
+								},
+								{
+									"key": "provinceId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Region",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/tours?regionId=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tours"
+							],
+							"query": [
+								{
+									"key": "regionId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Keyword",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/tours?keyword=lo",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tours"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "lo"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "getById",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/api/tours/1"
+			},
+			"response": []
+		}
+	]
+}
