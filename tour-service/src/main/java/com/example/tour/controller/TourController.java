@@ -31,7 +31,10 @@ public class TourController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        Pageable pageable = PageRequest.of(page, size);
+        // lấy tour từ ngày mới nhất dc tạo ra
+        Pageable pageable = PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
+
+        // Get tours with filters
         Page<Tour> tours = tourService.listTours(regionId, provinceId, status, keyword, pageable);
         return ResponseEntity.ok(tours);
     }

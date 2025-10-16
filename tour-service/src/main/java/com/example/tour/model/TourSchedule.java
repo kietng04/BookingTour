@@ -1,5 +1,7 @@
 package com.example.tour.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -11,8 +13,10 @@ public class TourSchedule {
     @Column(name = "schedule_id")
     private Long id;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tour_id", nullable = false)
+    @JsonBackReference
     private Tour tour;
 
     @Column(name = "day_number", nullable = false)
