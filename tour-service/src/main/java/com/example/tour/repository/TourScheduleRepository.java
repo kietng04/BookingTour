@@ -9,7 +9,6 @@ import java.util.List;
 @Repository
 public interface TourScheduleRepository extends JpaRepository<TourSchedule, Long> {
 
-    // Find all schedules for a tour, ordered by day number
     List<TourSchedule> findByTourIdOrderByDayNumber(Long tourId);
 }
 

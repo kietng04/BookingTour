@@ -16,10 +16,6 @@ public class DiscountController {
     @Autowired
     private DiscountService discountService;
 
-    /**
-     * GET /tours/{tourId}/discounts?activeOnly=true|false
-     * List discounts for a tour
-     */
     @GetMapping
     public ResponseEntity<List<TourDiscount>> listDiscounts(@PathVariable Long tourId,
                                                              @RequestParam(defaultValue = "false") boolean activeOnly) {
@@ -27,10 +23,6 @@ public class DiscountController {
         return ResponseEntity.ok(discounts);
     }
 
-    /**
-     * POST /tours/{tourId}/discounts [ADMIN]
-     * Add discount to tour
-     */
     @PostMapping
     public ResponseEntity<TourDiscount> addDiscount(@PathVariable Long tourId,
                                                      @RequestBody CreateDiscountRequest request) {
@@ -38,10 +30,6 @@ public class DiscountController {
         return ResponseEntity.ok(discount);
     }
 
-    /**
-     * PUT /tours/{tourId}/discounts/{discountId} [ADMIN]
-     * Update discount
-     */
     @PutMapping("/{discountId}")
     public ResponseEntity<TourDiscount> updateDiscount(@PathVariable Long tourId,
                                                         @PathVariable Long discountId,
@@ -50,10 +38,6 @@ public class DiscountController {
         return ResponseEntity.ok(discount);
     }
 
-    /**
-     * DELETE /tours/{tourId}/discounts/{discountId} [ADMIN]
-     * Delete discount
-     */
     @DeleteMapping("/{discountId}")
     public ResponseEntity<Void> deleteDiscount(@PathVariable Long tourId, @PathVariable Long discountId) {
         discountService.deleteDiscount(tourId, discountId);

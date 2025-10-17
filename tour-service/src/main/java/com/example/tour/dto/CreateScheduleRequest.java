@@ -4,7 +4,6 @@ public class CreateScheduleRequest {
     private Integer dayNumber;
     private String scheduleDescription;
 
-    // Getters and Setters
     public Integer getDayNumber() {
         return dayNumber;
     }

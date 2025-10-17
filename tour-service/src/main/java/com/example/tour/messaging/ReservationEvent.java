@@ -28,7 +28,6 @@ public class ReservationEvent {
         this.userId = userId;
     }
 
-    // Getters and Setters
     public String getEventId() {
         return eventId;
     }

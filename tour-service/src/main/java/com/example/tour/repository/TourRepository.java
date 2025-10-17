@@ -13,24 +13,16 @@ import java.util.List;
 @Repository
 public interface TourRepository extends JpaRepository<Tour, Long> {
 
-    // Filter by region
     Page<Tour> findByRegionId(Integer regionId, Pageable pageable);
 
-    // Filter by province
     Page<Tour> findByProvinceId(Integer provinceId, Pageable pageable);
 
-    // Filter by status
     Page<Tour> findByStatus(Tour.TourStatus status, Pageable pageable);
 
-    
-    // Search by keyword in tourName or description (avoid LOWER on concatenated param to prevent Postgres lower(bytea))
     @Query("SELECT t FROM Tour t WHERE LOWER(t.tourName) LIKE CONCAT('%', LOWER(:keyword), '%') " +
            "OR LOWER(t.description) LIKE CONCAT('%', LOWER(:keyword), '%')")
     Page<Tour> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
-    // Complex filters
-    // ktra ko có region, province sẽ tự động bỏ
-    // ko truyền trạng thái thì sẽ lấy tất cả
        @Query("""
        SELECT t FROM Tour t
        WHERE (:regionId IS NULL OR t.regionId = :regionId)

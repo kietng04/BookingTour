@@ -16,20 +16,12 @@ public class ImageController {
     @Autowired
     private ImageService imageService;
 
-    /**
-     * GET /tours/{tourId}/images
-     * List all images for a tour
-     */
     @GetMapping
     public ResponseEntity<List<TourImage>> listImages(@PathVariable Long tourId) {
         List<TourImage> images = imageService.listImages(tourId);
         return ResponseEntity.ok(images);
     }
 
-    /**
-     * POST /tours/{tourId}/images [ADMIN]
-     * Add image to tour
-     */
     @PostMapping
     public ResponseEntity<TourImage> addImage(@PathVariable Long tourId,
                                                @RequestBody CreateImageRequest request) {
@@ -37,10 +29,6 @@ public class ImageController {
         return ResponseEntity.ok(image);
     }
 
-    /**
-     * PUT /tours/{tourId}/images/{imageId} [ADMIN]
-     * Update image
-     */
     @PutMapping("/{imageId}")
     public ResponseEntity<TourImage> updateImage(@PathVariable Long tourId,
                                                   @PathVariable Long imageId,
@@ -49,10 +37,6 @@ public class ImageController {
         return ResponseEntity.ok(image);
     }
 
-    /**
-     * DELETE /tours/{tourId}/images/{imageId} [ADMIN]
-     * Delete image
-     */
     @DeleteMapping("/{imageId}")
     public ResponseEntity<Void> deleteImage(@PathVariable Long tourId, @PathVariable Long imageId) {
         imageService.deleteImage(tourId, imageId);

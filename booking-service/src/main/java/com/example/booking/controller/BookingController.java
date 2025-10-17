@@ -35,7 +35,6 @@ public class BookingController {
         log.info("   Tour ID: {}, Departure ID: {}, Seats: {}, Amount: {}", 
             request.getTourId(), request.getDepartureId(), request.getSeats(), request.getTotalAmount());
         
-        // Publish payment charge request
         PaymentChargeMessage chargeMessage = new PaymentChargeMessage(
             bookingId, 
             request.getTotalAmount(), 
@@ -55,7 +54,6 @@ public class BookingController {
     public ResponseEntity<BookingResponse> getBooking(@PathVariable String id) {
         log.info("🔍 [BOOKING-SERVICE] Getting booking {}", id);
         
-        // Return stub response
         BookingResponse response = new BookingResponse(
             id, 
             "UNKNOWN", 

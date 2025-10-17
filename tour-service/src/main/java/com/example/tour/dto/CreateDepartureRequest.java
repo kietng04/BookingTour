@@ -7,7 +7,6 @@ public class CreateDepartureRequest {
     private LocalDate endDate;
     private Integer totalSlots;
 
-    // Getters and Setters
     public LocalDate getStartDate() {
         return startDate;
     }

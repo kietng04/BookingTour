@@ -4,10 +4,9 @@ import java.io.Serializable;
 
 public class PaymentResultMessage implements Serializable {
     private String bookingId;
-    private String status; // "COMPLETED" or "FAILED"
+    private String status;
     private String message;
 
-    // Constructors
     public PaymentResultMessage() {}
 
     public PaymentResultMessage(String bookingId, String status, String message) {
@@ -16,7 +15,6 @@ public class PaymentResultMessage implements Serializable {
         this.message = message;
     }
 
-    // Getters and Setters
     public String getBookingId() {
         return bookingId;
     }
