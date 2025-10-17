@@ -9,7 +9,6 @@ import java.util.List;
 @Repository
 public interface TourLogRepository extends JpaRepository<TourLog, Long> {
 
-    // Find all logs for a tour
     List<TourLog> findByTourIdOrderByChangedAtDesc(Long tourId);
 }
 

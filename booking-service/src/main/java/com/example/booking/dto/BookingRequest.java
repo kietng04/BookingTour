@@ -7,7 +7,6 @@ public class BookingRequest {
     private Integer seats;
     private Double totalAmount;
 
-    // Constructors
     public BookingRequest() {}
 
     public BookingRequest(Long userId, Long tourId, Long departureId, Integer seats, Double totalAmount) {
@@ -18,7 +17,6 @@ public class BookingRequest {
         this.totalAmount = totalAmount;
     }
 
-    // Getters and Setters
     public Long getUserId() {
         return userId;
     }

@@ -7,7 +7,6 @@ public class PaymentChargeMessage implements Serializable {
     private Double amount;
     private Long userId;
 
-    // Constructors
     public PaymentChargeMessage() {}
 
     public PaymentChargeMessage(String bookingId, Double amount, Long userId) {
@@ -16,7 +15,6 @@ public class PaymentChargeMessage implements Serializable {
         this.userId = userId;
     }
 
-    // Getters and Setters
     public String getBookingId() {
         return bookingId;
     }

@@ -23,7 +23,6 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public List<TourDiscount> listDiscounts(Long tourId, boolean activeOnly) {
-        // TODO: Implement listActive with dateNow
         if (activeOnly) {
             return discountRepository.findActiveTourDiscounts(tourId, LocalDate.now());
         }
@@ -48,7 +47,6 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public TourDiscount updateDiscount(Long tourId, Long discountId, CreateDiscountRequest request) {
-        // TODO: Verify discount belongs to tour
         TourDiscount discount = discountRepository.findById(discountId)
                 .orElseThrow(() -> new RuntimeException("Discount not found"));
 
@@ -73,7 +71,6 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public void deleteDiscount(Long tourId, Long discountId) {
-        // TODO: Verify discount belongs to tour
         TourDiscount discount = discountRepository.findById(discountId)
                 .orElseThrow(() -> new RuntimeException("Discount not found"));
         discountRepository.delete(discount);

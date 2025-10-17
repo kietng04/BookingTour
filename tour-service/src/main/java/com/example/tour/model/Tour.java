@@ -95,8 +95,6 @@ public class Tour {
         ACTIVE, UNACTIVE, FULL, END
     }
 
-
-    // Getters and Setters
     public Long getId() {
         return id;
     }

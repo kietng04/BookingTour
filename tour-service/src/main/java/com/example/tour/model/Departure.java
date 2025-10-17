@@ -43,10 +43,9 @@ public class Departure {
     }
 
     public enum DepartureStatus {
-        ConCho, SapFull, Full, DaKhoiHanh
+        AVAILABLE, FULL, CANCELLED
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

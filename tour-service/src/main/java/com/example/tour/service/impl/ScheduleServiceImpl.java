@@ -22,13 +22,11 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public List<TourSchedule> listSchedules(Long tourId) {
-        // TODO: Verify tour exists
         return scheduleRepository.findByTourIdOrderByDayNumber(tourId);
     }
 
     @Override
     public TourSchedule addSchedule(Long tourId, CreateScheduleRequest request) {
-        // TODO: Preserve dayNumber
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new RuntimeException("Tour not found"));
 
@@ -42,7 +40,6 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public TourSchedule updateSchedule(Long tourId, Long scheduleId, CreateScheduleRequest request) {
-        // TODO: Verify schedule belongs to tour
         TourSchedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Schedule not found"));
 
@@ -58,7 +55,6 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public void deleteSchedule(Long tourId, Long scheduleId) {
-        // TODO: Verify schedule belongs to tour
         TourSchedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Schedule not found"));
         scheduleRepository.delete(schedule);

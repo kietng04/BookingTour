@@ -25,7 +25,6 @@ public class TourSchedule {
     @Column(name = "schedule_description", columnDefinition = "TEXT", nullable = false)
     private String scheduleDescription;
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

@@ -22,13 +22,11 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public List<TourImage> listImages(Long tourId) {
-        // TODO: Verify tour exists
         return imageRepository.findByTourId(tourId);
     }
 
     @Override
     public TourImage addImage(Long tourId, CreateImageRequest request) {
-        // TODO: Maintain only one isPrimary=true per tour
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new RuntimeException("Tour not found"));
 
@@ -42,7 +40,6 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public TourImage updateImage(Long tourId, Long imageId, CreateImageRequest request) {
-        // TODO: Ensure only one primary image
         TourImage image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new RuntimeException("Image not found"));
 
@@ -58,7 +55,6 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public void deleteImage(Long tourId, Long imageId) {
-        // TODO: Verify image belongs to tour
         TourImage image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new RuntimeException("Image not found"));
         imageRepository.delete(image);

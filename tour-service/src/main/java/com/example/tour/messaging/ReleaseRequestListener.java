@@ -15,20 +15,11 @@ public class ReleaseRequestListener {
     @Autowired
     private TourEventPublisher eventPublisher;
 
-    /**
-     * Listen for booking cancelled / reservation cancel events
-     * Logic:
-     * - releaseSlots() and publish tour.seat.released
-     */
     @RabbitListener(queues = RabbitMQConfig.TOUR_RELEASE_REQUEST_QUEUE)
     public void onBookingCancelled(ReservationEvent event) {
         try {
-            // TODO: Add idempotency check (check if already processed)
-            
-            // Release slots
             departureService.releaseSlots(event.getDepartureId(), event.getRequestedSeats());
 
-            // Publish released event
             eventPublisher.publishSeatReleased(
                     event.getBookingId(),
                     event.getTourId(),

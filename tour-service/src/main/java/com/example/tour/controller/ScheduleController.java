@@ -16,20 +16,12 @@ public class ScheduleController {
     @Autowired
     private ScheduleService scheduleService;
 
-    /**
-     * GET /tours/{tourId}/schedules
-     * List all schedules for a tour
-     */
     @GetMapping
     public ResponseEntity<List<TourSchedule>> listSchedules(@PathVariable Long tourId) {
         List<TourSchedule> schedules = scheduleService.listSchedules(tourId);
         return ResponseEntity.ok(schedules);
     }
 
-    /**
-     * POST /tours/{tourId}/schedules [ADMIN]
-     * Add schedule to tour
-     */
     @PostMapping
     public ResponseEntity<TourSchedule> addSchedule(@PathVariable Long tourId,
                                                      @RequestBody CreateScheduleRequest request) {
@@ -37,10 +29,6 @@ public class ScheduleController {
         return ResponseEntity.ok(schedule);
     }
 
-    /**
-     * PUT /tours/{tourId}/schedules/{scheduleId} [ADMIN]
-     * Update schedule
-     */
     @PutMapping("/{scheduleId}")
     public ResponseEntity<TourSchedule> updateSchedule(@PathVariable Long tourId,
                                                         @PathVariable Long scheduleId,
@@ -49,10 +37,6 @@ public class ScheduleController {
         return ResponseEntity.ok(schedule);
     }
 
-    /**
-     * DELETE /tours/{tourId}/schedules/{scheduleId} [ADMIN]
-     * Delete schedule
-     */
     @DeleteMapping("/{scheduleId}")
     public ResponseEntity<Void> deleteSchedule(@PathVariable Long tourId, @PathVariable Long scheduleId) {
         scheduleService.deleteSchedule(tourId, scheduleId);

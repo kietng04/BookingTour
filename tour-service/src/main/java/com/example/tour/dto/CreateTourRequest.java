@@ -14,7 +14,6 @@ public class CreateTourRequest {
     private BigDecimal adultPrice;
     private BigDecimal childPrice;
 
-    // Getters and Setters
     public String getTourName() {
         return tourName;
     }

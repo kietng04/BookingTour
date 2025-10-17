@@ -20,7 +20,6 @@ public class TourServiceImpl implements TourService {
     public Page<Tour> listTours(Integer regionId, Integer provinceId, String status, String keyword, Pageable pageable) {
         Tour.TourStatus tourStatus = null;
 
-        // Xử lý chuyển đổi trạng thái
         if (status != null && !status.isBlank()) {
             try {
                 tourStatus = Tour.TourStatus.valueOf(status.trim().toUpperCase());
@@ -32,7 +31,6 @@ public class TourServiceImpl implements TourService {
             }
         }
 
-        // xử lý keyword
         String searchKeyword = null;
     if (keyword != null && !keyword.trim().isEmpty()) {
         searchKeyword = keyword.trim().toLowerCase()
@@ -44,7 +42,6 @@ public class TourServiceImpl implements TourService {
         return tours;
     }
 
-    
     @Override
     public Tour getTourById(Long id) {
         Tour tour = tourRepository.findById(id)
@@ -52,10 +49,8 @@ public class TourServiceImpl implements TourService {
         return tour;
     }
 
-
     @Override
     public Tour createTour(CreateTourRequest request) {
-        // TODO: Validate basic fields, log action
         Tour tour = new Tour();
         tour.setTourName(request.getTourName());
         tour.setRegionId(request.getRegionId());
@@ -71,10 +66,8 @@ public class TourServiceImpl implements TourService {
         return tourRepository.save(tour);
     }
 
-
     @Override
     public Tour updateTour(Long id, UpdateTourRequest request) {
-        // TODO: Partial update, log action
         Tour tour = tourRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với id = " + id));
         
@@ -97,7 +90,6 @@ public class TourServiceImpl implements TourService {
 
     @Override
     public void deleteTour(Long id) {
-        // TODO: Soft/hard delete, log action
         Tour tour = tourRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với id = " + id));
         tourRepository.delete(tour);
