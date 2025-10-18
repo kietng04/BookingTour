@@ -9,7 +9,13 @@ import java.util.List;
 @Repository
 public interface TourScheduleRepository extends JpaRepository<TourSchedule, Long> {
 
-    // Find all schedules for a tour, ordered by day number
+    // Tìm lịch trình tour, sort theo ngày
     List<TourSchedule> findByTourIdOrderByDayNumber(Long tourId);
+    
+    // Ktra tồn tại lịch trình tour với ngày cụ thể
+    boolean existsByTourIdAndDayNumber(Long tourId, Integer dayNumber);
+    
+    // Find lịch trình tour với ngày cụ thể
+    TourSchedule findByTourIdAndDayNumber(Long tourId, Integer dayNumber);
 }
 

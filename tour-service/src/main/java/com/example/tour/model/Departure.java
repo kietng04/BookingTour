@@ -1,9 +1,19 @@
 package com.example.tour.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import java.time.LocalDate;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = {"tour"})
 @Table(name = "departures")
 public class Departure {
 
@@ -44,63 +54,6 @@ public class Departure {
 
     public enum DepartureStatus {
         ConCho, SapFull, Full, DaKhoiHanh
-    }
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Tour getTour() {
-        return tour;
-    }
-
-    public void setTour(Tour tour) {
-        this.tour = tour;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public Integer getTotalSlots() {
-        return totalSlots;
-    }
-
-    public void setTotalSlots(Integer totalSlots) {
-        this.totalSlots = totalSlots;
-    }
-
-    public Integer getRemainingSlots() {
-        return remainingSlots;
-    }
-
-    public void setRemainingSlots(Integer remainingSlots) {
-        this.remainingSlots = remainingSlots;
-    }
-
-    public DepartureStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(DepartureStatus status) {
-        this.status = status;
     }
 }
 

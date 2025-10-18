@@ -1,10 +1,19 @@
 package com.example.tour.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = {"tour"})
 @Table(name = "tour_schedules")
 public class TourSchedule {
 
@@ -24,38 +33,5 @@ public class TourSchedule {
 
     @Column(name = "schedule_description", columnDefinition = "TEXT", nullable = false)
     private String scheduleDescription;
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Tour getTour() {
-        return tour;
-    }
-
-    public void setTour(Tour tour) {
-        this.tour = tour;
-    }
-
-    public Integer getDayNumber() {
-        return dayNumber;
-    }
-
-    public void setDayNumber(Integer dayNumber) {
-        this.dayNumber = dayNumber;
-    }
-
-    public String getScheduleDescription() {
-        return scheduleDescription;
-    }
-
-    public void setScheduleDescription(String scheduleDescription) {
-        this.scheduleDescription = scheduleDescription;
-    }
 }
 
