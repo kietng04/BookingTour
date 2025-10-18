@@ -5,12 +5,11 @@ import java.time.LocalDate;
 
 public class CreateDiscountRequest {
     private String discountName;
-    private String discountType; // "percent" or "fixed"
+    private String discountType;
     private BigDecimal discountValue;
     private LocalDate startDate;
     private LocalDate endDate;
 
-    // Getters and Setters
     public String getDiscountName() {
         return discountName;
     }

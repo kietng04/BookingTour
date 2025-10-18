@@ -48,12 +48,12 @@ public class Departure {
             remainingSlots = totalSlots;
         }
         if (status == null) {
-            status = DepartureStatus.ConCho;
+            status = DepartureStatus.AVAILABLE;
         }
     }
 
     public enum DepartureStatus {
-        ConCho, SapFull, Full, DaKhoiHanh
+        AVAILABLE, FULL, CANCELLED
     }
 }
 

@@ -16,7 +16,6 @@ public class CreateTourRequest {
     private BigDecimal childPrice;
     private List<TourScheduleRequest> schedules;
 
-    // Getters and Setters
     public String getTourName() {
         return tourName;
     }

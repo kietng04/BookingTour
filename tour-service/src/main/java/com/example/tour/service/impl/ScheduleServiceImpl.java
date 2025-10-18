@@ -83,7 +83,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         // check tồn tại và thuộc tour
         TourSchedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch trình với id = " + scheduleId));
-                
+
         scheduleRepository.delete(schedule);
     }
 

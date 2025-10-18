@@ -14,9 +14,6 @@ public class TourEventPublisher {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    /**
-     * Publish seat reserved event
-     */
     public void publishSeatReserved(Long bookingId, Long tourId, Long departureId, 
                                      Integer seats, String correlationId) {
         ReservationEvent event = new ReservationEvent(
@@ -37,9 +34,6 @@ public class TourEventPublisher {
         );
     }
 
-    /**
-     * Publish seat reservation failed event
-     */
     public void publishSeatReservationFailed(Long bookingId, Long tourId, Long departureId,
                                               Integer seats, String correlationId, String reason) {
         ReservationEvent event = new ReservationEvent(
@@ -60,9 +54,6 @@ public class TourEventPublisher {
         );
     }
 
-    /**
-     * Publish seat released event
-     */
     public void publishSeatReleased(Long bookingId, Long tourId, Long departureId,
                                      Integer seats, String correlationId) {
         ReservationEvent event = new ReservationEvent(

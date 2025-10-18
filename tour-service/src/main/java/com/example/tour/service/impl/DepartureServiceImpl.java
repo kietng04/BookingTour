@@ -25,7 +25,6 @@ public class DepartureServiceImpl implements DepartureService {
 
     @Override
     public List<Departure> listDepartures(Long tourId, LocalDate from, LocalDate to, String status) {
-        // TODO: Implement filters
         Departure.DepartureStatus departureStatus = status != null ? Departure.DepartureStatus.valueOf(status) : null;
         return departureRepository.findByTourIdAndFilters(tourId, from, to, departureStatus);
     }
@@ -47,7 +46,6 @@ public class DepartureServiceImpl implements DepartureService {
 
     @Override
     public Departure updateDeparture(Long tourId, Long departureId, CreateDepartureRequest request) {
-        // TODO: Verify departure belongs to tour
         Departure departure = departureRepository.findById(departureId)
                 .orElseThrow(() -> new RuntimeException("Departure not found"));
 
@@ -66,7 +64,6 @@ public class DepartureServiceImpl implements DepartureService {
 
     @Override
     public void deleteDeparture(Long tourId, Long departureId) {
-        // TODO: Verify departure belongs to tour
         Departure departure = departureRepository.findById(departureId)
                 .orElseThrow(() -> new RuntimeException("Departure not found"));
         departureRepository.delete(departure);
@@ -74,7 +71,6 @@ public class DepartureServiceImpl implements DepartureService {
 
     @Override
     public Map<String, Object> getAvailability(Long tourId, Long departureId) {
-        // TODO: Check availability
         Departure departure = departureRepository.findById(departureId)
                 .orElseThrow(() -> new RuntimeException("Departure not found"));
 
@@ -89,8 +85,6 @@ public class DepartureServiceImpl implements DepartureService {
 
     @Override
     public void reserveSlots(Long departureId, Integer quantity) {
-        // TODO: Decrease remainingSlots (called by SAGA)
-        // TODO: Add idempotency check
         Departure departure = departureRepository.findById(departureId)
                 .orElseThrow(() -> new RuntimeException("Departure not found"));
 
@@ -104,8 +98,6 @@ public class DepartureServiceImpl implements DepartureService {
 
     @Override
     public void releaseSlots(Long departureId, Integer quantity) {
-        // TODO: Increase remainingSlots
-        // TODO: Add idempotency check
         Departure departure = departureRepository.findById(departureId)
                 .orElseThrow(() -> new RuntimeException("Departure not found"));
 

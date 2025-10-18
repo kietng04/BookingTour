@@ -16,12 +16,9 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints - GET requests for tours
                         .requestMatchers("GET", "/tours/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
-                        // Protected endpoints - POST/PUT/DELETE require authentication
-                        // TODO: Add JWT filter and role-based authorization (ADMIN only)
-                        .anyRequest().permitAll() // Temporarily permit all for development
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
