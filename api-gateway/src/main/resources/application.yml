@@ -6,11 +6,47 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - http://localhost:3000
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
       discovery:
         locator:
           enabled: true
           lower-case-service-id: true
       routes:
+        # GitHub OAuth callback route (direct from GitHub)
+        - id: github-oauth-callback
+          uri: lb://user-service
+          predicates:
+            - Path=/auth/github/callback
+        # OAuth2 callback route (specific, comes first)
+        - id: user-oauth2-callback
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/login/oauth2/**
+          filters:
+            - StripPrefix=2
+        # OAuth2 authorize route
+        - id: user-oauth2-authorize
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/start-oauth/**
+          filters:
+            - StripPrefix=2
+            - PrefixPath=/auth
+        # General user-service routes
         - id: user-service
           uri: lb://user-service
           predicates:
