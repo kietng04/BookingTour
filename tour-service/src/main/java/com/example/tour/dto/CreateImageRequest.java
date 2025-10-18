@@ -4,7 +4,6 @@ public class CreateImageRequest {
     private String imageUrl;
     private Boolean isPrimary;
 
-    // Getters and Setters
     public String getImageUrl() {
         return imageUrl;
     }

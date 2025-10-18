@@ -34,10 +34,9 @@ public class TourDiscount {
     private LocalDate endDate;
 
     public enum DiscountType {
-        percent, fixed
+        PERCENT, FIXED
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

@@ -5,7 +5,6 @@ public class BookingResponse {
     private String status;
     private String message;
 
-    // Constructors
     public BookingResponse() {}
 
     public BookingResponse(String bookingId, String status, String message) {
@@ -14,7 +13,6 @@ public class BookingResponse {
         this.message = message;
     }
 
-    // Getters and Setters
     public String getBookingId() {
         return bookingId;
     }

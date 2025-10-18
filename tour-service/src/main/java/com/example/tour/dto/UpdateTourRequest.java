@@ -15,7 +15,6 @@ public class UpdateTourRequest {
     private BigDecimal childPrice;
     private String status;
 
-    // Getters and Setters
     public String getTourName() {
         return tourName;
     }

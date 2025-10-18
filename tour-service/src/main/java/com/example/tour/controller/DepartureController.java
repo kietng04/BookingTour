@@ -19,10 +19,6 @@ public class DepartureController {
     @Autowired
     private DepartureService departureService;
 
-    /**
-     * GET /tours/{tourId}/departures?from=&to=&status=
-     * List departures for a tour
-     */
     @GetMapping
     public ResponseEntity<List<Departure>> listDepartures(
             @PathVariable Long tourId,
@@ -34,10 +30,6 @@ public class DepartureController {
         return ResponseEntity.ok(departures);
     }
 
-    /**
-     * GET /tours/{tourId}/availability?departureId=
-     * Get availability for specific departure
-     */
     @GetMapping("/availability")
     public ResponseEntity<Map<String, Object>> getAvailability(@PathVariable Long tourId,
                                                                  @RequestParam Long departureId) {
@@ -45,10 +37,6 @@ public class DepartureController {
         return ResponseEntity.ok(availability);
     }
 
-    /**
-     * POST /tours/{tourId}/departures [ADMIN]
-     * Add departure to tour
-     */
     @PostMapping
     public ResponseEntity<Departure> addDeparture(@PathVariable Long tourId,
                                                    @RequestBody CreateDepartureRequest request) {
@@ -56,10 +44,6 @@ public class DepartureController {
         return ResponseEntity.ok(departure);
     }
 
-    /**
-     * PUT /tours/{tourId}/departures/{departureId} [ADMIN]
-     * Update departure
-     */
     @PutMapping("/{departureId}")
     public ResponseEntity<Departure> updateDeparture(@PathVariable Long tourId,
                                                       @PathVariable Long departureId,
@@ -68,10 +52,6 @@ public class DepartureController {
         return ResponseEntity.ok(departure);
     }
 
-    /**
-     * DELETE /tours/{tourId}/departures/{departureId} [ADMIN]
-     * Delete departure
-     */
     @DeleteMapping("/{departureId}")
     public ResponseEntity<Void> deleteDeparture(@PathVariable Long tourId, @PathVariable Long departureId) {
         departureService.deleteDeparture(tourId, departureId);

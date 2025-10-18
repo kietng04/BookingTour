@@ -10,10 +10,8 @@ import java.util.Optional;
 @Repository
 public interface TourImageRepository extends JpaRepository<TourImage, Long> {
 
-    // Find all images for a tour
     List<TourImage> findByTourId(Long tourId);
 
-    // Find primary image for a tour
     Optional<TourImage> findByTourIdAndIsPrimaryTrue(Long tourId);
 }
 

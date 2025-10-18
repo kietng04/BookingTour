@@ -12,13 +12,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TourRepository extends JpaRepository<Tour, Long> {
 
-    // Filter by region
     Page<Tour> findByRegionId(Integer regionId, Pageable pageable);
 
-    // Filter by province
     Page<Tour> findByProvinceId(Integer provinceId, Pageable pageable);
 
-    // Filter by status
     Page<Tour> findByStatus(Tour.TourStatus status, Pageable pageable);
 
     

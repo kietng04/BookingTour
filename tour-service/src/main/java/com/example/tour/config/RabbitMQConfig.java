@@ -7,15 +7,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    // Exchange names
     public static final String BOOKING_EVENTS_EXCHANGE = "booking.events";
     public static final String TOUR_EVENTS_EXCHANGE = "tour.events";
 
-    // Queue names
     public static final String TOUR_RESERVATION_REQUEST_QUEUE = "tour.reservation.request";
     public static final String TOUR_RELEASE_REQUEST_QUEUE = "tour.release.request";
 
-    // Routing keys
     public static final String BOOKING_CREATED_KEY = "booking.created";
     public static final String RESERVATION_REQUEST_KEY = "reservation.request";
     public static final String BOOKING_CANCELLED_KEY = "booking.cancelled";
@@ -25,7 +22,6 @@ public class RabbitMQConfig {
     public static final String TOUR_SEAT_FAILED_KEY = "tour.seat.reservationFailed";
     public static final String TOUR_SEAT_RELEASED_KEY = "tour.seat.released";
 
-    // Exchanges
     @Bean
     public TopicExchange bookingEventsExchange() {
         return new TopicExchange(BOOKING_EVENTS_EXCHANGE);
@@ -36,7 +32,6 @@ public class RabbitMQConfig {
         return new TopicExchange(TOUR_EVENTS_EXCHANGE);
     }
 
-    // Queues
     @Bean
     public Queue tourReservationRequestQueue() {
         return new Queue(TOUR_RESERVATION_REQUEST_QUEUE, true);
@@ -47,7 +42,6 @@ public class RabbitMQConfig {
         return new Queue(TOUR_RELEASE_REQUEST_QUEUE, true);
     }
 
-    // Bindings for reservation requests
     @Bean
     public Binding bindingBookingCreated() {
         return BindingBuilder.bind(tourReservationRequestQueue())
@@ -62,7 +56,6 @@ public class RabbitMQConfig {
                 .with(RESERVATION_REQUEST_KEY);
     }
 
-    // Bindings for release requests
     @Bean
     public Binding bindingBookingCancelled() {
         return BindingBuilder.bind(tourReleaseRequestQueue())
