@@ -27,7 +27,7 @@ const OAuth2Callback: React.FC = () => {
         localStorage.setItem('avatar', avatar);
       }
       setStatusMessage('Login successful! Redirecting...');
-      setTimeout(() => navigate('/dashboard'), 800);
+      setTimeout(() => navigate('/'), 800);
       return;
     }
 
@@ -70,7 +70,7 @@ const OAuth2Callback: React.FC = () => {
         }
 
         setStatusMessage('Login successful! Redirecting...');
-        setTimeout(() => navigate('/dashboard'), 800);
+        setTimeout(() => navigate('/'), 800);
       } catch (err) {
         console.error('GitHub OAuth callback error:', err);
         setHasError(true);
