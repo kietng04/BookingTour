@@ -1,5 +1,6 @@
 package com.example.tour.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -12,6 +13,7 @@ public class Departure {
     @Column(name = "departure_id")
     private Long id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tour_id", nullable = false)
     private Tour tour;
@@ -29,7 +31,7 @@ public class Departure {
     private Integer remainingSlots;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(name = "status", nullable = false, length = 20)
     private DepartureStatus status;
 
     @PrePersist
@@ -38,12 +40,15 @@ public class Departure {
             remainingSlots = totalSlots;
         }
         if (status == null) {
-            status = DepartureStatus.ConCho;
+            status = DepartureStatus.CONCHO;
         }
     }
 
     public enum DepartureStatus {
-        AVAILABLE, FULL, CANCELLED
+        CONCHO,
+        SAPFULL,
+        FULL,
+        DAKHOIHANH
     }
 
     public Long getId() {
@@ -60,6 +65,11 @@ public class Departure {
 
     public void setTour(Tour tour) {
         this.tour = tour;
+    }
+
+    @Transient
+    public Long getTourId() {
+        return tour != null ? tour.getId() : null;
     }
 
     public LocalDate getStartDate() {

@@ -12,9 +12,9 @@ import java.util.List;
 @Repository
 public interface DepartureRepository extends JpaRepository<Departure, Long> {
 
-    List<Departure> findByTourId(Long tourId);
+    List<Departure> findByTour_Id(Long tourId);
 
-    List<Departure> findByTourIdAndStatus(Long tourId, Departure.DepartureStatus status);
+    List<Departure> findByTour_IdAndStatus(Long tourId, Departure.DepartureStatus status);
 
     @Query("SELECT d FROM Departure d WHERE d.tour.id = :tourId AND d.startDate >= :today ORDER BY d.startDate")
     List<Departure> findUpcomingDepartures(@Param("tourId") Long tourId, @Param("today") LocalDate today);
