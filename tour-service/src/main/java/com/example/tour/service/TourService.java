@@ -8,6 +8,10 @@ import org.springframework.data.domain.Pageable;
 
 public interface TourService {
 
+    /**
+     * List tours with filters and pagination
+     * Filter by: regionId, provinceId, status, keywordI
+     */
     Page<Tour> listTours(Integer regionId, Integer provinceId, String status, String keyword, Pageable pageable);
 
     Tour getTourById(Long id);
