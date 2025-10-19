@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,7 +43,7 @@ public class TourController {
     @PostMapping
     public ResponseEntity<Tour> createTour(@RequestBody CreateTourRequest request) {
         Tour tour = tourService.createTour(request);
-        return ResponseEntity.ok(tour);
+        return ResponseEntity.status(HttpStatus.CREATED).body(tour);
     }
 
     @PutMapping("/{id}")
@@ -57,6 +58,10 @@ public class TourController {
         return ResponseEntity.ok().build();
     }
 
+
+    /**
+     * Health check endpoint
+     */
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("Tour Service is healthy!");

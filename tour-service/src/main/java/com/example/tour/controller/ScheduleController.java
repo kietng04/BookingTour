@@ -1,13 +1,17 @@
 package com.example.tour.controller;
 
 import com.example.tour.dto.CreateScheduleRequest;
+import com.example.tour.dto.UpdateScheduleRequest;
 import com.example.tour.model.TourSchedule;
 import com.example.tour.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/tours/{tourId}/schedules")
@@ -23,24 +27,30 @@ public class ScheduleController {
     }
 
     @PostMapping
-    public ResponseEntity<TourSchedule> addSchedule(@PathVariable Long tourId,
-                                                     @RequestBody CreateScheduleRequest request) {
+    public ResponseEntity<TourSchedule> addSchedule(
+            @PathVariable Long tourId,
+            @RequestBody CreateScheduleRequest request) {
+
         TourSchedule schedule = scheduleService.addSchedule(tourId, request);
-        return ResponseEntity.ok(schedule);
+        return ResponseEntity.status(HttpStatus.CREATED).body(schedule);
     }
 
     @PutMapping("/{scheduleId}")
-    public ResponseEntity<TourSchedule> updateSchedule(@PathVariable Long tourId,
-                                                        @PathVariable Long scheduleId,
-                                                        @RequestBody CreateScheduleRequest request) {
+    public ResponseEntity<TourSchedule> updateSchedule(
+            @PathVariable Long tourId,
+            @PathVariable Long scheduleId,
+            @RequestBody UpdateScheduleRequest request) {
+            
         TourSchedule schedule = scheduleService.updateSchedule(tourId, scheduleId, request);
         return ResponseEntity.ok(schedule);
     }
 
     @DeleteMapping("/{scheduleId}")
-    public ResponseEntity<Void> deleteSchedule(@PathVariable Long tourId, @PathVariable Long scheduleId) {
+    public ResponseEntity<Void> deleteSchedule(
+            @PathVariable Long tourId,
+            @PathVariable Long scheduleId) {
+            
         scheduleService.deleteSchedule(tourId, scheduleId);
         return ResponseEntity.ok().build();
     }
 }
-

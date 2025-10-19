@@ -90,17 +90,221 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/tours"
+					},
+					"response": []
+				},
+				{
+					"name": "GetFilter",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8082/tours?keyword=Phú%20Quốc&page=0&size=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"tours"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "Phú%20Quốc"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/tours/1"
+					},
+					"response": []
 				}
 			]
 		},
 		{
-			"name": "getById",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": "http://localhost:8080/api/tours/1"
-			},
-			"response": []
+			"name": "OnlyTour",
+			"item": [
+				{
+					"name": "Thêm tour thành công",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"tourName\": \"Tour Đà Lạt 3N2Đ\",\r\n  \"regionId\": 2,\r\n  \"provinceId\": 2,\r\n  \"description\": \"Khám phá thành phố ngàn hoa, tham quan Thung Lũng Tình Yêu, Langbiang và chợ đêm Đà Lạt.\",\r\n  \"days\": 3,\r\n  \"nights\": 2,\r\n  \"departurePoint\": \"TP. Hồ Chí Minh\",\r\n  \"mainDestination\": \"Đà Lạt\",\r\n  \"adultPrice\": 2500000,\r\n  \"childPrice\": 1800000\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/tours"
+					},
+					"response": []
+				},
+				{
+					"name": "Thêm tour sai giá",
+					"request": {
+						"method": "POST",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Thêm tour và chi tiết tour",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"tourName\": \"Tour Du lịch Hạ Long 3 ngày 2 đêm\",\r\n  \"regionId\": 1,\r\n  \"provinceId\": 1,\r\n  \"description\": \"Tour du lịch vịnh Hạ Long...\",\r\n  \"days\": 3,\r\n  \"nights\": 2,\r\n  \"departurePoint\": \"Hà Nội\",\r\n  \"mainDestination\": \"Hạ Long\",\r\n  \"adultPrice\": 5000000,\r\n  \"childPrice\": 2500000,\r\n  \"schedules\": [\r\n    {\r\n      \"dayNumber\": 1,\r\n      \"scheduleDescription\": \"Sáng: Khởi hành từ Hà Nội...\\nTrưa: Đến Hạ Long...\\nTối: Nghỉ đêm trên tàu\"\r\n    },\r\n    {\r\n      \"dayNumber\": 2,\r\n      \"scheduleDescription\": \"Sáng: Tham quan hang Sửng Sốt...\\nChiều: Chèo kayak...\\nTối: BBQ trên bãi biển\"\r\n    },\r\n    {\r\n      \"dayNumber\": 3, \r\n      \"scheduleDescription\": \"Sáng: Tập thái cực quyền...\\nTrưa: Trả phòng...\\nChiều: Về Hà Nội\"\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/tours"
+					},
+					"response": []
+				},
+				{
+					"name": "Thêm tour thành công 2",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"tourName\": \"Tour Hà Nội - Sapa 3N2Đ\",\r\n  \"regionId\": 1,\r\n  \"provinceId\": 1,\r\n  \"description\": \"Tour khám phá vùng núi Tây Bắc với những cảnh đẹp hùng vĩ và văn hóa đặc sắc của đồng bào dân tộc thiểu số.\",\r\n  \"days\": 3,\r\n  \"nights\": 2,\r\n  \"departurePoint\": \"Hà Nội\",\r\n  \"mainDestination\": \"Sapa, Lào Cai\",\r\n  \"adultPrice\": 2500000,\r\n  \"childPrice\": 2000000,\r\n  \"schedules\": [\r\n    {\r\n      \"dayNumber\": 1,\r\n      \"scheduleDescription\": \"Sáng: Khởi hành từ Hà Nội đi Sapa. Chiều: Tham quan thị trấn Sapa, chợ đêm Sapa. Tối: Nghỉ đêm tại khách sạn Sapa.\"\r\n    },\r\n    {\r\n      \"dayNumber\": 2,\r\n      \"scheduleDescription\": \"Sáng: Trekking tham quan bản Cát Cát, thác Bạc. Chiều: Tham quan bản Tả Phìn, gặp gỡ đồng bào dân tộc H'Mông. Tối: Nghỉ đêm tại Sapa.\"\r\n    },\r\n    {\r\n      \"dayNumber\": 3,\r\n      \"scheduleDescription\": \"Sáng: Tham quan đèo Ô Quy Hồ, Fansipan. Chiều: Mua sắm đặc sản địa phương. Tối: Về Hà Nội, kết thúc tour.\"\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/tours"
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateTour",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"tourName\": \"Tour Hà Nội - Sapa 3N2Đ (Cập nhật)\",\r\n  \"description\": \"Tour khám phá vùng núi Tây Bắc với những cảnh đẹp hùng vĩ và văn hóa đặc sắc của đồng bào dân tộc thiểu số. Có thêm nhiều hoạt động thú vị.\",\r\n  \"adultPrice\": 2800000,\r\n  \"childPrice\": 2200000,\r\n  \"status\": \"ACTIVE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/tours/1"
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteTour",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": "http://localhost:8080/api/tours/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OnlyTourSchedule",
+			"item": [
+				{
+					"name": "GetTourSchedules",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8082/tours/2/schedules"
+					},
+					"response": []
+				},
+				{
+					"name": "AddTourSchedules",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"dayNumber\": 3,\r\n  \"scheduleDescription\": \"Sáng: Tham quan chợ Bắc Hà, mua sắm đặc sản địa phương. Chiều: Tham quan nhà cổ của người Tày. Tối: Thưởng thức các món ăn đặc sản địa phương.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8082/tours/1/schedules"
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateTourSchedules",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"dayNumber\": 3,\r\n  \"scheduleDescription\": \"Sáng: Trekking tham quan bản Cát Cát, thác Bạc với hướng dẫn viên chuyên nghiệp. Chiều: Tham quan bản Tả Phìn, gặp gỡ đồng bào dân tộc H'Mông và tìm hiểu văn hóa truyền thống. Tối: Nghỉ đêm tại khách sạn Sapa với view núi tuyệt đẹp.\"\r\n}"
+						},
+						"url": "http://localhost:8082/tours/1/schedules/1"
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteTourSchedules",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "http://localhost:8082/tours/1/schedules/1"
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }
