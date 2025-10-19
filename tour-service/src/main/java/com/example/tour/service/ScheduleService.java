@@ -1,6 +1,7 @@
 package com.example.tour.service;
 
 import com.example.tour.dto.CreateScheduleRequest;
+import com.example.tour.dto.UpdateScheduleRequest;
 import com.example.tour.model.TourSchedule;
 
 import java.util.List;
@@ -11,7 +12,7 @@ public interface ScheduleService {
 
     TourSchedule addSchedule(Long tourId, CreateScheduleRequest request);
 
-    TourSchedule updateSchedule(Long tourId, Long scheduleId, CreateScheduleRequest request);
+    TourSchedule updateSchedule(Long tourId, Long scheduleId, UpdateScheduleRequest request);
 
     void deleteSchedule(Long tourId, Long scheduleId);
 }

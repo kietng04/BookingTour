@@ -1,6 +1,7 @@
 package com.example.tour.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class CreateTourRequest {
     private String tourName;
@@ -13,6 +14,7 @@ public class CreateTourRequest {
     private String mainDestination;
     private BigDecimal adultPrice;
     private BigDecimal childPrice;
+    private List<TourScheduleRequest> schedules;
 
     public String getTourName() {
         return tourName;
@@ -92,6 +94,14 @@ public class CreateTourRequest {
 
     public void setChildPrice(BigDecimal childPrice) {
         this.childPrice = childPrice;
+    }
+
+    public List<TourScheduleRequest> getSchedules() {
+        return schedules;
+    }
+
+    public void setSchedules(List<TourScheduleRequest> schedules) {
+        this.schedules = schedules;
     }
 }
 

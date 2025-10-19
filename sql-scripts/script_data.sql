@@ -18,11 +18,66 @@ INSERT INTO regions (region_name) VALUES
 ('Miền Nam');
 
 -- 2. Provinces
+-- =======================
+-- 🌄 MIỀN BẮC (region_id = 1)
+-- =======================
 INSERT INTO provinces (province_name, region_id) VALUES
--- Miền Bắc (region_id = 1)
 ('Thành phố Hà Nội', 1),
+('Tỉnh Hà Giang', 1),
+('Tỉnh Cao Bằng', 1),
+('Tỉnh Lào Cai', 1),
+('Tỉnh Bắc Kạn', 1),
+('Tỉnh Lạng Sơn', 1),
 ('Tỉnh Tuyên Quang', 1),
-('Tỉnh Lào Cai', 1);
+('Tỉnh Thái Nguyên', 1),
+('Tỉnh Phú Thọ', 1),
+('Tỉnh Bắc Giang', 1),
+('Tỉnh Quảng Ninh', 1),
+('Tỉnh Hải Dương', 1),
+('Thành phố Hải Phòng', 1),
+('Tỉnh Hưng Yên', 1),
+('Tỉnh Hà Nam', 1),
+('Tỉnh Nam Định', 1),
+('Tỉnh Ninh Bình', 1);
+
+-- =======================
+-- 🏖️ MIỀN TRUNG (region_id = 2)
+-- =======================
+INSERT INTO provinces (province_name, region_id) VALUES
+('Thành phố Đà Nẵng', 2),
+('Tỉnh Thanh Hóa', 2),
+('Tỉnh Nghệ An', 2),
+('Tỉnh Hà Tĩnh', 2),
+('Tỉnh Quảng Bình', 2),
+('Tỉnh Quảng Trị', 2),
+('Tỉnh Thừa Thiên - Huế', 2),
+('Tỉnh Quảng Nam', 2),
+('Tỉnh Quảng Ngãi', 2),
+('Tỉnh Bình Định', 2),
+('Tỉnh Phú Yên', 2),
+('Tỉnh Khánh Hòa', 2),
+('Tỉnh Ninh Thuận', 2),
+('Tỉnh Bình Thuận', 2);
+
+-- =======================
+-- 🌴 MIỀN NAM (region_id = 3)
+-- =======================
+INSERT INTO provinces (province_name, region_id) VALUES
+('Thành phố Hồ Chí Minh', 3),
+('Tỉnh Bình Dương', 3),
+('Tỉnh Đồng Nai', 3),
+('Tỉnh Bà Rịa - Vũng Tàu', 3),
+('Tỉnh Long An', 3),
+('Tỉnh Tiền Giang', 3),
+('Tỉnh Bến Tre', 3),
+('Tỉnh Vĩnh Long', 3),
+('Tỉnh Cần Thơ', 3),
+('Tỉnh An Giang', 3),
+('Tỉnh Kiên Giang', 3),
+('Tỉnh Cà Mau', 3),
+('Tỉnh Sóc Trăng', 3),
+('Tỉnh Bạc Liêu', 3),
+('Tỉnh Đồng Tháp', 3);
 
 -- 3. Users
 INSERT INTO users (username, full_name, email, phone_number, password_hash, status) VALUES
