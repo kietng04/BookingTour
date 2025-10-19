@@ -65,6 +65,7 @@ public class AuthService {
                 user.getUsername(),
                 user.getEmail(),
                 user.getFullName(),
+                user.getAvatar(),
                 "Login successful!"
         );
     }

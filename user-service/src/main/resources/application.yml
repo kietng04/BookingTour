@@ -17,6 +17,21 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GITHUB_CLIENT_ID:Iv23liLKJKx7zX5P8P9l}
+            client-secret: ${GITHUB_CLIENT_SECRET:your_github_client_secret_here}
+            scope: user:email
+            redirect-uri: "http://localhost:8080/api/users/login/oauth2/code/github"
+        provider:
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
+            user-name-attribute: login
 
 eureka:
   client:
@@ -37,3 +52,11 @@ management:
 jwt:
   secret: mySecretKeyForJWTTokenGenerationThatNeedsToBeAtLeast256BitsLong
   expiration: 86400000
+
+oauth:
+  github:
+    client-id: ${GITHUB_CLIENT_ID:Ov23liWUSMlVs3MmpqvQ}
+    client-secret: ${GITHUB_CLIENT_SECRET:180a60169755844be487bb6e56d83c0621211615}
+    redirect-uri: ${GITHUB_REDIRECT_URI:http://localhost:3000/auth/callback}
+    frontend-success-uri: ${GITHUB_FRONTEND_SUCCESS_URI:http://localhost:3000/auth/callback}
+    frontend-error-uri: ${GITHUB_FRONTEND_ERROR_URI:http://localhost:3000/auth/error}
