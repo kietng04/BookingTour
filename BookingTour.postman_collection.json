@@ -77,7 +77,7 @@
 								"localhost"
 							],
 							"port": "8080",
-							"path": [
+							"path": [ 
 								"api",
 								"tours"
 							],
