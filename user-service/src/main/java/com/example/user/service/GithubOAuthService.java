@@ -171,7 +171,6 @@ public class GithubOAuthService {
                 }
             }
         } catch (RestClientException ex) {
-            // Ignore and fall back
         }
 
         return null;
@@ -302,4 +301,5 @@ public class GithubOAuthService {
         }
     }
 }
+
 

@@ -44,3 +44,4 @@ public class ProvinceController {
         return ResponseEntity.ok(provinceService.getByRegion(regionId));
     }
 }
+

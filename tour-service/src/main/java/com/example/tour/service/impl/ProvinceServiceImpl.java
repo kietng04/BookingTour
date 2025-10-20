@@ -35,3 +35,4 @@ public class ProvinceServiceImpl implements ProvinceService {
         return provinceRepository.findByRegionId(regionId);
     }
 }
+

@@ -6,9 +6,6 @@ const LoginWithGithub: React.FC = () => {
   const handleClick = () => {
     setLoading(true);
     try {
-      // Call user-service directly to bypass API Gateway routing issues
-      // In Docker, this will resolve to the user-service container
-      // In local dev, this goes to localhost:8081
       const userServiceUrl = process.env.REACT_APP_USER_SERVICE_URL || 'http://localhost:8081';
       window.location.href = `${userServiceUrl}/auth/start-oauth/github`;
     } catch (err) {

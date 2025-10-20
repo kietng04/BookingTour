@@ -47,3 +47,4 @@ public class RegisterRequest {
         this.fullName = fullName;
     }
 }
+

@@ -19,3 +19,4 @@ public interface TourDiscountRepository extends JpaRepository<TourDiscount, Long
     List<TourDiscount> findActiveTourDiscounts(@Param("tourId") Long tourId, @Param("today") LocalDate today);
 }
 
+

@@ -9,7 +9,6 @@ const TourCreate = () => (
     <TourForm
       mode="create"
       onSubmit={(data) => {
-        // eslint-disable-next-line no-console
         console.log('Create tour payload', data);
       }}
     />

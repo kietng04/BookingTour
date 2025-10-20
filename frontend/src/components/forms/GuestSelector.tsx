@@ -28,7 +28,6 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
   });
 
   useEffect(() => {
-    // If total changes from parent, adjust distribution proportionally
     setDistribution((prev) => {
       const prevTotal = prev.adults + prev.youth + prev.children;
       if (value === prevTotal) {
@@ -37,7 +36,6 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
       if (value <= 0) {
         return { adults: min, youth: 0, children: 0 };
       }
-      // Maintain adults as baseline, adjust others to fit total.
       const adjusted = { ...prev };
       let remaining = value;
       adjusted.adults = Math.max(min, Math.min(remaining, value));

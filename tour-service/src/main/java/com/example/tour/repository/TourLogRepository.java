@@ -12,3 +12,4 @@ public interface TourLogRepository extends JpaRepository<TourLog, Long> {
     List<TourLog> findByTourIdOrderByChangedAtDesc(Long tourId);
 }
 
+

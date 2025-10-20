@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { BarChart2, BookOpen, CalendarClock, LayoutDashboard, LogOut, Settings, Star, Users } from 'lucide-react';
+import { BarChart2, BookOpen, CalendarClock, LayoutDashboard, LogOut, Settings, Star, Users, Calendar } from 'lucide-react';
 import clsx from 'clsx';
 import Button from '../components/common/Button.jsx';
 
 const navigation = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/' },
   { icon: BookOpen, label: 'Tours', to: '/tours' },
+  { icon: Calendar, label: 'Departures', to: '/departures' },
   { icon: CalendarClock, label: 'Bookings', to: '/bookings' },
   { icon: Users, label: 'Users', to: '/users' },
   { icon: Star, label: 'Reviews', to: '/reviews' },
