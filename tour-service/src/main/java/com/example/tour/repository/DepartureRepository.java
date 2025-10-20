@@ -29,3 +29,4 @@ public interface DepartureRepository extends JpaRepository<Departure, Long> {
                                             @Param("status") Departure.DepartureStatus status);
 }
 
+

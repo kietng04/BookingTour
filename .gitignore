@@ -22,3 +22,8 @@ Thumbs.db
 
 .serena
 .claude
+
+# Frontend Admin (Vite)
+frontend-admin/node_modules/
+frontend-admin/dist/
+frontend-admin/.vite/

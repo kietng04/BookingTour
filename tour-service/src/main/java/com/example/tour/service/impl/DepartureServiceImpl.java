@@ -212,3 +212,4 @@ public class DepartureServiceImpl implements DepartureService {
         return Departure.DepartureStatus.CONCHO;
     }
 }
+

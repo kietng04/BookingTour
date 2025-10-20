@@ -114,3 +114,4 @@ public class User {
         this.isOAuthUser = isOAuthUser;
     }
 }
+

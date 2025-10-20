@@ -26,8 +26,8 @@ management:
       exposure:
         include: health,info
 
-# Mock payment behavior
 payment:
   mock:
     fail-mode: false  # Set to true to simulate payment failure
+    delay: 500
 

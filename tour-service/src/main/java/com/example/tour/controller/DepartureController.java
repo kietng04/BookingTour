@@ -61,3 +61,4 @@ public class DepartureController {
         return ResponseEntity.ok().build();
     }
 }
+

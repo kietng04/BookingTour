@@ -1,8 +1,15 @@
 package com.example.tour.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.support.converter.DefaultClassMapper;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class RabbitMQConfig {
@@ -69,5 +76,22 @@ public class RabbitMQConfig {
                 .to(bookingEventsExchange())
                 .with(RESERVATION_CANCEL_KEY);
     }
+
+    @Bean
+    public MessageConverter jsonMessageConverter() {
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
+        DefaultClassMapper classMapper = new DefaultClassMapper();
+
+        Map<String, Class<?>> idClassMapping = new HashMap<>();
+        idClassMapping.put("com.example.booking.dto.ReservationEvent",
+                          com.example.tour.messaging.ReservationEvent.class);
+
+        classMapper.setIdClassMapping(idClassMapping);
+        classMapper.setTrustedPackages("com.example.*");
+        converter.setClassMapper(classMapper);
+
+        return converter;
+    }
 }
+
 

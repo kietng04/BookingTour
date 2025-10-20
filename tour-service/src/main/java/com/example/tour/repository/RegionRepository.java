@@ -13,3 +13,4 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     @Query("SELECT r FROM Region r WHERE LOWER(r.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Region> findByNameContaining(@Param("keyword") String keyword);
 }
+

@@ -15,3 +15,4 @@ public interface TourImageRepository extends JpaRepository<TourImage, Long> {
     Optional<TourImage> findByTourIdAndIsPrimaryTrue(Long tourId);
 }
 
+

@@ -47,3 +47,4 @@ public class RegisterResponse {
         this.message = message;
     }
 }
+

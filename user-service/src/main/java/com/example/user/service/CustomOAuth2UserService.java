@@ -82,7 +82,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             }
         }
 
-        // Fallback to GitHub-style noreply address to keep column non-null/unique
         return providerId + "@users.noreply.github.com";
     }
 
@@ -121,9 +120,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 }
             }
         } catch (RestClientException ex) {
-            // Swallow and fall back; GitHub email endpoint occasionally fails for newly granted scopes.
         }
 
         return null;
     }
 }
+

@@ -40,7 +40,6 @@ const TourEdit = () => {
           ]
         }}
         onSubmit={(data) => {
-          // eslint-disable-next-line no-console
           console.log('Update tour payload', data);
         }}
       />

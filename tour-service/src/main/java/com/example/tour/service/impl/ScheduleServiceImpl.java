@@ -24,7 +24,6 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public List<TourSchedule> listSchedules(Long tourId) {
-        // check tồn tại
         if (!tourRepository.existsById(tourId)) 
             throw new RuntimeException("Không tìm thấy tour với id = " + tourId);
         
@@ -34,14 +33,11 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     @Transactional
     public TourSchedule addSchedule(Long tourId, CreateScheduleRequest request) {
-        // check tồn tại
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với id = " + tourId));
 
-        // Validate
         validateSchedule(request, tour.getDays());
 
-        // Check trùng lịch
         if (scheduleRepository.existsByTourIdAndDayNumber(tourId, request.getDayNumber())) 
             throw new IllegalArgumentException("Ngày " + request.getDayNumber() + " đã có lịch trình trong tour này");
         
@@ -56,17 +52,14 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     @Transactional
     public TourSchedule updateSchedule(Long tourId, Long scheduleId, UpdateScheduleRequest request) {
-        // check tồn tại và thuộc tour
         TourSchedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch trình với id = " + scheduleId));
 
-        // validate
         if (request.getDayNumber() != null || request.getScheduleDescription() != null) {
             Tour tour = tourRepository.findById(tourId).orElseThrow();
             validateUpdateSchedule(request, tour.getDays());
         }
 
-        // check trùng lịch
         if (request.getDayNumber() != null && !request.getDayNumber().equals(schedule.getDayNumber()))
             if (scheduleRepository.existsByTourIdAndDayNumber(tourId, request.getDayNumber()))
                 throw new IllegalArgumentException("Ngày " + request.getDayNumber() + " đã có lịch trình trong tour này");
@@ -80,7 +73,6 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     @Transactional
     public void deleteSchedule(Long tourId, Long scheduleId) {
-        // check tồn tại và thuộc tour
         TourSchedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch trình với id = " + scheduleId));
 
@@ -129,4 +121,5 @@ public class ScheduleServiceImpl implements ScheduleService {
         
     }
 }
+
 

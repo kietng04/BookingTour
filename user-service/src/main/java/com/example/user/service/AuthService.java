@@ -10,6 +10,7 @@ import com.example.user.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -51,7 +52,9 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername())
+        String identifier = request.getUsername().trim();
+        User user = userRepository.findByUsername(identifier)
+                .or(() -> identifier.contains("@") ? userRepository.findByEmail(identifier) : Optional.empty())
                 .orElseThrow(() -> new RuntimeException("Invalid username or password!"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -70,3 +73,4 @@ public class AuthService {
         );
     }
 }
+

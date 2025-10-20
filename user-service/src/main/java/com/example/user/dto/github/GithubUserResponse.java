@@ -12,3 +12,4 @@ public record GithubUserResponse(
         @JsonProperty("avatar_url") String avatarUrl
 ) {}
 
+

@@ -11,7 +11,7 @@ RUN npm install --legacy-peer-deps --force
 
 COPY . .
 
-RUN npm run build
+RUN npm run build && mv dist build
 
 # Production stage
 FROM node:18-alpine

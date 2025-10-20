@@ -24,3 +24,4 @@ public interface DepartureService {
     void releaseSlots(Long departureId, Integer quantity);
 }
 
+

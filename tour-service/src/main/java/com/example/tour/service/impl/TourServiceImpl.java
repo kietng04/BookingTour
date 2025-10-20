@@ -26,7 +26,6 @@ public class TourServiceImpl implements TourService {
     private TourRepository tourRepository;
 
 
-    // Lấy danh sách tour dựa trên paging và các điều kiện (filter, catalog)
     @Override
     public Page<Tour> listTours(Integer regionId, Integer provinceId, String status, String keyword, Pageable pageable) {
         Tour.TourStatus tourStatus = null;
@@ -53,7 +52,6 @@ public class TourServiceImpl implements TourService {
 
 
     
-    // Lấy tour cụ thể bằng Id
     @Override
     public Tour getTourById(Long id) {
         Tour tour = tourRepository.findById(id)
@@ -62,10 +60,8 @@ public class TourServiceImpl implements TourService {
     }
 
 
-    // Tạo tour mới dành cho admin
     @Override
     public Tour createTour(CreateTourRequest request) {
-        // Validate
         validateTourName(request.getTourName());
         validateProvinceAndRegion(request.getProvinceId(), request.getRegionId());
         validateDayAndNight(request.getDays(), request.getNights());
@@ -73,11 +69,9 @@ public class TourServiceImpl implements TourService {
         validatePrice(request.getChildPrice(), request.getAdultPrice());
         validateDescription(request.getDescription());
         
-        // Validate schedules
         if (request.getSchedules() != null && !request.getSchedules().isEmpty())
             validateSchedules(request.getSchedules(), request.getDays());
         
-        // Tạo tour entity
         Tour tour = new Tour();
         tour.setTourName(request.getTourName().trim());
         tour.setRegionId(request.getRegionId());
@@ -90,7 +84,6 @@ public class TourServiceImpl implements TourService {
         tour.setAdultPrice(request.getAdultPrice());
         tour.setChildPrice(request.getChildPrice());
         
-        // Add lịch trình tour khi create tour
         if (request.getSchedules() != null && !request.getSchedules().isEmpty()) {
             List<TourSchedule> schedules = request.getSchedules().stream()
             .map(scheduleRequest -> {
@@ -103,17 +96,14 @@ public class TourServiceImpl implements TourService {
 
             tour.setSchedules(schedules);
         }
-        // Lưu tour cùng với schedules (cascade sẽ tự động lưu schedules)
         return tourRepository.save(tour);
     }
 
     @Override
     public Tour updateTour(Long id, UpdateTourRequest request) {
-        // Ktra tour có trong database chưa
         Tour tour = tourRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với id = " + id));
        
-        // validate
         if (request.getTourName() != null) {
             validateTourName(request.getTourName());
             tour.setTourName(request.getTourName());
@@ -159,7 +149,6 @@ public class TourServiceImpl implements TourService {
 
     @Override
     public void deleteTour(Long id) {
-        // Ktra tour có trong database chưa
         Tour tour = tourRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với id = " + id));
         
@@ -186,9 +175,7 @@ public class TourServiceImpl implements TourService {
         if (provinceId == null || regionId == null) 
             throw new IllegalArgumentException("Vui lòng chọn khu vực và tỉnh/thành phố cho tour");
         
-        // kiểm tra province không có trong db
 
-        // kiểm tra region ko có trong db
         
     }
 
@@ -229,18 +216,15 @@ public class TourServiceImpl implements TourService {
         
         Set<Integer> dayNumbers = new HashSet<>();
         for (TourScheduleRequest schedule : schedules) {
-            // Kiểm tra số ngày
             if (schedule.getDayNumber() == null || schedule.getDayNumber() <= 0) 
                 throw new IllegalArgumentException("Số ngày trong lịch trình phải là số nguyên dương");
             
             if (schedule.getDayNumber() > totalDays) 
                 throw new IllegalArgumentException("Số ngày trong lịch trình không được vượt quá tổng số ngày của tour");
             
-            // Kiểm tra trùng lặp ngày
             if (!dayNumbers.add(schedule.getDayNumber())) 
                 throw new IllegalArgumentException("Số ngày " + schedule.getDayNumber() + " bị trùng lặp trong lịch trình");
             
-            // Kiểm tra mô tả lịch trình
             if (schedule.getScheduleDescription() == null || schedule.getScheduleDescription().isBlank()) 
                 throw new IllegalArgumentException("Mô tả lịch trình ngày " + schedule.getDayNumber() + " không được để trống");
             
@@ -248,7 +232,6 @@ public class TourServiceImpl implements TourService {
                 throw new IllegalArgumentException("Mô tả lịch trình ngày " + schedule.getDayNumber() + " phải có ít nhất 10 ký tự");
             
         }
-        // Kiểm tra thiếu lịch trình
         List<Integer> missingDays = IntStream.rangeClosed(1, totalDays)
         .filter(i -> !dayNumbers.contains(i))
         .boxed()
@@ -261,4 +244,5 @@ public class TourServiceImpl implements TourService {
         
     }
 }
+
 

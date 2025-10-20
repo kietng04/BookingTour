@@ -16,7 +16,7 @@ public class PaymentController {
     
     @PostMapping("/charge/{bookingId}")
     public ResponseEntity<PaymentResponse> processPayment(@PathVariable String bookingId) {
-        log.info("💳 [PAYMENT-SERVICE] Processing payment for booking: {}", bookingId);
+        log.info("[PAYMENT-SERVICE] Processing payment for booking: {}", bookingId);
         
         String status = failMode ? "FAILED" : "COMPLETED";
         String message = failMode ? 
@@ -30,8 +30,9 @@ public class PaymentController {
     @PostMapping("/toggle-fail-mode")
     public ResponseEntity<String> toggleFailMode() {
         failMode = !failMode;
-        log.info("🔨 [PAYMENT-SERVICE] Fail mode toggled to: {}", failMode);
+        log.info("[PAYMENT-SERVICE] Fail mode toggled to: {}", failMode);
         return ResponseEntity.ok("Fail mode is now: " + (failMode ? "ENABLED" : "DISABLED"));
     }
 }
+
 

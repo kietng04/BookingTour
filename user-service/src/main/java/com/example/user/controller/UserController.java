@@ -69,3 +69,4 @@ public class UserController {
         return ResponseEntity.ok("User Service is healthy!");
     }
 }
+

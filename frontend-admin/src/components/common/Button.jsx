@@ -20,19 +20,19 @@ const sizes = {
   icon: 'h-10 w-10'
 };
 
-const Button = forwardRef(({ variant = 'primary', size = 'md', to, className, children, ...props }, ref) => {
+const Button = forwardRef(({ variant = 'primary', size = 'md', to, type = 'button', className, children, ...rest }, ref) => {
   const classes = clsx(base, variants[variant], sizes[size], className);
 
   if (to) {
     return (
-      <Link ref={ref} to={to} className={classes} {...props}>
+      <Link ref={ref} to={to} className={classes} {...rest}>
         {children}
       </Link>
     );
   }
 
   return (
-    <button ref={ref} type="button" className={classes} {...props}>
+    <button ref={ref} type={type} className={classes} {...rest}>
       {children}
     </button>
   );
@@ -44,6 +44,7 @@ Button.propTypes = {
   variant: PropTypes.oneOf(['primary', 'secondary', 'ghost', 'danger']),
   size: PropTypes.oneOf(['sm', 'md', 'lg', 'icon']),
   to: PropTypes.string,
+  type: PropTypes.oneOf(['button', 'submit', 'reset']),
   className: PropTypes.string,
   children: PropTypes.node.isRequired
 };
