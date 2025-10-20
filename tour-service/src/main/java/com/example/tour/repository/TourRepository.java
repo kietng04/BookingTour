@@ -19,13 +19,11 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
     Page<Tour> findByStatus(Tour.TourStatus status, Pageable pageable);
 
     
-    // Search bằng keyword trong tourName hoặc description
     @Query("SELECT t FROM Tour t WHERE LOWER(t.tourName) LIKE CONCAT('%', LOWER(:keyword), '%') " +
            "OR LOWER(t.description) LIKE CONCAT('%', LOWER(:keyword), '%')")
     Page<Tour> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
 
-    // filter đa điều kiện dành cho catalog và search
        @Query("""
        SELECT DISTINCT t FROM Tour t
        WHERE
@@ -50,4 +48,5 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
               Pageable pageable);
 
 }
+
 

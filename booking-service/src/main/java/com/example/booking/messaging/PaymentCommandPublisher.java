@@ -18,13 +18,14 @@ public class PaymentCommandPublisher {
     private RabbitTemplate rabbitTemplate;
     
     public void publishChargeRequest(PaymentChargeMessage message) {
-        log.info("📤 [BOOKING-SERVICE] Publishing payment.charge: {}", message);
+        log.info("[BOOKING-SERVICE] Publishing payment.charge: {}", message);
         rabbitTemplate.convertAndSend(
             RabbitMQConfig.PAYMENT_EXCHANGE,
             RabbitMQConfig.ROUTING_KEY_CHARGE,
             message
         );
-        log.info("✅ [BOOKING-SERVICE] Payment charge request sent successfully");
+        log.info("[BOOKING-SERVICE] Payment charge request sent successfully");
     }
 }
+
 

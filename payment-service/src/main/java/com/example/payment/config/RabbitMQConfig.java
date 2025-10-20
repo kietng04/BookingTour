@@ -52,3 +52,4 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(paymentEventsQueue).to(paymentExchange).with(ROUTING_KEY_FAILED);
     }
 }
+

@@ -17,13 +17,14 @@ public class PaymentEventPublisher {
     private RabbitTemplate rabbitTemplate;
     
     public void publishResult(PaymentResultMessage message, String routingKey) {
-        log.info("📤 [PAYMENT-SERVICE] Publishing {} event: {}", routingKey, message);
+        log.info("[PAYMENT-SERVICE] Publishing {} event: {}", routingKey, message);
         rabbitTemplate.convertAndSend(
             RabbitMQConfig.PAYMENT_EXCHANGE,
             routingKey,
             message
         );
-        log.info("✅ [PAYMENT-SERVICE] Payment result sent successfully");
+        log.info("[PAYMENT-SERVICE] Payment result sent successfully");
     }
 }
+
 

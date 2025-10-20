@@ -4,6 +4,8 @@ import Dashboard from './pages/Dashboard.jsx';
 import TourList from './pages/Tours/TourList.jsx';
 import TourCreate from './pages/Tours/TourCreate.jsx';
 import TourEdit from './pages/Tours/TourEdit.jsx';
+import DepartureList from './pages/Departures/DepartureList.jsx';
+import DepartureDetail from './pages/Departures/DepartureDetail.jsx';
 import BookingList from './pages/Bookings/BookingList.jsx';
 import BookingDetail from './pages/Bookings/BookingDetail.jsx';
 import UserList from './pages/Users/UserList.jsx';
@@ -19,6 +21,8 @@ const App = () => (
       <Route path="/tours" element={<TourList />} />
       <Route path="/tours/new" element={<TourCreate />} />
       <Route path="/tours/:tourId" element={<TourEdit />} />
+      <Route path="/departures" element={<DepartureList />} />
+      <Route path="/departures/:departureId" element={<DepartureDetail />} />
       <Route path="/bookings" element={<BookingList />} />
       <Route path="/bookings/:bookingId" element={<BookingDetail />} />
       <Route path="/users" element={<UserList />} />

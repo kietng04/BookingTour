@@ -39,3 +39,4 @@ public class CreateDepartureRequest {
         this.totalSlots = totalSlots;
     }
 }
+

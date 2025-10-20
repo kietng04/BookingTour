@@ -11,14 +11,25 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-    
+
     public static final String PAYMENT_EXCHANGE = "payment.exchange";
     public static final String PAYMENT_CHARGE_QUEUE = "payment.charge.queue";
     public static final String PAYMENT_EVENTS_QUEUE = "payment.events.queue";
-    
+
     public static final String ROUTING_KEY_CHARGE = "payment.charge";
     public static final String ROUTING_KEY_COMPLETED = "payment.completed";
     public static final String ROUTING_KEY_FAILED = "payment.failed";
+
+    public static final String BOOKING_EVENTS_EXCHANGE = "booking.events";
+    public static final String TOUR_EVENTS_EXCHANGE = "tour.events";
+
+    public static final String TOUR_SEAT_RESERVED_QUEUE = "tour.seat.reserved.queue";
+    public static final String TOUR_SEAT_FAILED_QUEUE = "tour.seat.failed.queue";
+
+    public static final String RESERVATION_REQUEST_KEY = "reservation.request";
+    public static final String RESERVATION_CANCEL_KEY = "reservation.cancel";
+    public static final String TOUR_SEAT_RESERVED_KEY = "tour.seat.reserved";
+    public static final String TOUR_SEAT_FAILED_KEY = "tour.seat.reservationFailed";
 
     @Bean
     public MessageConverter jsonMessageConverter() {
@@ -54,4 +65,39 @@ public class RabbitMQConfig {
     public Binding bindingPaymentFailed(Queue paymentEventsQueue, DirectExchange paymentExchange) {
         return BindingBuilder.bind(paymentEventsQueue).to(paymentExchange).with(ROUTING_KEY_FAILED);
     }
+
+    @Bean
+    public org.springframework.amqp.core.TopicExchange bookingEventsExchange() {
+        return new org.springframework.amqp.core.TopicExchange(BOOKING_EVENTS_EXCHANGE);
+    }
+
+    @Bean
+    public org.springframework.amqp.core.TopicExchange tourEventsExchange() {
+        return new org.springframework.amqp.core.TopicExchange(TOUR_EVENTS_EXCHANGE);
+    }
+
+    @Bean
+    public Queue tourSeatReservedQueue() {
+        return new Queue(TOUR_SEAT_RESERVED_QUEUE, true);
+    }
+
+    @Bean
+    public Queue tourSeatFailedQueue() {
+        return new Queue(TOUR_SEAT_FAILED_QUEUE, true);
+    }
+
+    @Bean
+    public Binding bindingTourSeatReserved() {
+        return BindingBuilder.bind(tourSeatReservedQueue())
+                .to(tourEventsExchange())
+                .with(TOUR_SEAT_RESERVED_KEY);
+    }
+
+    @Bean
+    public Binding bindingTourSeatFailed() {
+        return BindingBuilder.bind(tourSeatFailedQueue())
+                .to(tourEventsExchange())
+                .with(TOUR_SEAT_FAILED_KEY);
+    }
 }
+

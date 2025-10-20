@@ -1,10 +1,11 @@
 package com.example.payment.messaging;
 
+import com.example.payment.service.PaymentService;
+import com.example.payment.service.PaymentService.PaymentResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.example.payment.config.RabbitMQConfig;
@@ -13,48 +14,41 @@ import com.example.payment.dto.PaymentResultMessage;
 
 @Component
 public class PaymentCommandListener {
-    
+
     private static final Logger log = LoggerFactory.getLogger(PaymentCommandListener.class);
-    
+
     @Autowired
     private PaymentEventPublisher eventPublisher;
-    
-    @Value("${payment.mock.fail-mode:false}")
-    private boolean failMode;
-    
+
+    @Autowired
+    private PaymentService paymentService;
+
     @RabbitListener(queues = RabbitMQConfig.PAYMENT_CHARGE_QUEUE)
     public void onChargeRequest(PaymentChargeMessage message) {
-        log.info("📥 [PAYMENT-SERVICE] Received charge request: {}", message);
-        log.info("💳 [PAYMENT-SERVICE] Processing payment for booking {} (Amount: {})", 
-            message.getBookingId(), message.getAmount());
-        
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        
-        if (failMode) {
-            log.warn("❌ [PAYMENT-SERVICE] Payment FAILED for booking {} (Mock fail mode enabled)", 
-                message.getBookingId());
-            
-            PaymentResultMessage failedResult = new PaymentResultMessage(
+        log.info("[PAYMENT-SERVICE] Received charge request: {}", message);
+
+        PaymentResult result = paymentService.processPayment(
                 message.getBookingId(),
-                "FAILED",
-                "Insufficient funds (mock)"
-            );
-            eventPublisher.publishResult(failedResult, RabbitMQConfig.ROUTING_KEY_FAILED);
-        } else {
-            log.info("✅ [PAYMENT-SERVICE] Payment COMPLETED for booking {} (Mock charge successful)", 
-                message.getBookingId());
-            
+                message.getAmount(),
+                message.getUserId()
+        );
+
+        if (result.isSuccess()) {
             PaymentResultMessage completedResult = new PaymentResultMessage(
-                message.getBookingId(),
-                "COMPLETED",
-                "Payment processed successfully (mock)"
+                    result.getBookingId(),
+                    "COMPLETED",
+                    result.getMessage()
             );
             eventPublisher.publishResult(completedResult, RabbitMQConfig.ROUTING_KEY_COMPLETED);
+        } else {
+            PaymentResultMessage failedResult = new PaymentResultMessage(
+                    result.getBookingId(),
+                    "FAILED",
+                    result.getMessage()
+            );
+            eventPublisher.publishResult(failedResult, RabbitMQConfig.ROUTING_KEY_FAILED);
         }
     }
 }
+
 
