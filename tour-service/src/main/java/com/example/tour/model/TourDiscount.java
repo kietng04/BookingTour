@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "tour_discounts")
 public class TourDiscount {
@@ -15,6 +17,7 @@ public class TourDiscount {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tour_id", nullable = false)
+    @JsonBackReference
     private Tour tour;
 
     @Column(name = "discount_name", length = 100)

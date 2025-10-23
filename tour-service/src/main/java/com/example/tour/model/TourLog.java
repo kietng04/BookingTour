@@ -3,6 +3,8 @@ package com.example.tour.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "tour_logs")
 public class TourLog {
@@ -14,6 +16,7 @@ public class TourLog {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tour_id", nullable = false)
+    @JsonBackReference
     private Tour tour;
 
     @Column(length = 100)
