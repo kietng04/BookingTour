@@ -77,7 +77,7 @@
 								"localhost"
 							],
 							"port": "8080",
-							"path": [ 
+							"path": [
 								"api",
 								"tours"
 							],
@@ -301,6 +301,97 @@
 						"method": "DELETE",
 						"header": [],
 						"url": "http://localhost:8082/tours/1/schedules/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ImageTour",
+			"item": [
+				{
+					"name": "AddImageToCloudinary",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"description": "(chọn ảnh từ máy)",
+									"type": "file",
+									"src": "/D:/mine/nhatrang3.jpg"
+								},
+								{
+									"key": "upload_preset",
+									"value": "unsigned_tour_upload",
+									"description": "unsigned_tour_upload",
+									"type": "text"
+								},
+								{
+									"key": "folder",
+									"value": "tours",
+									"description": "tours",
+									"type": "text"
+								}
+							]
+						},
+						"url": "https://api.cloudinary.com/v1_1/dimvm7r9g/image/upload"
+					},
+					"response": []
+				},
+				{
+					"name": "AddImageTour",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"imageUrl\": \"http://res.cloudinary.com/dimvm7r9g/image/upload/v1761203000/tours/ofxieetfmx0xy7jldhby.jpg\",\r\n  \"isPrimary\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8082/tours/1/images"
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateImageTour",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"imageUrl\": \"http://res.cloudinary.com/dimvm7r9g/image/upload/v1761202954/tours/fprqa5ieroea4vajihp5.jpg\",\r\n  \"isPrimary\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8082/tours/1/images/2"
+					},
+					"response": []
+				},
+				{
+					"name": "GetImageTour",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8082/tours/1/images"
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteTour",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "http://localhost:8082/tours/1/images/1"
 					},
 					"response": []
 				}

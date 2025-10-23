@@ -28,7 +28,7 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public TourImage addImage(Long tourId, CreateImageRequest request) {
         Tour tour = tourRepository.findById(tourId)
-                .orElseThrow(() -> new RuntimeException("Tour not found"));
+                .orElseThrow(() -> new RuntimeException("Ko tìm thấy tour"));
 
         TourImage image = new TourImage();
         image.setTour(tour);
@@ -41,7 +41,7 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public TourImage updateImage(Long tourId, Long imageId, CreateImageRequest request) {
         TourImage image = imageRepository.findById(imageId)
-                .orElseThrow(() -> new RuntimeException("Image not found"));
+                .orElseThrow(() -> new RuntimeException("Ko tìm thấy ảnh" + imageId));
 
         if (request.getImageUrl() != null) {
             image.setImageUrl(request.getImageUrl());
