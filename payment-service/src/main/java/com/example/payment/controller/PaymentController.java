@@ -15,7 +15,7 @@ public class PaymentController {
     private static boolean failMode = false;
     
     @PostMapping("/charge/{bookingId}")
-    public ResponseEntity<PaymentResponse> processPayment(@PathVariable String bookingId) {
+        public ResponseEntity<PaymentResponse> processPayment(@PathVariable String bookingId) {
         log.info("[PAYMENT-SERVICE] Processing payment for booking: {}", bookingId);
         
         String status = failMode ? "FAILED" : "COMPLETED";
