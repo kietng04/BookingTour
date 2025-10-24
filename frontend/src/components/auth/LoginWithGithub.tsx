@@ -6,6 +6,7 @@ const LoginWithGithub: React.FC = () => {
   const handleClick = () => {
     setLoading(true);
     try {
+      sessionStorage.setItem('oauthProvider', 'github');
       const userServiceUrl = process.env.REACT_APP_USER_SERVICE_URL || 'http://localhost:8081';
       window.location.href = `${userServiceUrl}/auth/start-oauth/github`;
     } catch (err) {

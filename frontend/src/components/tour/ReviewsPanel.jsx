@@ -9,8 +9,8 @@ const ReviewsPanel = ({ reviews }) => (
   <Card className="space-y-6">
     <div className="flex items-center justify-between gap-4">
       <div>
-        <p className="text-xs uppercase tracking-widest text-primary-500">Guest stories</p>
-        <h3 className="text-lg font-semibold text-slate-900">Recent reviews</h3>
+        <p className="text-xs uppercase tracking-widest text-primary-500">Câu chuyện từ du khách</p>
+        <h3 className="text-lg font-semibold text-slate-900">Đánh giá mới nhất</h3>
       </div>
       <MessageCircle className="h-6 w-6 text-primary-500" />
     </div>

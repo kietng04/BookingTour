@@ -14,13 +14,13 @@ async function fetchAPI(endpoint, options = {}) {
     const response = await fetch(url, config);
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Request failed' }));
+      const error = await response.json().catch(() => ({ message: 'Yêu cầu thất bại' }));
       throw new Error(error.message || `HTTP ${response.status}`);
     }
 
     return await response.json();
   } catch (error) {
-    console.error(`API Error (${endpoint}):`, error);
+    console.error(`Lỗi API (${endpoint}):`, error);
     throw error;
   }
 }

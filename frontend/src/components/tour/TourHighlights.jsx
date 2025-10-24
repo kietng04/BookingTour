@@ -4,7 +4,7 @@ import Card from '../common/Card.jsx';
 
 const TourHighlights = ({ highlights }) => (
   <Card className="space-y-4">
-    <h3 className="text-lg font-semibold text-slate-900">Why travelers love this</h3>
+    <h3 className="text-lg font-semibold text-slate-900">Điểm nổi bật được yêu thích</h3>
     <ul className="space-y-3">
       {highlights.map((highlight) => (
         <li key={highlight} className="flex gap-3 text-sm text-slate-600">

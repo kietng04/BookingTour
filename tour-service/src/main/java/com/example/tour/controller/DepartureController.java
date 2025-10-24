@@ -60,5 +60,18 @@ public class DepartureController {
         departureService.deleteDeparture(tourId, departureId);
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * Normalize status string to exact enum name (case-insensitive). Returns null if invalid.
+     */
+    private String normalizeStatus(String raw) {
+        if (raw == null || raw.isBlank()) return null;
+        for (Departure.DepartureStatus s : Departure.DepartureStatus.values()) {
+            if (s.name().equalsIgnoreCase(raw)) {
+                return s.name();
+            }
+        }
+        return null;
+    }
 }
 

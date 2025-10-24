@@ -5,21 +5,21 @@ import Button from '../components/common/Button.jsx';
 const statusConfig = {
   success: {
     icon: BadgeCheck,
-    title: 'Payment confirmed',
-    message: 'Your booking is locked in. Expect an itinerary concierge email in the next few minutes.',
-    action: { label: 'View my bookings', to: '/profile' }
+    title: 'Thanh toán thành công',
+    message: 'Đơn đặt tour của bạn đã được giữ chỗ. Concierge sẽ gửi lịch trình chi tiết qua email trong vài phút tới.',
+    action: { label: 'Xem lịch sử đặt chỗ', to: '/profile' }
   },
   failed: {
     icon: ShieldAlert,
-    title: 'Payment unsuccessful',
-    message: 'The transaction did not complete. Update your payment method or reach out to your concierge.',
-    action: { label: 'Explore tours', to: '/tours' }
+    title: 'Thanh toán không thành công',
+    message: 'Giao dịch chưa hoàn tất. Hãy kiểm tra lại phương thức thanh toán hoặc liên hệ concierge để được hỗ trợ.',
+    action: { label: 'Khám phá tour', to: '/tours' }
   },
   pending: {
     icon: Hourglass,
-    title: 'Payment pending confirmation',
-    message: 'We are waiting for the payment provider to confirm the transaction. This usually takes under two minutes.',
-    action: { label: 'Check my bookings', to: '/profile' }
+    title: 'Đang chờ xác nhận',
+    message: 'Hệ thống đang chờ cổng thanh toán phản hồi. Quá trình thường mất dưới hai phút, vui lòng đợi trong giây lát.',
+    action: { label: 'Kiểm tra đặt chỗ', to: '/profile' }
   }
 };
 
@@ -42,7 +42,7 @@ const PaymentStatus = () => {
             {config.action.label}
           </Button>
         </div>
-        <Link to="/" className="mt-6 inline-block text-sm text-primary-500">Back to homepage</Link>
+        <Link to="/" className="mt-6 inline-block text-sm text-primary-500">Về trang chủ</Link>
       </div>
     </div>
   );

@@ -49,6 +49,7 @@ public class BookingController {
         );
 
         Map<String, Object> response = new HashMap<>();
+        
         response.put("bookingId", booking.getId());
         response.put("status", booking.getStatus().name());
         response.put("message", "Booking created, processing seat reservation");

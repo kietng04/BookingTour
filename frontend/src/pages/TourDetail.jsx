@@ -41,8 +41,8 @@ const TourDetail = () => {
   if (!tour) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-20 text-center">
-        <p className="text-sm text-slate-500">Tour not found.</p>
-        <Button to="/tours" className="mt-4">Back to tours</Button>
+        <p className="text-sm text-slate-500">Không tìm thấy tour.</p>
+        <Button to="/tours" className="mt-4">Quay lại danh sách tour</Button>
       </div>
     );
   }
@@ -53,13 +53,13 @@ const TourDetail = () => {
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-14 md:px-8">
       <Link to="/tours" className="inline-flex items-center gap-2 text-sm font-semibold text-primary-500">
         <ArrowLeft className="h-4 w-4" />
-        Back to all tours
+        Quay về tất cả tour
       </Link>
 
       <section className="space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.25em] text-primary-500">Private journey</p>
+            <p className="text-xs uppercase tracking-[0.25em] text-primary-500">Hành trình riêng tư</p>
             <h1 className="text-3xl font-semibold text-slate-900 md:text-4xl">{tour.name}</h1>
             <div className="flex flex-wrap gap-4 text-sm text-slate-500">
               <span className="inline-flex items-center gap-2">
@@ -68,7 +68,7 @@ const TourDetail = () => {
               </span>
               <span className="inline-flex items-center gap-2">
                 <CalendarDays className="h-4 w-4 text-primary-500" />
-                {tour.duration} days
+                {tour.duration} ngày
               </span>
               <span className="inline-flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary-500" />
@@ -77,10 +77,12 @@ const TourDetail = () => {
             </div>
           </div>
           <div className="space-y-2 rounded-3xl bg-primary-50 px-6 py-4 text-right text-primary-700">
-            <p className="text-xs uppercase tracking-widest">Investment</p>
-            <p className="text-2xl font-semibold">{formatCurrency(tour.price)} <span className="text-sm font-medium text-primary-500">per guest</span></p>
+            <p className="text-xs uppercase tracking-widest">Giá trọn gói</p>
+            <p className="text-2xl font-semibold">
+              {formatCurrency(tour.price)} <span className="text-sm font-medium text-primary-500">/ khách</span>
+            </p>
             <Button to={`/booking/${tour.id}`} size="sm">
-              Start booking
+              Đặt tour ngay
             </Button>
           </div>
         </div>
@@ -91,18 +93,18 @@ const TourDetail = () => {
       {/* Available Departures Section */}
       <section className="space-y-6">
         <div>
-          <h2 className="text-2xl font-semibold text-slate-900">Available Departures</h2>
-          <p className="mt-2 text-sm text-slate-600">Select your preferred departure date and book your spot</p>
+          <h2 className="text-2xl font-semibold text-slate-900">Lịch khởi hành còn chỗ</h2>
+          <p className="mt-2 text-sm text-slate-600">Chọn ngày phù hợp để giữ chỗ ngay lập tức</p>
         </div>
 
         {loadingDepartures ? (
           <div className="text-center py-12">
-            <p className="text-sm text-slate-500">Loading departures...</p>
+            <p className="text-sm text-slate-500">Đang tải lịch khởi hành...</p>
           </div>
         ) : departures.length === 0 ? (
           <Card className="text-center py-12">
-            <p className="text-sm text-slate-500">No departures available at the moment.</p>
-            <p className="mt-2 text-xs text-slate-400">Please check back later or contact us for custom dates.</p>
+            <p className="text-sm text-slate-500">Hiện chưa có ngày khởi hành phù hợp.</p>
+            <p className="mt-2 text-xs text-slate-400">Vui lòng quay lại sau hoặc liên hệ concierge để được sắp xếp lịch riêng.</p>
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -119,11 +121,11 @@ const TourDetail = () => {
                       <div className="flex items-center gap-2 text-primary-600">
                         <Calendar className="h-4 w-4" />
                         <span className="text-sm font-medium">
-                          {startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          {startDate.toLocaleDateString('vi-VN', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </span>
                       </div>
                       <p className="text-xs text-slate-500">
-                        to {endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        đến {endDate.toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' })}
                       </p>
                     </div>
                     <span className={`rounded-full px-3 py-1 text-xs font-medium ${
@@ -133,14 +135,14 @@ const TourDetail = () => {
                           : 'bg-amber-100 text-amber-700'
                         : 'bg-slate-100 text-slate-500'
                     }`}>
-                      {isAvailable ? 'Available' : 'Full'}
+                      {isAvailable ? 'Còn chỗ' : 'Hết chỗ'}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm text-slate-600">
                     <UsersIcon className="h-4 w-4 text-slate-400" />
                     <span>
-                      {departure.remainingSlots} of {departure.totalSlots} seats left
+                      Còn {departure.remainingSlots}/{departure.totalSlots} chỗ
                     </span>
                   </div>
 
@@ -161,7 +163,7 @@ const TourDetail = () => {
                       className="w-full"
                       disabled={!isAvailable}
                     >
-                      {isAvailable ? 'Book This Departure' : 'Fully Booked'}
+                      {isAvailable ? 'Đặt suất này' : 'Đã hết chỗ'}
                     </Button>
                   </div>
                 </Card>
@@ -174,10 +176,10 @@ const TourDetail = () => {
       <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-6">
           <Card className="space-y-4">
-            <h2 className="text-lg font-semibold text-slate-900">The experience</h2>
+            <h2 className="text-lg font-semibold text-slate-900">Trải nghiệm nổi bật</h2>
             <p className="text-sm text-slate-600 leading-relaxed">{tour.description}</p>
             <div className="rounded-2xl bg-slate-100/70 p-4 text-sm text-slate-600">
-              <p>Backend hook: fetch `/tours/{tour.id}` to hydrate this page. Sections map directly to API response (highlights, itinerary, policies, etc.).</p>
+              <p>Backend: sử dụng endpoint `/tours/{tour.id}` để lấy dữ liệu đầy đủ. Các khối nội dung khớp trực tiếp với response (highlights, itinerary, policies...).</p>
             </div>
           </Card>
 
@@ -187,7 +189,7 @@ const TourDetail = () => {
 
         <div className="space-y-6">
           <Card className="space-y-4">
-            <h3 className="text-lg font-semibold text-slate-900">What&apos;s included</h3>
+            <h3 className="text-lg font-semibold text-slate-900">Bao gồm trong giá</h3>
             <ul className="space-y-2 text-sm text-slate-600">
               {tour.includes.map((item) => (
                 <li key={item} className="flex items-start gap-2">
@@ -197,7 +199,7 @@ const TourDetail = () => {
               ))}
             </ul>
             <div className="border-t border-slate-200 pt-4">
-              <h4 className="text-sm font-semibold text-slate-700">Not included</h4>
+              <h4 className="text-sm font-semibold text-slate-700">Không bao gồm</h4>
               <ul className="mt-2 space-y-2 text-sm text-slate-500">
                 {tour.excludes.map((item) => (
                   <li key={item}>• {item}</li>
@@ -207,17 +209,17 @@ const TourDetail = () => {
           </Card>
 
           <Card className="space-y-3">
-            <h3 className="text-lg font-semibold text-slate-900">Policies</h3>
+            <h3 className="text-lg font-semibold text-slate-900">Chính sách</h3>
             <div>
-              <h4 className="text-sm font-semibold text-slate-700">Flexible cancellation</h4>
+              <h4 className="text-sm font-semibold text-slate-700">Chính sách huỷ linh hoạt</h4>
               <p className="text-sm text-slate-500">{tour.policies.cancellation}</p>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-slate-700">Traveler requirements</h4>
+              <h4 className="text-sm font-semibold text-slate-700">Yêu cầu dành cho khách</h4>
               <p className="text-sm text-slate-500">{tour.policies.requirements}</p>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-slate-700">Payment terms</h4>
+              <h4 className="text-sm font-semibold text-slate-700">Điều kiện thanh toán</h4>
               <p className="text-sm text-slate-500">{tour.policies.payment}</p>
             </div>
           </Card>
@@ -228,10 +230,10 @@ const TourDetail = () => {
 
       <SectionTitle
         align="center"
-        eyebrow="Need something custom?"
-        title="Design a trip with our concierge team"
-        description="Link tracks to `/inquiries` API. Perfect for high-touch groups or corporate retreats."
-        actions={<Button to="/contact">Plan a custom journey</Button>}
+        eyebrow="Cần lịch trình riêng?"
+        title="Thiết kế chuyến đi cùng concierge của chúng tôi"
+        description="Dẫn form tới endpoint `/inquiries` để đội ngũ xử lý yêu cầu cao cấp, nhóm khách đoàn hay doanh nghiệp."
+        actions={<Button to="/contact">Nhờ tư vấn riêng</Button>}
       />
     </div>
   );

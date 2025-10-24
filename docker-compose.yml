@@ -67,6 +67,9 @@ services:
       - GITHUB_CLIENT_ID=Ov23liWUSMlVs3MmpqvQ
       - GITHUB_CLIENT_SECRET=180a60169755844be487bb6e56d83c0621211615
       - GITHUB_REDIRECT_URI=http://localhost:3000/auth/callback
+      - GOOGLE_CLIENT_ID=647139008177-bn7pulod8unbft0k07c8rde26h8om2no.apps.googleusercontent.com
+      - GOOGLE_CLIENT_SECRET=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
+      - GOOGLE_REDIRECT_URI=http://localhost:3000/auth/callback
     depends_on:
       eureka-server:
         condition: service_healthy

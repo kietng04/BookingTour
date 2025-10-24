@@ -10,26 +10,26 @@ const Register = () => (
         <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 text-primary-500">
           <UserPlus className="h-5 w-5" />
         </span>
-        <h1 className="text-2xl font-semibold text-slate-900">Create a BookingTour account</h1>
-        <p className="text-sm text-slate-500">Save journeys, receive tailored recommendations, and chat with your concierge.</p>
+        <h1 className="text-2xl font-semibold text-slate-900">Tạo tài khoản BookingTour</h1>
+        <p className="text-sm text-slate-500">Lưu hành trình, nhận gợi ý cá nhân hoá và trò chuyện cùng concierge.</p>
       </div>
       <form className="grid gap-5 md:grid-cols-2">
-        <InputField label="First name" placeholder="First name" required />
-        <InputField label="Last name" placeholder="Last name" required />
-        <InputField label="Email" type="email" icon={Mail} placeholder="you@email.com" required className="md:col-span-2" />
-        <InputField label="Phone number" icon={Phone} placeholder="+1 234 567 8900" className="md:col-span-2" />
-        <InputField label="Password" type="password" placeholder="Create a strong password" className="md:col-span-2" required />
+        <InputField label="Họ" placeholder="Ví dụ: Nguyễn" required />
+        <InputField label="Tên" placeholder="Ví dụ: Minh Anh" required />
+        <InputField label="Email" type="email" icon={Mail} placeholder="ban@example.com" required className="md:col-span-2" />
+        <InputField label="Số điện thoại" icon={Phone} placeholder="Ví dụ: 0901 234 567" className="md:col-span-2" />
+        <InputField label="Mật khẩu" type="password" placeholder="Nhập mật khẩu mạnh" className="md:col-span-2" required />
         <label className="flex items-start gap-3 text-xs text-slate-500 md:col-span-2">
           <input type="checkbox" className="mt-1 rounded border-slate-300 text-primary-500 focus:ring-primary-500" />
-          Subscribe to curated travel stories and early-access journeys.
+          Nhận bản tin trải nghiệm và ưu đãi mở bán sớm.
         </label>
         <Button size="lg" className="w-full md:col-span-2">
-          Create account
+          Tạo tài khoản
         </Button>
       </form>
       <p className="mt-6 text-center text-sm text-slate-500">
-        Already have an account?{' '}
-        <Link to="/auth/login" className="font-semibold text-primary-500">Sign in</Link>
+        Đã có tài khoản?{' '}
+        <Link to="/auth/login" className="font-semibold text-primary-500">Đăng nhập</Link>
       </p>
     </div>
   </div>

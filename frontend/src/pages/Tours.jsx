@@ -22,15 +22,16 @@ const Tours = () => {
       );
     }
     if (filters.difficulty && filters.difficulty !== 'any') {
-      results = results.filter((tour) =>
-        tour.difficulty.toLowerCase() === filters.difficulty.toLowerCase()
+      results = results.filter(
+        (tour) => tour.difficulty.toLowerCase() === filters.difficulty.toLowerCase()
       );
     }
     if (filters.priceRange && filters.priceRange !== 'any') {
       results = results.filter((tour) => {
-        if (filters.priceRange === 'under-2000') return tour.price < 2000;
-        if (filters.priceRange === '2000-4000') return tour.price >= 2000 && tour.price <= 4000;
-        return tour.price > 4000;
+        if (filters.priceRange === 'under-5000000') return tour.price < 5000000;
+        if (filters.priceRange === '5000000-9000000')
+          return tour.price >= 5000000 && tour.price <= 9000000;
+        return tour.price > 9000000;
       });
     }
     return results;
@@ -39,9 +40,9 @@ const Tours = () => {
   return (
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-14 md:px-8">
       <SectionTitle
-        eyebrow="Find your next escape"
-        title="Browse curated tours and private experiences"
-        description="Filters mirror backend query params (`/tours?destination=` `?priceRange=` etc.) so swapping to live data is effortless."
+        eyebrow="Tìm hành trình kế tiếp"
+        title="Khám phá tour chọn lọc và trải nghiệm riêng tư"
+        description="Bộ lọc khớp hoàn toàn với query backend (`/tours?destination=&priceRange=`...) giúp chuyển sang dữ liệu thật dễ dàng."
       />
 
       <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
@@ -50,9 +51,9 @@ const Tours = () => {
           <TourGrid tours={filteredTours} />
         ) : (
           <EmptyState
-            title="No tours match your filters"
-            description="Reset filters or try another destination. Our concierge team can also design a custom itinerary."
-            actionLabel="Talk to concierge"
+            title="Không có tour phù hợp với bộ lọc"
+            description="Hãy thử điều chỉnh tiêu chí hoặc chọn điểm đến khác. Đội concierge luôn sẵn sàng thiết kế lịch trình riêng cho bạn."
+            actionLabel="Trao đổi với concierge"
             actionTo="/contact"
             icon={MapPin}
           />
