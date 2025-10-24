@@ -6,16 +6,16 @@ const ReviewSummary = ({ averageRating, total, distribution }) => (
   <Card className="space-y-6">
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div>
-        <p className="text-xs uppercase tracking-widest text-primary-500">Overall satisfaction</p>
+        <p className="text-xs uppercase tracking-widest text-primary-500">Mức độ hài lòng chung</p>
         <div className="mt-2 flex items-end gap-4">
           <span className="text-4xl font-semibold text-slate-900">{averageRating.toFixed(1)}</span>
           <RatingStars rating={averageRating} />
         </div>
-        <p className="mt-2 text-sm text-slate-500">{total} verified traveler reviews</p>
+        <p className="mt-2 text-sm text-slate-500">{total} đánh giá đã xác thực</p>
       </div>
       <div className="rounded-2xl bg-primary-50 px-5 py-4 text-sm text-primary-600">
-        <p className="font-semibold text-primary-700">97% would recommend</p>
-        <p className="mt-1 text-xs text-primary-400">Mirror this with NPS data from `/analytics/reviews`.</p>
+        <p className="font-semibold text-primary-700">97% sẵn sàng giới thiệu</p>
+        <p className="mt-1 text-xs text-primary-400">Có thể đối chiếu với dữ liệu NPS tại `/analytics/reviews`.</p>
       </div>
     </div>
 
