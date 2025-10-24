@@ -29,7 +29,7 @@ const ReviewList = ({ reviews, tourLookup }) => (
 
         <div>
           <p className="text-xs uppercase tracking-widest text-primary-500">
-            {tourLookup[review.tourId] ?? 'Custom itinerary'}
+            {tourLookup[review.tourId] ?? 'Lịch trình tuỳ chỉnh'}
           </p>
           <h3 className="mt-2 text-lg font-semibold text-slate-900">{review.title}</h3>
           <p className="mt-3 text-sm leading-relaxed text-slate-600">{review.comment}</p>

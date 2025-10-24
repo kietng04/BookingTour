@@ -11,6 +11,7 @@ spring:
           '[/**]':
             allowedOrigins:
               - http://localhost:3000
+              - http://localhost:5173
               - http://localhost:5174
             allowedMethods:
               - GET
@@ -31,6 +32,10 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/auth/github/callback
+        - id: google-oauth-callback
+          uri: lb://user-service
+          predicates:
+            - Path=/auth/google/callback
         - id: user-oauth2-callback
           uri: lb://user-service
           predicates:

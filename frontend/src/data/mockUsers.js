@@ -1,15 +1,15 @@
 export const currentUser = {
   id: 'u-001',
-  name: 'Olivia Chen',
-  email: 'olivia.chen@email.com',
-  tier: 'Platinum Voyager',
-  totalTrips: 8,
-  nextTrip: 'aurora-escape',
+  name: 'Nguyễn Bảo Linh',
+  email: 'bao.linh@example.com',
+  tier: 'Thành viên Vàng',
+  totalTrips: 5,
+  nextTrip: 'phu-quoc-nghi-duong',
   avatar: 'https://i.pravatar.cc/100?img=47',
   preferences: {
-    style: 'Boutique Luxury',
-    region: 'Nordics',
-    pace: 'Slow travel'
+    style: 'Nghỉ dưỡng cao cấp',
+    region: 'Biển đảo Việt Nam',
+    pace: 'Nhẹ nhàng'
   },
-  savedTours: ['aurora-escape', 'safari-serengeti']
+  savedTours: ['phu-quoc-nghi-duong', 'ha-giang-vong-cung']
 };

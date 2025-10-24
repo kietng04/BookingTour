@@ -69,11 +69,11 @@ const Reviews = () => {
   return (
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-14 md:px-8">
       <SectionTitle
-        eyebrow="Voices from travelers"
-        title="Real stories from recent journeys"
-        description="Every review is synced from the moderation queue. Use filters to surface relevant testimonials for your marketing or concierge teams."
+        eyebrow="Tiếng nói từ du khách"
+        title="Những câu chuyện chân thực sau mỗi hành trình"
+        description="Toàn bộ đánh giá được đồng bộ từ hàng đợi kiểm duyệt. Dùng bộ lọc để tìm gợi ý phù hợp cho chiến dịch marketing hoặc đội concierge."
         align="center"
-        actions={<Button to="/tours">Browse tours</Button>}
+        actions={<Button to="/tours">Xem tour</Button>}
       />
 
       <div className="grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)]">
@@ -92,12 +92,12 @@ const Reviews = () => {
           <Card className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-600">
               <MessageSquareHeart className="h-4 w-4" />
-              Concierge tip
+              Gợi ý concierge
             </div>
             <p className="text-sm text-slate-600">
-              Positive reviews with <span className="font-semibold text-slate-800">“Luxury retreat”</span> or{' '}
-              <span className="font-semibold text-slate-800">“Family friendly”</span> badges map to backend loyalty campaigns.
-              Use them in emails or upsell journeys in `/crm/segments`.
+              Các đánh giá có huy hiệu <span className="font-semibold text-slate-800">“Nghỉ dưỡng sang trọng”</span> hoặc{' '}
+              <span className="font-semibold text-slate-800">“Gia đình”</span> tương ứng với chiến dịch loyalty trên backend.
+              Kết hợp trong email chăm sóc hoặc upsell tại mô-đun `/crm/segments`.
             </p>
           </Card>
         </div>
@@ -106,13 +106,13 @@ const Reviews = () => {
           {filteredReviews.length > 0 ? (
             <ReviewList reviews={filteredReviews} tourLookup={tourLookup} />
           ) : (
-            <EmptyState
-              title="No reviews match these filters"
-              description="Broaden your filters or highlight concierge-curated testimonials."
-              actionLabel="Reset filters"
-              icon={MessageCircle}
-              onAction={() => setFilters({ ...defaultFilters })}
-            />
+          <EmptyState
+            title="Không có đánh giá phù hợp bộ lọc"
+            description="Hãy nới rộng tiêu chí hoặc sử dụng các testimonial do concierge đề xuất."
+            actionLabel="Đặt lại bộ lọc"
+            icon={MessageCircle}
+            onAction={() => setFilters({ ...defaultFilters })}
+          />
           )}
         </div>
       </div>

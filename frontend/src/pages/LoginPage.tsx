@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import LoginWithGithub from '../components/auth/LoginWithGithub';
+import LoginWithGoogle from '../components/auth/LoginWithGoogle';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -42,6 +43,7 @@ const LoginPage: React.FC = () => {
         </form>
         <div style={{ textAlign: 'center', margin: '20px 0', fontSize: '14px', color: '#666' }}>—— Or login with ——</div>
         <LoginWithGithub />
+        <LoginWithGoogle />
       </div>
     </div>
   );

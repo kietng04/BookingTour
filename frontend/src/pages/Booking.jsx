@@ -44,7 +44,7 @@ const Booking = () => {
   if (!tour) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-20 text-center">
-        <p className="text-sm text-slate-500">We could not locate this tour.</p>
+        <p className="text-sm text-slate-500">Không tìm thấy tour bạn yêu cầu.</p>
       </div>
     );
   }
@@ -52,21 +52,21 @@ const Booking = () => {
   return (
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-14 md:px-8">
       <SectionTitle
-        eyebrow="Reserve your journey"
-        title={`Secure your spot for ${tour.name}`}
-        description="Submitting this form calls the backend booking endpoint (`POST /bookings`). We pre-fill price, policies, and metadata for a streamlined payment step."
+        eyebrow="Giữ chỗ chuyến đi"
+        title={`Hoàn tất đặt chỗ tour ${tour.name}`}
+        description="Khi gửi biểu mẫu, hệ thống gọi endpoint `POST /bookings` của backend. Giá, chính sách và metadata được điền sẵn để bước thanh toán diễn ra nhanh gọn."
       />
 
       {departure && (
         <div className="rounded-2xl bg-primary-50 border border-primary-200 p-4">
-          <h3 className="text-sm font-semibold text-primary-900">Selected Departure</h3>
+          <h3 className="text-sm font-semibold text-primary-900">Lịch khởi hành đã chọn</h3>
           <p className="mt-1 text-sm text-primary-700">
-            {new Date(departure.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            {new Date(departure.startDate).toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' })}
             {' - '}
-            {new Date(departure.endDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            {new Date(departure.endDate).toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
           <p className="mt-1 text-xs text-primary-600">
-            {departure.remainingSlots} seats remaining
+            Còn {departure.remainingSlots} chỗ
           </p>
         </div>
       )}
@@ -82,22 +82,22 @@ const Booking = () => {
           <BookingTimeline
             steps={[
               {
-                label: 'Request submitted',
-                description: 'Trigger backend booking in `pending` status. Concierge receives alert.',
+                label: 'Đã gửi yêu cầu',
+                description: 'Tạo booking trạng thái `pending` trên backend, đội concierge nhận thông báo ngay.',
                 timestamp: new Date().toISOString(),
                 completed: true
               },
               {
-                label: 'Concierge confirmation',
-                description: 'Team verifies availability, upgrades, and special requests before marking confirmed.'
+                label: 'Concierge xác nhận',
+                description: 'Kiểm tra chỗ, xử lý nâng hạng, ghi nhận yêu cầu đặc biệt trước khi chuyển trạng thái confirmed.'
               },
               {
-                label: 'Payment & docs',
-                description: 'Secure payment link, traveler forms, and insurance options shared automatically.'
+                label: 'Thanh toán & hồ sơ',
+                description: 'Gửi link thanh toán an toàn, biểu mẫu thông tin khách và gợi ý bảo hiểm tự động.'
               },
               {
-                label: 'Departure concierge',
-                description: '48-hour pre-travel call, airport transfers, and on-ground host introduction.'
+                label: 'Chăm sóc trước khởi hành',
+                description: 'Gọi nhắc 48 giờ trước chuyến đi, xác nhận đưa đón và kết nối host địa phương.'
               }
             ]}
           />

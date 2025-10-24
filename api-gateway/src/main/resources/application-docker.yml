@@ -6,11 +6,36 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - http://localhost:3000
+              - http://localhost:3001
+              - http://localhost:5173
+              - http://localhost:5174
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
       discovery:
         locator:
           enabled: true
           lower-case-service-id: true
       routes:
+        - id: user-oauth2-authorize
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/start-oauth/**
+          filters:
+            - StripPrefix=2
+            - PrefixPath=/auth
         - id: user-service
           uri: lb://user-service
           predicates:

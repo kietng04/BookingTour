@@ -14,7 +14,7 @@ interface GuestSelectorProps {
 type GuestCategory = 'adults' | 'youth' | 'children';
 
 const GuestSelector: React.FC<GuestSelectorProps> = ({
-  label = 'Guests',
+  label = 'Số khách',
   value,
   onChange,
   min = 1,
@@ -88,9 +88,9 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
   };
 
   const categories: Array<{ key: GuestCategory; label: string; description: string; minCount: number }> = [
-    { key: 'adults', label: 'Adults', description: 'Age 18+', minCount: 1 },
-    { key: 'youth', label: 'Teens', description: 'Age 13-17', minCount: 0 },
-    { key: 'children', label: 'Children', description: 'Age 2-12', minCount: 0 },
+    { key: 'adults', label: 'Người lớn', description: 'Từ 18 tuổi trở lên', minCount: 1 },
+    { key: 'youth', label: 'Thanh thiếu niên', description: 'Từ 13 - 17 tuổi', minCount: 0 },
+    { key: 'children', label: 'Trẻ em', description: 'Từ 2 - 12 tuổi', minCount: 0 },
   ];
 
   return (
@@ -107,7 +107,7 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
       >
         <div className="flex flex-col items-start">
           <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">{label}</span>
-          <span>{totalGuests} {totalGuests === 1 ? 'guest' : 'guests'}</span>
+          <span>{totalGuests} khách</span>
         </div>
         <ChevronDown className={clsx('h-4 w-4 text-gray-400 transition-transform', isOpen && 'rotate-180')} />
       </button>
@@ -136,7 +136,7 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
                       disabled={distribution[category.key] <= category.minCount}
                     >
                       <Minus className="h-4 w-4" aria-hidden="true" />
-                      <span className="sr-only">Decrease {category.label}</span>
+                      <span className="sr-only">Giảm {category.label}</span>
                     </button>
                     <span className="w-8 text-center text-sm font-semibold text-gray-900">
                       {distribution[category.key]}
@@ -148,14 +148,14 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
                       disabled={totalGuests >= max}
                     >
                       <Plus className="h-4 w-4" aria-hidden="true" />
-                      <span className="sr-only">Increase {category.label}</span>
+                      <span className="sr-only">Tăng {category.label}</span>
                     </button>
                   </div>
                 </div>
               ))}
             </div>
             <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 text-xs text-gray-500">
-              <span>Max {max} guests per booking</span>
+              <span>Tối đa {max} khách mỗi lần đặt</span>
               <button
                 type="button"
                 className="font-semibold text-brand-600 hover:underline"
@@ -165,7 +165,7 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
                   setIsOpen(false);
                 }}
               >
-                Reset
+                Đặt lại
               </button>
             </div>
           </motion.div>

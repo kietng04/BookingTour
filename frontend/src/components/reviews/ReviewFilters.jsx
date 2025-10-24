@@ -4,10 +4,10 @@ import Card from '../common/Card.jsx';
 import Button from '../common/Button.jsx';
 
 const ratingOptions = [
-  { value: 'all', label: 'All ratings' },
-  { value: '5', label: '5 stars' },
-  { value: '4', label: '4 stars & up' },
-  { value: '3', label: '3 stars & up' }
+  { value: 'all', label: 'Tất cả mức điểm' },
+  { value: '5', label: '5 sao' },
+  { value: '4', label: 'Từ 4 sao trở lên' },
+  { value: '3', label: 'Từ 3 sao trở lên' }
 ];
 
 const ReviewFilters = ({ filters, onChange, tours, badges }) => {
@@ -19,8 +19,8 @@ const ReviewFilters = ({ filters, onChange, tours, badges }) => {
     <Card className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-widest text-primary-500">Filter reviews</p>
-          <h3 className="text-lg font-semibold text-slate-900">Find relevant feedback</h3>
+          <p className="text-xs uppercase tracking-widest text-primary-500">Lọc đánh giá</p>
+          <h3 className="text-lg font-semibold text-slate-900">Tìm phản hồi phù hợp</h3>
         </div>
         <Filter className="h-5 w-5 text-primary-500" />
       </div>
@@ -32,7 +32,7 @@ const ReviewFilters = ({ filters, onChange, tours, badges }) => {
           onChange={(event) => onChange({ ...filters, tour: event.target.value })}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 transition focus:border-primary-300 focus:ring-4 focus:ring-primary-100"
         >
-          <option value="all">All tours</option>
+          <option value="all">Tất cả tour</option>
           {tours.map((tour) => (
             <option key={tour.id} value={tour.id}>
               {tour.name}
@@ -42,7 +42,7 @@ const ReviewFilters = ({ filters, onChange, tours, badges }) => {
       </label>
 
       <label className="flex flex-col gap-2 text-sm text-slate-600">
-        <span className="font-medium text-slate-700">Rating</span>
+        <span className="font-medium text-slate-700">Mức đánh giá</span>
         <select
           value={filters.rating}
           onChange={(event) => onChange({ ...filters, rating: event.target.value })}
@@ -57,13 +57,13 @@ const ReviewFilters = ({ filters, onChange, tours, badges }) => {
       </label>
 
       <label className="flex flex-col gap-2 text-sm text-slate-600">
-        <span className="font-medium text-slate-700">Badge</span>
+        <span className="font-medium text-slate-700">Huy hiệu</span>
         <select
           value={filters.badge}
           onChange={(event) => onChange({ ...filters, badge: event.target.value })}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 transition focus:border-primary-300 focus:ring-4 focus:ring-primary-100"
         >
-          <option value="all">Any badge</option>
+          <option value="all">Bất kỳ huy hiệu</option>
           {badges.map((badge) => (
             <option key={badge} value={badge}>
               {badge}
@@ -73,22 +73,22 @@ const ReviewFilters = ({ filters, onChange, tours, badges }) => {
       </label>
 
       <label className="flex flex-col gap-2 text-sm text-slate-600">
-        <span className="font-medium text-slate-700">Sort by</span>
+        <span className="font-medium text-slate-700">Sắp xếp theo</span>
         <select
           value={filters.sort}
           onChange={(event) => onChange({ ...filters, sort: event.target.value })}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 transition focus:border-primary-300 focus:ring-4 focus:ring-primary-100"
         >
-          <option value="newest">Newest first</option>
-          <option value="oldest">Oldest first</option>
-          <option value="rating-desc">Highest rated</option>
-          <option value="rating-asc">Lowest rated</option>
+          <option value="newest">Mới nhất</option>
+          <option value="oldest">Cũ nhất</option>
+          <option value="rating-desc">Điểm cao nhất</option>
+          <option value="rating-asc">Điểm thấp nhất</option>
         </select>
       </label>
 
       <Button type="button" variant="ghost" onClick={handleReset} className="w-full">
         <RefreshCcw className="h-4 w-4" />
-        Reset filters
+        Đặt lại bộ lọc
       </Button>
     </Card>
   );

@@ -64,12 +64,13 @@ public class GithubOAuthService {
                 .queryParam("client_id", clientId)
                 .queryParam("redirect_uri", redirectUri)
                 .queryParam("scope", "user:email")
+                .queryParam("state", "github")
                 .build()
                 .toUriString();
     }
 
     @Transactional
-    public GithubLoginResult handleGithubCallback(String code, String state) {
+    public OAuthLoginResult handleGithubCallback(String code, String state) {
         if (!StringUtils.hasText(code)) {
             throw new IllegalArgumentException("Authorization code is required");
         }
@@ -81,7 +82,7 @@ public class GithubOAuthService {
         User user = upsertUser(userResponse, email);
         String token = jwtUtil.generateToken(user.getUsername(), user.getEmail());
 
-        return new GithubLoginResult(
+        return new OAuthLoginResult(
                 token,
                 user.getUsername(),
                 user.getEmail(),
@@ -259,47 +260,5 @@ public class GithubOAuthService {
         }
     }
 
-    public static class GithubLoginResult {
-        private final String token;
-        private final String username;
-        private final String email;
-        private final String fullName;
-        private final String avatar;
-        private final String message;
-
-        public GithubLoginResult(String token, String username, String email, String fullName, String avatar, String message) {
-            this.token = token;
-            this.username = username;
-            this.email = email;
-            this.fullName = fullName;
-            this.avatar = avatar;
-            this.message = message;
-        }
-
-        public String getToken() {
-            return token;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public String getFullName() {
-            return fullName;
-        }
-
-        public String getAvatar() {
-            return avatar;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-    }
 }
-
 
