@@ -40,6 +40,12 @@ public class TourController {
         return ResponseEntity.ok(tour);
     }
 
+    @GetMapping("/by-slug/{slug}")
+    public ResponseEntity<Tour> getTourBySlug(@PathVariable String slug) {
+        Tour tour = tourService.getTourBySlug(slug);
+        return ResponseEntity.ok(tour);
+    }
+
     @PostMapping
     public ResponseEntity<Tour> createTour(@RequestBody CreateTourRequest request) {
         Tour tour = tourService.createTour(request);

@@ -16,6 +16,8 @@ public interface TourService {
 
     Tour getTourById(Long id);
 
+    Tour getTourBySlug(String slug);
+
     Tour createTour(CreateTourRequest request);
 
     Tour updateTour(Long id, UpdateTourRequest request);

@@ -1,137 +1,159 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import DatePicker from 'react-datepicker';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { differenceInCalendarDays } from 'date-fns';
-import { CheckCircle2, Download, Mail, Phone, Sparkles } from 'lucide-react';
-import BookingStepper from '../components/booking/BookingStepper';
-import BookingSummary from '../components/booking/BookingSummary';
+import { useForm } from 'react-hook-form';
+import { format } from 'date-fns';
 import GuestSelector from '../components/forms/GuestSelector';
-import { tours } from '../data/tours';
+import MoMoPaymentButton from '../components/payment/MoMoPaymentButton';
+import { toursAPI, bookingsAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { Loader2, CalendarDays, MapPin } from 'lucide-react';
 
-interface DetailsFormValues {
-  guests: number;
-  dateRange: [Date | null, Date | null];
-  specialRequests?: string;
+interface Departure {
+  id: number;
+  startDate: string;
+  endDate: string;
+  remainingSlots: number;
+  totalSlots?: number;
 }
 
-interface TravelerFormValues {
-  firstName: string;
-  lastName: string;
+interface TourResponse {
+  id: number;
+  tourName: string;
+  description: string;
+  mainDestination: string;
+  adultPrice: number;
+  images: Array<{ imageUrl: string; isPrimary: boolean }>;
+  departures: Departure[];
+}
+
+interface ContactFormValues {
+  fullName: string;
   email: string;
   phone: string;
-  nationality: string;
-  termsAccepted: boolean;
 }
 
-interface PaymentFormValues {
-  cardHolder: string;
-  cardNumber: string;
-  expiry: string;
-  cvc: string;
-  billingAddress: string;
-}
+type Step = 1 | 2;
 
 const BookingPage: React.FC = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const tour = tours.find((item) => item.slug === slug);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [reservation, setReservation] = useState<{ guests: number; startDate?: Date; endDate?: Date }>({
-    guests: 2,
-  });
-  const [traveler, setTraveler] = useState<TravelerFormValues | null>(null);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const { token, user } = useAuth();
 
-  const detailsForm = useForm<DetailsFormValues>({
-    defaultValues: {
-      guests: reservation.guests,
-      dateRange: [reservation.startDate ?? null, reservation.endDate ?? null],
-      specialRequests: '',
-    },
-  });
+  const [tour, setTour] = useState<TourResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<Step>(1);
+  const [guests, setGuests] = useState(2);
+  const [selectedDepartureId, setSelectedDepartureId] = useState<number | null>(null);
+  const [contactInfo, setContactInfo] = useState<ContactFormValues | null>(null);
+  const [creatingBooking, setCreatingBooking] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
 
-  const travelerForm = useForm<TravelerFormValues>({
+  const contactForm = useForm<ContactFormValues>({
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
+      fullName: user?.fullName ?? '',
+      email: user?.email ?? '',
       phone: '',
-      nationality: '',
-      termsAccepted: false,
     },
   });
 
-  const paymentForm = useForm<PaymentFormValues>({
-    defaultValues: {
-      cardHolder: '',
-      cardNumber: '',
-      expiry: '',
-      cvc: '',
-      billingAddress: '',
-    },
-  });
+  useEffect(() => {
+    const fetchTour = async () => {
+      if (!slug) {
+        setError('Không tìm thấy tour phù hợp.');
+        setLoading(false);
+          return;
+        }
 
-  const nights = useMemo(() => {
-    if (reservation.startDate && reservation.endDate) {
-      const diff = differenceInCalendarDays(reservation.endDate, reservation.startDate);
-      return Math.max(diff, 1);
-    }
-    return 1;
-  }, [reservation.endDate, reservation.startDate]);
+      try {
+        setLoading(true);
+        const response = await toursAPI.getBySlug(slug);
+        setTour(response);
+        if (response?.departures?.length) {
+          setSelectedDepartureId(response.departures[0].id);
+        }
+      } catch (err) {
+        console.error('Failed to fetch tour', err);
+        setError('Không tải được thông tin tour. Vui lòng thử lại sau.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTour();
+  }, [slug]);
+
+  const selectedDeparture: Departure | undefined = useMemo(() => {
+    if (!tour || selectedDepartureId == null) return undefined;
+    return tour.departures.find((departure) => departure.id === selectedDepartureId);
+  }, [tour, selectedDepartureId]);
 
   const estimatedTotal = useMemo(() => {
     if (!tour) return 0;
-    return tour.priceFrom + tour.priceFrom * 0.12 * reservation.guests + nights * 120;
-  }, [nights, reservation.guests, tour]);
+    const basePrice = Number(tour.adultPrice) || 0;
+    return Math.max(1, guests) * basePrice;
+  }, [tour, guests]);
 
-  const handleToast = (message: string) => {
-    setToastMessage(message);
-    setTimeout(() => setToastMessage(null), 3200);
+  const handleContactSubmit = (values: ContactFormValues) => {
+    setContactInfo(values);
+    setStep(2);
   };
 
-  const onSubmitDetails: SubmitHandler<DetailsFormValues> = (values) => {
-    const [start, end] = values.dateRange;
-    setReservation({
-      guests: values.guests,
-      startDate: start ?? undefined,
-      endDate: end ?? undefined,
-    });
-    setCurrentStep(2);
-    handleToast('Great choice! Tell us who is joining this trip.');
+  const handleCreateBooking = async () => {
+    if (!tour || !selectedDeparture) {
+      throw new Error('Thiếu thông tin tour hoặc ngày khởi hành.');
+    }
+
+    setBookingError(null);
+    setCreatingBooking(true);
+    try {
+      const payload = {
+        userId: user?.userId ?? 1,
+        tourId: tour.id,
+          departureId: selectedDeparture.id,
+        seats: guests,
+        totalAmount: estimatedTotal,
+      };
+
+      console.log('[BookingPage] Creating booking payload', payload);
+
+      const response = await bookingsAPI.create(payload, token ?? undefined);
+      setCreatingBooking(false);
+      return { bookingId: response.bookingId };
+    } catch (err) {
+      setCreatingBooking(false);
+      console.error('Failed to create booking', err);
+      const message = err instanceof Error ? err.message : 'Không thể tạo booking. Vui lòng thử lại.';
+      setBookingError(message);
+      throw err instanceof Error ? err : new Error(message);
+    }
   };
 
-  const onSubmitTraveler: SubmitHandler<TravelerFormValues> = (values) => {
-    setTraveler(values);
-    setCurrentStep(3);
-    handleToast('Traveler details saved. Secure your booking with payment.');
-  };
-
-  const onSubmitPayment: SubmitHandler<PaymentFormValues> = (values) => {
-    setIsProcessingPayment(true);
-    setTimeout(() => {
-      setIsProcessingPayment(false);
-      handleToast('Payment authorized. You are all set!');
-      setCurrentStep(4);
-    }, 2000);
-  };
-
-  if (!tour) {
+  if (loading) {
     return (
-    <main id="main-content" className="container min-h-[60vh] py-20">
+      <main className="flex min-h-[60vh] items-center justify-center bg-gray-25">
+        <div className="flex items-center gap-3 text-sm font-medium text-gray-600">
+          <Loader2 className="h-5 w-5 animate-spin text-brand-500" />
+          Đang tải thông tin tour...
+        </div>
+      </main>
+    );
+  }
+
+  if (error || !tour) {
+    return (
+      <main className="container min-h-[60vh] py-20">
         <div className="mx-auto max-w-xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-wide text-brand-500">Tour not found</p>
-          <h1 className="mt-3 text-3xl font-semibold text-gray-900">This experience is unavailable</h1>
+          <p className="text-sm font-semibold uppercase tracking-wide text-brand-500">Không tìm thấy tour</p>
+          <h1 className="mt-3 text-3xl font-semibold text-gray-900">Trải nghiệm này hiện không khả dụng</h1>
           <p className="mt-3 text-sm text-gray-600">
-            The tour may have been updated or removed. Discover our handpicked alternatives.
+            {error || 'Tour có thể đã thay đổi hoặc bị gỡ bỏ. Bạn có thể quay về trang danh sách để chọn tour khác.'}
           </p>
           <button
             onClick={() => navigate('/')}
             className="mt-6 inline-flex items-center rounded-full bg-brand-500 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-brand-600 focus-visible:bg-brand-600"
           >
-            Browse tours
+            Quay về trang chủ
           </button>
         </div>
       </main>
@@ -139,547 +161,295 @@ const BookingPage: React.FC = () => {
   }
 
   return (
-    <main id="main-content" className="bg-gray-25 pb-16">
-      <div className="container space-y-10 py-10 lg:py-16">
-        <div className="space-y-6">
+    <main className="bg-gray-25 pb-16">
+      <div className="container space-y-8 py-10 lg:space-y-12 lg:py-16">
+        <section className="space-y-4">
           <button
-            type="button"
             onClick={() => navigate(-1)}
-            className="text-sm font-semibold text-gray-600 transition hover:text-gray-900 focus-visible:text-gray-900"
+            className="inline-flex items-center text-sm font-semibold text-brand-600 transition hover:text-brand-700"
           >
-            ← Back to details
+            ← Quay lại
           </button>
-          <h1 className="text-3xl font-semibold text-gray-900 md:text-4xl">Secure your booking</h1>
-          <p className="max-w-2xl text-sm text-gray-600">
-            Complete the checkout in a few guided steps. Your reservation is held for the next 15 minutes.
-          </p>
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-500">
+                {tour.mainDestination}
+              </p>
+              <h1 className="mt-2 text-3xl font-semibold text-gray-900 lg:text-4xl">{tour.tourName}</h1>
+              <p className="mt-4 max-w-3xl text-sm text-gray-600">{tour.description}</p>
+            </div>
+            <div className="flex gap-4 text-sm text-gray-500">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-card">
+                <CalendarDays className="h-4 w-4 text-brand-500" />
+                {selectedDeparture
+                  ? `${format(new Date(selectedDeparture.startDate), 'dd/MM/yyyy')} - ${format(
+                      new Date(selectedDeparture.endDate),
+                      'dd/MM/yyyy'
+                    )}`
+                  : 'Chọn ngày khởi hành'}
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-card">
+                <MapPin className="h-4 w-4 text-brand-500" /> {tour.mainDestination}
+              </span>
+            </div>
         </div>
+        </section>
 
-        <BookingStepper currentStep={currentStep} />
-
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)]">
+        <section className="grid gap-10 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
           <div className="space-y-8">
-            <AnimatePresence mode="wait">
-              {currentStep === 1 && (
-                <motion.section
-                  key="step-1"
-                  className="rounded-3xl border border-gray-100 bg-white p-6 shadow-card lg:p-8"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <h2 className="text-xl font-semibold text-gray-900">1. Trip details</h2>
-                  <p className="mt-2 text-sm text-gray-600">
-                    Choose your preferred travel dates and tell us how many guests are attending.
+            {step === 1 ? (
+              <form
+                onSubmit={contactForm.handleSubmit(handleContactSubmit)}
+                className="space-y-6 rounded-3xl border border-gray-100 bg-white p-6 shadow-card lg:p-8"
+              >
+                <header className="space-y-2">
+                  <h2 className="text-xl font-semibold text-gray-900">1. Thông tin liên hệ</h2>
+                  <p className="text-sm text-gray-600">
+                    Nhập thông tin liên hệ chính và chọn ngày khởi hành để tiếp tục thanh toán MoMo.
                   </p>
-                  <form onSubmit={detailsForm.handleSubmit(onSubmitDetails)} className="mt-6 space-y-5">
-                    <div className="grid gap-5 md:grid-cols-2">
+                </header>
+
+                <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-                          Travel dates
-                        </label>
-                        <Controller
-                          control={detailsForm.control}
-                          name="dateRange"
-                          rules={{
-                            validate: ([start, end]) => {
-                              if (!start || !end) {
-                                return 'Please select both check-in and check-out dates.';
-                              }
-                              return true;
-                            },
-                          }}
-                          render={({ field: { onChange, value } }) => (
-                            <DatePicker
-                              selectsRange
-                              startDate={value?.[0] ?? null}
-                              endDate={value?.[1] ?? null}
-                              onChange={(update) => {
-                                if (Array.isArray(update)) {
-                                  onChange(update);
-                                }
-                              }}
-                              minDate={new Date()}
-                              placeholderText="Select dates"
-                              className="w-full rounded-xl border border-gray-200 py-3 px-4 text-sm font-medium text-gray-900 focus:border-brand-300"
-                            />
-                          )}
-                        />
-                        {detailsForm.formState.errors.dateRange && (
-                          <p className="text-xs font-medium text-error">
-                            {detailsForm.formState.errors.dateRange.message}
-                          </p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-                          Guests
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">Ngày khởi hành</p>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {tour.departures?.length ? (
+                        tour.departures.map((departure) => {
+                          const isSelected = departure.id === selectedDepartureId;
+                          return (
+                            <button
+                              type="button"
+                              key={departure.id}
+                              onClick={() => setSelectedDepartureId(departure.id)}
+                              className={`rounded-2xl border px-4 py-3 text-left text-sm transition hover:border-brand-300 hover:bg-brand-50 ${
+                                isSelected ? 'border-brand-400 bg-brand-50 text-brand-700' : 'border-gray-200 bg-gray-25'
+                              }`}
+                            >
+                              <span className="block font-semibold text-gray-900">
+                                {format(new Date(departure.startDate), 'dd/MM/yyyy')} →{' '}
+                                {format(new Date(departure.endDate), 'dd/MM/yyyy')}
+                              </span>
+                              <span className="mt-1 block text-xs text-gray-500">
+                                Còn lại {departure.remainingSlots}{' '}
+                                {(departure.totalSlots ?? 0) > 0 ? `/ ${(departure.totalSlots ?? 0)}` : 'chỗ'}
                         </span>
-                        <Controller
-                          control={detailsForm.control}
-                          name="guests"
-                          rules={{
-                            required: 'Let us know how many guests will travel.',
-                            min: { value: 1, message: 'At least one guest is required.' },
-                            max: { value: 12, message: 'For groups larger than 12, contact our team.' },
-                          }}
-                          render={({ field: { value, onChange } }) => (
-                            <GuestSelector value={value ?? 2} onChange={onChange} min={1} max={12} />
-                          )}
-                        />
-                        {detailsForm.formState.errors.guests && (
-                          <p className="text-xs font-medium text-error">
-                            {detailsForm.formState.errors.guests.message}
+                            </button>
+                          );
+                        })
+                      ) : (
+                        <p className="rounded-2xl border border-dashed border-gray-200 bg-gray-25 p-4 text-sm text-gray-500">
+                          Tour chưa có lịch khởi hành công khai.
                           </p>
                         )}
                       </div>
                     </div>
+
                     <div className="space-y-2">
-                      <label
-                        htmlFor="specialRequests"
-                        className="text-xs font-semibold uppercase tracking-widest text-gray-500"
-                      >
-                        Special requests (optional)
-                      </label>
-                      <textarea
-                        id="specialRequests"
-                        rows={4}
-                        {...detailsForm.register('specialRequests')}
-                        className="w-full rounded-xl border border-gray-200 py-3 px-4 text-sm font-medium text-gray-900 focus:border-brand-300"
-                        placeholder="Food allergies, celebrations, mobility requests..."
-                      />
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">Số khách</p>
+                    <GuestSelector value={guests} onChange={setGuests} />
                     </div>
-                    <div className="flex items-center justify-end gap-3">
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                      <label className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
+                        Họ và tên
+                        </label>
+                        <input
+                          type="text"
+                        {...contactForm.register('fullName', { required: 'Vui lòng nhập họ tên.' })}
+                        className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-900 focus:border-brand-300"
+                        placeholder="Nguyễn Văn A"
+                        />
+                      {contactForm.formState.errors.fullName && (
+                          <p className="mt-1 text-xs font-medium text-error">
+                          {contactForm.formState.errors.fullName.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                      <label className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
+                        Email
+                        </label>
+                        <input
+                        type="email"
+                        {...contactForm.register('email', {
+                          required: 'Vui lòng nhập email.',
+                          pattern: { value: /\S+@\S+\.\S+/, message: 'Email không hợp lệ.' },
+                        })}
+                        className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-900 focus:border-brand-300"
+                        placeholder="ban@example.com"
+                      />
+                      {contactForm.formState.errors.email && (
+                          <p className="mt-1 text-xs font-medium text-error">
+                          {contactForm.formState.errors.email.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                      <div>
+                    <label className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
+                      Số điện thoại
+                        </label>
+                          <input
+                            type="tel"
+                      {...contactForm.register('phone', { required: 'Vui lòng nhập số điện thoại.' })}
+                      className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-900 focus:border-brand-300"
+                      placeholder="(+84) 123 456 789"
+                    />
+                    {contactForm.formState.errors.phone && (
+                          <p className="mt-1 text-xs font-medium text-error">
+                        {contactForm.formState.errors.phone.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                <div className="flex items-center justify-between border-t border-gray-100 pt-4 text-sm">
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Tổng tạm tính</p>
+                    <p className="text-xl font-semibold text-gray-900">
+                      {estimatedTotal.toLocaleString('vi-VN')} ₫
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Giá dành cho {guests} khách. Phí thanh toán MoMo được miễn.
+                    </p>
+                    </div>
+                  <div className="flex gap-3">
                       <button
                         type="button"
-                        onClick={() => navigate(`/tours/${tour.slug}`)}
-                        className="inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-brand-300 hover:text-gray-900 focus-visible:border-brand-300"
+                      onClick={() => navigate(-1)}
+                      className="rounded-full border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:border-brand-300 hover:text-gray-900"
                       >
-                        Review itinerary
+                      Hủy
                       </button>
                       <button
                         type="submit"
-                        className="inline-flex items-center rounded-full bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-600 focus-visible:bg-brand-600"
+                      disabled={!selectedDepartureId}
+                      className="rounded-full bg-brand-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600 focus-visible:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        Continue to traveler info →
+                      Tiếp tục thanh toán
                       </button>
+                  </div>
                     </div>
                   </form>
-                </motion.section>
-              )}
-
-              {currentStep === 2 && (
-                <motion.section
-                  key="step-2"
-                  className="rounded-3xl border border-gray-100 bg-white p-6 shadow-card lg:p-8"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <h2 className="text-xl font-semibold text-gray-900">2. Traveler information</h2>
-                  <p className="mt-2 text-sm text-gray-600">
-                    We need main traveler details to secure reservations and share your travel documents.
+            ) : (
+              <div className="space-y-6 rounded-3xl border border-gray-100 bg-white p-6 shadow-card lg:p-8">
+                <header className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-500">Bước cuối</p>
+                  <h2 className="text-xl font-semibold text-gray-900">2. Thanh toán MoMo</h2>
+                  <p className="text-sm text-gray-600">
+                    Kiểm tra lại thông tin và chọn "Thanh toán qua MoMo" để nhận mã QR chính thức.
                   </p>
-                  <form onSubmit={travelerForm.handleSubmit(onSubmitTraveler)} className="mt-6 space-y-5">
-                    <div className="grid gap-5 md:grid-cols-2">
-                      <div>
-                        <label
-                          htmlFor="firstName"
-                          className="text-xs font-semibold uppercase tracking-widest text-gray-500"
-                        >
-                          First name
-                        </label>
-                        <input
-                          id="firstName"
-                          type="text"
-                          {...travelerForm.register('firstName', { required: 'Please provide your first name.' })}
-                          className="mt-2 w-full rounded-xl border border-gray-200 py-3 px-4 text-sm font-medium text-gray-900 focus:border-brand-300"
-                        />
-                        {travelerForm.formState.errors.firstName && (
-                          <p className="mt-1 text-xs font-medium text-error">
-                            {travelerForm.formState.errors.firstName.message}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="lastName"
-                          className="text-xs font-semibold uppercase tracking-widest text-gray-500"
-                        >
-                          Last name
-                        </label>
-                        <input
-                          id="lastName"
-                          type="text"
-                          {...travelerForm.register('lastName', { required: 'Please provide your surname.' })}
-                          className="mt-2 w-full rounded-xl border border-gray-200 py-3 px-4 text-sm font-medium text-gray-900 focus:border-brand-300"
-                        />
-                        {travelerForm.formState.errors.lastName && (
-                          <p className="mt-1 text-xs font-medium text-error">
-                            {travelerForm.formState.errors.lastName.message}
-                          </p>
-                        )}
-                      </div>
+                </header>
+
+                <div className="space-y-4 rounded-2xl bg-gray-25 p-5 text-sm text-gray-700">
+                  <div className="flex items-center justify-between">
+                    <span>Khách liên hệ</span>
+                    <span className="font-medium text-gray-900">{contactInfo?.fullName}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Email</span>
+                    <span className="font-medium text-gray-900">{contactInfo?.email}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Số điện thoại</span>
+                    <span className="font-medium text-gray-900">{contactInfo?.phone}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Ngày khởi hành</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedDeparture
+                        ? `${format(new Date(selectedDeparture.startDate), 'dd/MM/yyyy')} - ${format(
+                            new Date(selectedDeparture.endDate),
+                            'dd/MM/yyyy'
+                          )}`
+                        : 'Chưa chọn'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Số khách</span>
+                    <span className="font-medium text-gray-900">{guests}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-base font-semibold text-gray-900">
+                    <span>Tổng thanh toán</span>
+                    <span>{estimatedTotal.toLocaleString('vi-VN')} ₫</span>
+                  </div>
                     </div>
-                    <div className="grid gap-5 md:grid-cols-2">
-                      <div>
-                        <label
-                          htmlFor="email"
-                          className="text-xs font-semibold uppercase tracking-widest text-gray-500"
-                        >
-                          Email address
-                        </label>
-                        <div className="relative mt-2">
-                          <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                          <input
-                            id="email"
-                            type="email"
-                            {...travelerForm.register('email', {
-                              required: 'We use your email to send confirmations.',
-                              pattern: { value: /\S+@\S+\.\S+/, message: 'Enter a valid email address.' },
-                            })}
-                            className="w-full rounded-xl border border-gray-200 py-3 pl-11 pr-4 text-sm font-medium text-gray-900 focus:border-brand-300"
-                          />
-                        </div>
-                        {travelerForm.formState.errors.email && (
-                          <p className="mt-1 text-xs font-medium text-error">
-                            {travelerForm.formState.errors.email.message}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="phone"
-                          className="text-xs font-semibold uppercase tracking-widest text-gray-500"
-                        >
-                          Phone number
-                        </label>
-                        <div className="relative mt-2">
-                          <Phone className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                          <input
-                            id="phone"
-                            type="tel"
-                            {...travelerForm.register('phone', {
-                              required: 'We need a phone number for travel updates.',
-                            })}
-                            className="w-full rounded-xl border border-gray-200 py-3 pl-11 pr-4 text-sm font-medium text-gray-900 focus:border-brand-300"
-                          />
-                        </div>
-                        {travelerForm.formState.errors.phone && (
-                          <p className="mt-1 text-xs font-medium text-error">
-                            {travelerForm.formState.errors.phone.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="nationality"
-                        className="text-xs font-semibold uppercase tracking-widest text-gray-500"
-                      >
-                        Nationality
-                      </label>
-                      <input
-                        id="nationality"
-                        type="text"
-                        {...travelerForm.register('nationality', {
-                          required: 'Nationality helps us advise on travel documentation.',
-                        })}
-                        className="mt-2 w-full rounded-xl border border-gray-200 py-3 px-4 text-sm font-medium text-gray-900 focus:border-brand-300"
-                        placeholder="e.g., German"
-                      />
-                      {travelerForm.formState.errors.nationality && (
-                        <p className="mt-1 text-xs font-medium text-error">
-                          {travelerForm.formState.errors.nationality.message}
-                        </p>
-                      )}
-                    </div>
-                    <label className="flex items-start gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-600">
-                      <input
-                        type="checkbox"
-                        {...travelerForm.register('termsAccepted', {
-                          required: 'Please confirm you accept our booking terms.',
-                        })}
-                        className="mt-1 h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-400"
-                      />
-                      I confirm that the provided traveler information is accurate and I agree to the BookingTour{' '}
-                      <a href="#terms" className="font-semibold text-brand-600 hover:underline">
-                        booking terms.
-                      </a>
-                    </label>
-                    {travelerForm.formState.errors.termsAccepted && (
-                      <p className="text-xs font-medium text-error">
-                        {travelerForm.formState.errors.termsAccepted.message}
+
+                <div className="space-y-3">
+                    <MoMoPaymentButton
+                    amount={estimatedTotal}
+                    tourName={tour.tourName}
+                    onCreateBooking={handleCreateBooking}
+                    userId={user?.userId}
+                    onProcessingChange={setCreatingBooking}
+                      onError={(message) => setBookingError(message)}
+                    />
+                  {bookingError && (
+                    <p className="rounded-2xl border border-error/20 bg-error/5 px-4 py-3 text-sm text-error">
+                      {bookingError}
                       </p>
                     )}
-                    <div className="flex items-center justify-between gap-3">
+                </div>
+
+                <div className="flex items-center justify-between border-t border-gray-100 pt-4 text-sm">
                       <button
                         type="button"
-                        onClick={() => setCurrentStep(1)}
-                        className="inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-brand-300 hover:text-gray-900 focus-visible:border-brand-300"
+                    onClick={() => setStep(1)}
+                    className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-brand-300 hover:text-gray-900"
                       >
-                        ← Back
+                    ← Quay lại chỉnh sửa
                       </button>
-                      <button
-                        type="submit"
-                        className="inline-flex items-center rounded-full bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-600 focus-visible:bg-brand-600"
-                      >
-                        Continue to payment →
-                      </button>
-                    </div>
-                  </form>
-                </motion.section>
-              )}
-
-              {currentStep === 3 && (
-                <motion.section
-                  key="step-3"
-                  className="rounded-3xl border border-gray-100 bg-white p-6 shadow-card lg:p-8"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <h2 className="text-xl font-semibold text-gray-900">3. Secure payment</h2>
-                  <p className="mt-2 text-sm text-gray-600">
-                    We accept all major credit cards. Your payment is encrypted and protected by European banks.
-                  </p>
-                  <form onSubmit={paymentForm.handleSubmit(onSubmitPayment)} className="mt-6 space-y-5">
-                    <div>
-                      <label
-                        htmlFor="cardHolder"
-                        className="text-xs font-semibold uppercase tracking-widest text-gray-500"
-                      >
-                        Cardholder name
-                      </label>
-                      <input
-                        id="cardHolder"
-                        type="text"
-                        {...paymentForm.register('cardHolder', { required: 'Name as displayed on your card.' })}
-                        className="mt-2 w-full rounded-xl border border-gray-200 py-3 px-4 text-sm font-medium text-gray-900 focus:border-brand-300"
-                      />
-                      {paymentForm.formState.errors.cardHolder && (
-                        <p className="mt-1 text-xs font-medium text-error">
-                          {paymentForm.formState.errors.cardHolder.message}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="cardNumber"
-                        className="text-xs font-semibold uppercase tracking-widest text-gray-500"
-                      >
-                        Card number
-                      </label>
-                      <input
-                        id="cardNumber"
-                        type="text"
-                        inputMode="numeric"
-                        {...paymentForm.register('cardNumber', {
-                          required: 'Card number is required.',
-                          pattern: {
-                            value: /^[0-9]{12,19}$/,
-                            message: 'Enter a valid card number.',
-                          },
-                        })}
-                        className="mt-2 w-full rounded-xl border border-gray-200 py-3 px-4 text-sm font-medium text-gray-900 focus:border-brand-300"
-                        placeholder="4242 4242 4242 4242"
-                      />
-                      {paymentForm.formState.errors.cardNumber && (
-                        <p className="mt-1 text-xs font-medium text-error">
-                          {paymentForm.formState.errors.cardNumber.message}
-                        </p>
-                      )}
-                    </div>
-                    <div className="grid gap-5 md:grid-cols-2">
-                      <div>
-                        <label
-                          htmlFor="expiry"
-                          className="text-xs font-semibold uppercase tracking-widest text-gray-500"
-                        >
-                          Expiry date
-                        </label>
-                        <input
-                          id="expiry"
-                          type="text"
-                          {...paymentForm.register('expiry', {
-                            required: 'Expiry date is required.',
-                            pattern: { value: /^(0[1-9]|1[0-2])\/\d{2}$/, message: 'Use MM/YY format.' },
-                          })}
-                          className="mt-2 w-full rounded-xl border border-gray-200 py-3 px-4 text-sm font-medium text-gray-900 focus:border-brand-300"
-                          placeholder="MM/YY"
-                        />
-                        {paymentForm.formState.errors.expiry && (
-                          <p className="mt-1 text-xs font-medium text-error">
-                            {paymentForm.formState.errors.expiry.message}
-                          </p>
-                        )}
+                  {creatingBooking && (
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <Loader2 className="h-4 w-4 animate-spin text-brand-500" />
+                      Đang tạo booking...
                       </div>
-                      <div>
-                        <label
-                          htmlFor="cvc"
-                          className="text-xs font-semibold uppercase tracking-widest text-gray-500"
-                        >
-                          CVC
-                        </label>
-                        <input
-                          id="cvc"
-                          type="password"
-                          inputMode="numeric"
-                          {...paymentForm.register('cvc', {
-                            required: 'Security code is required.',
-                            minLength: { value: 3, message: 'CVC must be 3-4 digits.' },
-                            maxLength: { value: 4, message: 'CVC must be 3-4 digits.' },
-                          })}
-                          className="mt-2 w-full rounded-xl border border-gray-200 py-3 px-4 text-sm font-medium text-gray-900 focus:border-brand-300"
-                          placeholder="123"
-                        />
-                        {paymentForm.formState.errors.cvc && (
-                          <p className="mt-1 text-xs font-medium text-error">
-                            {paymentForm.formState.errors.cvc.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="billingAddress"
-                        className="text-xs font-semibold uppercase tracking-widest text-gray-500"
-                      >
-                        Billing address
-                      </label>
-                      <textarea
-                        id="billingAddress"
-                        rows={3}
-                        {...paymentForm.register('billingAddress', {
-                          required: 'Billing address is required for receipts.',
-                        })}
-                        className="mt-2 w-full rounded-xl border border-gray-200 py-3 px-4 text-sm font-medium text-gray-900 focus:border-brand-300"
-                        placeholder="Street, city, postal code, country"
-                      />
-                      {paymentForm.formState.errors.billingAddress && (
-                        <p className="mt-1 text-xs font-medium text-error">
-                          {paymentForm.formState.errors.billingAddress.message}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setCurrentStep(2)}
-                        className="inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-brand-300 hover:text-gray-900 focus-visible:border-brand-300"
-                      >
-                        ← Back
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={isProcessingPayment}
-                        className="inline-flex items-center rounded-full bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-600 focus-visible:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-70"
-                      >
-                        {isProcessingPayment ? 'Processing…' : 'Confirm & pay →'}
-                      </button>
-                    </div>
-                  </form>
-                </motion.section>
-              )}
-
-              {currentStep === 4 && (
-                <motion.section
-                  key="step-4"
-                  className="rounded-3xl border border-gray-100 bg-white p-6 shadow-card lg:p-8"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="flex items-center gap-3 rounded-2xl bg-brand-50 p-4 text-brand-700">
-                    <CheckCircle2 className="h-6 w-6" aria-hidden="true" />
-                    <div>
-                      <h2 className="text-xl font-semibold">Booking confirmed</h2>
-                      <p className="text-sm text-brand-600">
-                        A confirmation email with your itinerary is on its way.
-                      </p>
+                  )}
                     </div>
                   </div>
-                  <div className="mt-6 space-y-4 text-sm text-gray-600">
-                    <p>
-                      Thank you {traveler?.firstName}! Your trip to {tour.destination} is now secure for{' '}
-                      {reservation.guests} {reservation.guests === 1 ? 'guest' : 'guests'}. Our concierge team will reach
-                      out within 24 hours to help with any refinements or additional arrangements.
-                    </p>
-                    <div className="rounded-2xl bg-gray-50 p-4">
-                      <h3 className="text-sm font-semibold uppercase tracking-widest text-gray-500">
-                        Next steps
-                      </h3>
-                      <ul className="mt-3 space-y-2">
-                        <li className="flex items-center gap-2">
-                          <Sparkles className="h-4 w-4 text-brand-500" aria-hidden="true" />
-                          Meet your expert travel designer to finalise the itinerary.
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <Sparkles className="h-4 w-4 text-brand-500" aria-hidden="true" />
-                          Access your digital travel guide with insider recommendations.
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <Sparkles className="h-4 w-4 text-brand-500" aria-hidden="true" />
-                          Add travel insurance or extra services if needed.
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-2 rounded-full bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-600 focus-visible:bg-brand-600"
-                        onClick={() => navigate('/')}
-                      >
-                        Explore more tours
-                      </button>
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-brand-300 hover:text-gray-900 focus-visible:border-brand-300"
-                      >
-                        <Download className="h-4 w-4" aria-hidden="true" />
-                        Download itinerary PDF
-                      </button>
-                    </div>
-                  </div>
-                </motion.section>
-              )}
-            </AnimatePresence>
+            )}
           </div>
 
-          <BookingSummary
-            tour={tour}
-            startDate={reservation.startDate}
-            endDate={reservation.endDate}
-            guests={reservation.guests}
-            step={currentStep}
-          />
-        </div>
-
-        <section className="rounded-3xl border border-gray-100 bg-white p-6 text-sm text-gray-600 shadow-card lg:p-8">
-          <h2 className="text-lg font-semibold text-gray-900">Need assistance?</h2>
-          <p className="mt-2">
-            Our concierge team is available 24/7 via live chat or WhatsApp. We can arrange private transfers, pre and
-            post-stays, and bespoke experiences tailored to your journey.
-          </p>
+          <aside className="space-y-5 rounded-3xl border border-gray-100 bg-white p-6 shadow-card lg:p-8">
+            <div className="space-y-4">
+              <img
+                src={tour.images?.find((img) => img.isPrimary)?.imageUrl ?? tour.images?.[0]?.imageUrl ?? ''}
+                alt={tour.tourName}
+                className="h-48 w-full rounded-2xl object-cover"
+                loading="lazy"
+              />
+              <div className="space-y-2 text-sm text-gray-600">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-500">Tổng quan</p>
+                <div className="flex items-center justify-between">
+                  <span>Điểm đến</span>
+                  <span className="font-medium text-gray-900">{tour.mainDestination}</span>
+                        </div>
+                <div className="flex items-center justify-between">
+                  <span>Khởi hành</span>
+                  <span className="font-medium text-gray-900">
+                    {selectedDeparture
+                      ? format(new Date(selectedDeparture.startDate), 'dd/MM/yyyy')
+                      : 'Chưa chọn'}
+                  </span>
+                      </div>
+                <div className="flex items-center justify-between">
+                  <span>Số khách</span>
+                  <span className="font-medium text-gray-900">{guests}</span>
+                    </div>
+                <div className="flex items-center justify-between text-base font-semibold text-gray-900">
+                  <span>Tạm tính</span>
+                  <span>{estimatedTotal.toLocaleString('vi-VN')} ₫</span>
+                    </div>
+                <p className="text-xs text-gray-500">
+                  Miễn phí hủy trong 24h, hoàn tiền nhanh nếu thanh toán thất bại.
+                </p>
+                    </div>
+                  </div>
+          </aside>
         </section>
       </div>
-
-      <AnimatePresence>
-        {toastMessage && (
-          <motion.div
-            className="fixed bottom-6 right-6 z-50 rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white shadow-card"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
-          >
-            {toastMessage}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </main>
   );
 };

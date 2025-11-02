@@ -12,12 +12,12 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews }) => (
       <article
         key={review.id}
         className="rounded-2xl border border-gray-100 bg-white p-6 shadow-card transition hover:-translate-y-1 hover:shadow-card-hover"
-        aria-label={`Review by ${review.travelerName}`}
+        aria-label={`Đánh giá từ ${review.travelerName}`}
       >
         <div className="flex items-center gap-4">
           <img
             src={review.travelerAvatar}
-            alt={`Portrait of ${review.travelerName}`}
+            alt={`Ảnh của ${review.travelerName}`}
             loading="lazy"
             className="h-12 w-12 rounded-full object-cover"
           />

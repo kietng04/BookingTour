@@ -7,7 +7,7 @@ const LoginWithGoogle: React.FC = () => {
     setLoading(true);
     try {
       sessionStorage.setItem('oauthProvider', 'google');
-      const userServiceUrl = process.env.REACT_APP_USER_SERVICE_URL || 'http://localhost:8081';
+      const userServiceUrl = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:8081';
       window.location.href = `${userServiceUrl}/auth/start-oauth/google`;
     } catch (err) {
       console.error('OAuth error:', err);
@@ -18,23 +18,15 @@ const LoginWithGoogle: React.FC = () => {
 
   return (
     <button
+      type="button"
       onClick={handleClick}
       disabled={loading}
-      style={{
-        width: '100%',
-        padding: '10px 20px',
-        backgroundColor: '#ffffff',
-        color: '#444',
-        border: '1px solid #ddd',
-        borderRadius: '5px',
-        fontSize: '16px',
-        fontWeight: 'bold',
-        cursor: loading ? 'not-allowed' : 'pointer',
-        opacity: loading ? 0.6 : 1,
-        marginTop: '10px',
-      }}
+      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 shadow-soft transition hover:border-brand-200 hover:text-brand-600 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:ring-brand-200 disabled:cursor-not-allowed disabled:opacity-70"
     >
-      {loading ? 'Redirecting...' : '🔴 Login with Google'}
+      <span role="img" aria-hidden="true">
+        🔴
+      </span>
+      {loading ? 'Đang chuyển hướng...' : 'Đăng nhập với Google'}
     </button>
   );
 };

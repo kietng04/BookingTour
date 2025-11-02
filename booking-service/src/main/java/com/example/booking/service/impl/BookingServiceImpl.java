@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -31,14 +32,15 @@ public class BookingServiceImpl implements BookingService {
     public Booking createBooking(BookingRequest request) {
         validateBookingRequest(request);
 
-        Booking booking = new Booking(
-                request.getUserId(),
-                request.getDepartureId(),
-                BigDecimal.valueOf(request.getTotalAmount()),
-                request.getSeats()
-        );
-
-        booking.setStatus(BookingStatus.PENDING);
+        Booking booking = Booking.builder()
+                .userId(request.getUserId())
+                .tourId(request.getTourId())
+                .departureId(request.getDepartureId())
+                .numSeats(request.getSeats())
+                .totalAmount(BigDecimal.valueOf(request.getTotalAmount()))
+                .status(BookingStatus.PENDING)
+                .paymentOverride(normalizePaymentOverride(request.getPaymentOverride()))
+                .build();
         Booking savedBooking = bookingRepository.save(booking);
 
         log.info("Created booking {} for user {} with status PENDING",
@@ -72,9 +74,9 @@ public class BookingServiceImpl implements BookingService {
                     "Booking is already cancelled");
         }
 
-        if (booking.getStatus() == BookingStatus.COMPLETED) {
+        if (booking.getStatus() == BookingStatus.CONFIRMED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Cannot cancel completed booking");
+                    "Cannot cancel confirmed booking");
         }
 
         booking.setStatus(BookingStatus.CANCELLED);
@@ -95,7 +97,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public List<Booking> getUserBookings(Long userId) {
-        return bookingRepository.findByUserId(userId);
+        return bookingRepository.findByUserId(userId, Pageable.unpaged()).getContent();
     }
 
     @Override
@@ -119,7 +121,15 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public Page<Booking> getBookingsByDepartureId(Long departureId, Pageable pageable) {
-        return bookingRepository.findByDepartureId(departureId, pageable);
+        List<Booking> bookings = bookingRepository.findByDepartureId(departureId);
+        return new PageImpl<>(bookings, pageable, bookings.size());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Booking> getBookingsByTourId(Long tourId, Pageable pageable) {
+        List<Booking> bookings = bookingRepository.findByTourId(tourId);
+        return new PageImpl<>(bookings, pageable, bookings.size());
     }
 
     private void validateBookingRequest(BookingRequest request) {
@@ -129,6 +139,9 @@ public class BookingServiceImpl implements BookingService {
         if (request.getDepartureId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "departureId is required");
         }
+        if (request.getTourId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "tourId is required");
+        }
         if (request.getSeats() == null || request.getSeats() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "seats must be greater than 0");
@@ -137,6 +150,24 @@ public class BookingServiceImpl implements BookingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "totalAmount must be greater than 0");
         }
+        if (request.getPaymentOverride() != null && !request.getPaymentOverride().isBlank()) {
+            String normalized = normalizePaymentOverride(request.getPaymentOverride());
+            if (normalized == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "paymentOverride must be SUCCESS, FAIL, MOMO or empty");
+            }
+        }
+    }
+
+    private String normalizePaymentOverride(String paymentOverride) {
+        if (paymentOverride == null || paymentOverride.isBlank()) {
+            return null;
+        }
+        String upper = paymentOverride.trim().toUpperCase();
+        return switch (upper) {
+            case "SUCCESS", "FAIL", "MOMO" -> upper;
+            default -> null;
+        };
     }
 }
 

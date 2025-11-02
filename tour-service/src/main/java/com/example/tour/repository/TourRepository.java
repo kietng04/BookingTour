@@ -1,6 +1,8 @@
 package com.example.tour.repository;
 
 import com.example.tour.model.Tour;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +19,8 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
     Page<Tour> findByProvinceId(Integer provinceId, Pageable pageable);
 
     Page<Tour> findByStatus(Tour.TourStatus status, Pageable pageable);
+
+    Optional<Tour> findBySlug(String slug);
 
     
     @Query("SELECT t FROM Tour t WHERE LOWER(t.tourName) LIKE CONCAT('%', LOWER(:keyword), '%') " +

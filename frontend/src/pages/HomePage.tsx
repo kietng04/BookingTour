@@ -1,14 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Filter, Shield, Award, Clock3, Compass, Map, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import HeroSection from '../components/home/HeroSection';
 import TourGrid from '../components/tours/TourGrid';
-import { Tour, tours } from '../data/tours';
+import { Tour } from '../data/tours';
 import FiltersDrawer, { FilterState } from '../components/home/FiltersDrawer';
+import { toursAPI } from '../services/api';
+import { enrichToursFromApi, ApiTour } from '../services/tourAdapter';
 
 const DEFAULT_FILTERS: FilterState = {
-  priceRange: [900, 4000],
+  priceRange: [0, 10000000],
   minRating: 4.5,
   tags: [],
 };
@@ -25,21 +27,45 @@ const HomePage: React.FC = () => {
     dateRange: {},
     guests: 2,
   });
+  const [tours, setTours] = useState<Tour[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
+  const loadTours = useCallback(
+    async (keyword?: string) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await toursAPI.getAll(keyword ? { keyword } : undefined);
+        const items: ApiTour[] = Array.isArray(response?.content)
+          ? response.content
+          : Array.isArray(response)
+            ? response
+            : [];
+        setTours(enrichToursFromApi(items));
+      } catch (err) {
+        console.error('Failed to fetch tours', err);
+        setError('Không thể tải danh sách tour. Vui lòng thử lại sau.');
+        setTours([]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
   useEffect(() => {
-    const loadingTimer = setTimeout(() => setIsLoading(false), 600);
-    return () => clearTimeout(loadingTimer);
-  }, []);
+    loadTours();
+  }, [loadTours]);
 
   const availableTags = useMemo(() => {
     const tagSet = new Set<string>();
     tours.forEach((tour) => tour.tags.forEach((tag) => tagSet.add(tag)));
     return Array.from(tagSet).sort();
-  }, []);
+  }, [tours]);
 
   const filteredTours = useMemo(() => {
     return tours.filter((tour) => {
@@ -60,24 +86,19 @@ const HomePage: React.FC = () => {
 
       return matchesDestination && withinPriceRange && meetsRating && matchesTags;
     });
-  }, [filters.minRating, filters.priceRange, filters.tags, searchState.destination]);
+  }, [filters.minRating, filters.priceRange, filters.tags, searchState.destination, tours]);
 
   const handleWishlist = (tourId: string) => {
     setWishlist((prev) => ({ ...prev, [tourId]: !prev[tourId] }));
   };
 
   const handleSearch = (values: SearchState) => {
-    setIsLoading(true);
     setSearchState(values);
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
+    loadTours(values.destination?.trim() ? values.destination.trim() : undefined);
   };
 
   const handleFilterApply = (newFilters: FilterState) => {
     setFilters({ ...newFilters });
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 400);
-    return () => clearTimeout(timer);
   };
 
   const activeFiltersCount =
@@ -106,23 +127,23 @@ const HomePage: React.FC = () => {
             {[
               {
                 icon: Shield,
-                title: 'Trusted Operators',
-                description: 'Each tour is vetted for safety, sustainability, and quality.',
+                title: 'Đối tác uy tín',
+                description: 'Mỗi hành trình đều được kiểm định kỹ lưỡng về độ an toàn và trách nhiệm môi trường.',
               },
               {
                 icon: Award,
-                title: 'Award-Winning Guides',
-                description: 'Certified guides with deep local knowledge and passion.',
+                title: 'Hướng dẫn viên bản địa',
+                description: 'Đội ngũ được chứng nhận với kiến thức địa phương sâu sắc và phong cách chuyên nghiệp.',
               },
               {
                 icon: Clock3,
-                title: 'Flexible Booking',
-                description: 'Free cancellation up to 48 hours on most experiences.',
+                title: 'Lịch trình linh hoạt',
+                description: 'Miễn phí hủy tới 48 giờ trước khởi hành đối với đa số tour trong hệ thống.',
               },
               {
                 icon: Sparkles,
-                title: 'Curated Moments',
-                description: 'Limited group sizes and special access to hidden gems.',
+                title: 'Trải nghiệm tuyển chọn',
+                description: 'Nhóm nhỏ giới hạn, tiếp cận độc quyền và dịch vụ cá nhân hóa cho từng khách.',
               },
             ].map((feature) => (
               <div
@@ -141,9 +162,9 @@ const HomePage: React.FC = () => {
       <section id="tours" className="container space-y-10 py-14 lg:py-20">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-3xl font-semibold text-gray-900 md:text-4xl">Explore our curated tours</h2>
+            <h2 className="text-3xl font-semibold text-gray-900 md:text-4xl">Hành trình gợi ý dành riêng cho bạn</h2>
             <p className="mt-2 max-w-2xl text-base text-gray-500">
-              Handpicked itineraries designed by travel specialists across Europe. Transparent pricing, authentic experiences, and verified reviews.
+              Những tuyến tour được thiết kế bởi chuyên gia địa phương, chi phí minh bạch cùng trải nghiệm chân thực và đánh giá xác thực.
             </p>
           </div>
           <button
@@ -152,7 +173,7 @@ const HomePage: React.FC = () => {
             className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-brand-300 hover:text-gray-900 focus-visible:border-brand-300"
           >
             <Filter className="h-4 w-4 text-brand-500" aria-hidden="true" />
-            Filters
+            Bộ lọc
             {activeFiltersCount > 0 && (
               <span className="ml-1 inline-flex h-5 min-w-[1.5rem] items-center justify-center rounded-full bg-brand-500 px-1 text-xs font-semibold text-white">
                 {activeFiltersCount}
@@ -160,6 +181,12 @@ const HomePage: React.FC = () => {
             )}
           </button>
         </div>
+
+        {error && !isLoading && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-600">
+            {error}
+          </div>
+        )}
 
         <TourGrid
           tours={filteredTours}
@@ -170,12 +197,12 @@ const HomePage: React.FC = () => {
 
         {filteredTours.length === 0 && !isLoading && (
           <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-25 p-10 text-center">
-            <h3 className="text-xl font-semibold text-gray-900">No tours found</h3>
+            <h3 className="text-xl font-semibold text-gray-900">Chưa có tour phù hợp</h3>
             <p className="mt-2 text-sm text-gray-600">
-              Try adjusting your search or explore our most popular experiences below.
+              Bạn hãy thử điều chỉnh tìm kiếm hoặc khám phá những điểm đến nổi bật được gợi ý bên dưới.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              {['Paris', 'Amalfi Coast', 'Iceland', 'Kyoto'].map((destination) => (
+              {['Hà Nội', 'Đà Nẵng', 'Phú Quốc', 'Sa Pa'].map((destination) => (
                 <button
                   key={destination}
                   type="button"

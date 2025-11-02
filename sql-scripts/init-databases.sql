@@ -93,11 +93,14 @@ CREATE TABLE departures (
 CREATE TABLE bookings (
     booking_id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
+    tour_id INTEGER NOT NULL,
     departure_id INTEGER NOT NULL,
     booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     total_amount DECIMAL(12,2) NOT NULL,
+    payment_override VARCHAR(20),
     status booking_status DEFAULT 'PENDING',
     FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (tour_id) REFERENCES tours(tour_id),
     FOREIGN KEY (departure_id) REFERENCES departures(departure_id)
 );
 

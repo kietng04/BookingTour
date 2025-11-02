@@ -39,6 +39,14 @@ const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
 
   const selectedMinRating = watch('minRating');
   const selectedTags = watch('tags');
+  const selectedPriceRange = watch('priceRange');
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      maximumFractionDigits: 0,
+    }).format(Number.isFinite(value) ? value : 0);
 
   const handleReset = () => {
     reset(baseline);
@@ -67,7 +75,7 @@ const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
             transition={{ type: 'spring', duration: 0.4 }}
             role="dialog"
             aria-modal="true"
-            aria-label="Filter tours"
+            aria-label="Bộ lọc tour"
           >
             <form
               className="flex h-full flex-col gap-6 p-6"
@@ -81,14 +89,14 @@ const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Refine results</h2>
-                  <p className="text-sm text-gray-500">Tailor the collection to match your travel style.</p>
+                  <h2 className="text-lg font-semibold text-gray-900">Tùy chỉnh kết quả</h2>
+                  <p className="text-sm text-gray-500">Lọc nhanh để tìm đúng hành trình phù hợp với phong cách của bạn.</p>
                 </div>
                 <button
                   type="button"
                   onClick={onClose}
                   className="rounded-full border border-gray-200 p-2 text-gray-500 transition hover:border-brand-200 hover:text-brand-500 focus-visible:border-brand-300 focus-visible:text-brand-500"
-                  aria-label="Close filters"
+                  aria-label="Đóng bộ lọc"
                 >
                   <X className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -97,39 +105,49 @@ const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
               <div className="space-y-6">
                 <fieldset className="space-y-3 rounded-2xl border border-gray-100 p-4">
                   <legend className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-                    Price range (per guest)
+                    Khoảng giá (mỗi khách)
                   </legend>
                   <div className="grid gap-3 text-sm text-gray-600">
                     <label className="flex items-center gap-2">
                       <SlidersHorizontal className="h-4 w-4 text-brand-500" aria-hidden="true" />
-                      <span className="flex-1">From</span>
+                      <span className="flex-1">Từ</span>
                       <input
                         type="number"
-                        min={500}
-                        max={8000}
-                        step={50}
+                        min={0}
+                        max={20000000}
+                        step={500000}
                         {...register('priceRange.0')}
                         className="w-24 rounded-xl border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-900 focus:border-brand-300"
                       />
                     </label>
                     <label className="flex items-center gap-2">
                       <SlidersHorizontal className="h-4 w-4 text-brand-500" aria-hidden="true" />
-                      <span className="flex-1">To</span>
+                      <span className="flex-1">Đến</span>
                       <input
                         type="number"
-                        min={500}
-                        max={10000}
-                        step={50}
+                        min={0}
+                        max={30000000}
+                        step={500000}
                         {...register('priceRange.1')}
                         className="w-24 rounded-xl border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-900 focus:border-brand-300"
                       />
                     </label>
+                    <p className="rounded-xl bg-gray-25 px-3 py-2 text-xs font-medium text-gray-500">
+                      Khoảng giá hiện tại:{' '}
+                      <span className="text-gray-900">
+                        {formatCurrency(Number(selectedPriceRange?.[0] ?? defaultValues.priceRange[0]))}
+                      </span>{' '}
+                      –{' '}
+                      <span className="text-gray-900">
+                        {formatCurrency(Number(selectedPriceRange?.[1] ?? defaultValues.priceRange[1]))}
+                      </span>
+                    </p>
                   </div>
                 </fieldset>
 
                 <fieldset className="space-y-3 rounded-2xl border border-gray-100 p-4">
                   <legend className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-                    Minimum traveler rating
+                    Điểm đánh giá tối thiểu
                   </legend>
                   <div className="flex flex-wrap gap-2">
                     {[4, 4.5, 4.7, 4.9].map((rating) => (
@@ -157,7 +175,7 @@ const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
 
                 <fieldset className="space-y-3 rounded-2xl border border-gray-100 p-4">
                   <legend className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-                    Experiences
+                    Trải nghiệm
                   </legend>
                   <div className="flex flex-wrap gap-2">
                     {availableTags.map((tag) => (
@@ -189,7 +207,7 @@ const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
                   onClick={handleReset}
                   className="inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-brand-200 hover:text-gray-900 focus-visible:border-brand-300"
                 >
-                  Reset
+                  Đặt lại
                 </button>
                 <div className="flex gap-3">
                   <button
@@ -197,13 +215,13 @@ const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
                     onClick={onClose}
                     className="inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-brand-200 hover:text-gray-900 focus-visible:border-brand-300"
                   >
-                    Cancel
+                    Thoát
                   </button>
                   <button
                     type="submit"
                     className="inline-flex items-center rounded-full bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-600 focus-visible:bg-brand-600"
                   >
-                    Apply filters
+                    Áp dụng
                   </button>
                 </div>
               </div>

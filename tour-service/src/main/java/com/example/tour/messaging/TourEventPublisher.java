@@ -14,8 +14,8 @@ public class TourEventPublisher {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    public void publishSeatReserved(Long bookingId, Long tourId, Long departureId, 
-                                     Integer seats, String correlationId) {
+    public void publishSeatReserved(Long bookingId, Long tourId, Long departureId,
+                                     Integer seats, String correlationId, String paymentOverride) {
         ReservationEvent event = new ReservationEvent(
                 UUID.randomUUID().toString(),
                 correlationId,
@@ -24,7 +24,8 @@ public class TourEventPublisher {
                 tourId,
                 departureId,
                 seats,
-                null
+                null,
+                paymentOverride
         );
 
         rabbitTemplate.convertAndSend(
@@ -35,7 +36,8 @@ public class TourEventPublisher {
     }
 
     public void publishSeatReservationFailed(Long bookingId, Long tourId, Long departureId,
-                                              Integer seats, String correlationId, String reason) {
+                                              Integer seats, String correlationId, String reason,
+                                              String paymentOverride) {
         ReservationEvent event = new ReservationEvent(
                 UUID.randomUUID().toString(),
                 correlationId,
@@ -44,8 +46,13 @@ public class TourEventPublisher {
                 tourId,
                 departureId,
                 seats,
-                null
+                null,
+                paymentOverride
         );
+
+        if (reason != null) {
+            System.err.println("Seat reservation failed for booking " + bookingId + ": " + reason);
+        }
 
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.TOUR_EVENTS_EXCHANGE,
@@ -55,7 +62,7 @@ public class TourEventPublisher {
     }
 
     public void publishSeatReleased(Long bookingId, Long tourId, Long departureId,
-                                     Integer seats, String correlationId) {
+                                     Integer seats, String correlationId, String paymentOverride) {
         ReservationEvent event = new ReservationEvent(
                 UUID.randomUUID().toString(),
                 correlationId,
@@ -64,7 +71,8 @@ public class TourEventPublisher {
                 tourId,
                 departureId,
                 seats,
-                null
+                null,
+                paymentOverride
         );
 
         rabbitTemplate.convertAndSend(
