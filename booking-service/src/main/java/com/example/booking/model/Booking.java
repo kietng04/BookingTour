@@ -1,118 +1,76 @@
 package com.example.booking.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bookings")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Booking {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "booking_id")
     private Long id;
-
+    
     @Column(name = "user_id", nullable = false)
     private Long userId;
-
+    
+    @Column(name = "tour_id", nullable = false)
+    private Long tourId;
+    
     @Column(name = "departure_id", nullable = false)
     private Long departureId;
-
-    @Column(name = "booking_date")
-    private LocalDateTime bookingDate;
-
-    @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
+    
+    @Column(name = "num_seats", nullable = false)
+    private Integer numSeats;
+    
+    @Column(name = "total_amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal totalAmount;
-
+    
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
+    @Column(name = "status", nullable = false, length = 50)
     private BookingStatus status;
-
-    @Column(name = "seats", nullable = false)
-    private Integer seats;
-
+    
+    @Column(name = "notes", length = 1000)
+    private String notes;
+    
+    @Column(name = "payment_override", length = 100)
+    private String paymentOverride;
+    
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
     @PrePersist
     protected void onCreate() {
-        if (bookingDate == null) {
-            bookingDate = LocalDateTime.now();
-        }
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
         if (status == null) {
             status = BookingStatus.PENDING;
         }
     }
-
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+    
     public enum BookingStatus {
         PENDING,
         CONFIRMED,
         CANCELLED,
-        COMPLETED
-    }
-
-    public Booking() {
-    }
-
-    public Booking(Long userId, Long departureId, BigDecimal totalAmount, Integer seats) {
-        this.userId = userId;
-        this.departureId = departureId;
-        this.totalAmount = totalAmount;
-        this.seats = seats;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getDepartureId() {
-        return departureId;
-    }
-
-    public void setDepartureId(Long departureId) {
-        this.departureId = departureId;
-    }
-
-    public LocalDateTime getBookingDate() {
-        return bookingDate;
-    }
-
-    public void setBookingDate(LocalDateTime bookingDate) {
-        this.bookingDate = bookingDate;
-    }
-
-    public BigDecimal getTotalAmount() {
-        return totalAmount;
-    }
-
-    public void setTotalAmount(BigDecimal totalAmount) {
-        this.totalAmount = totalAmount;
-    }
-
-    public BookingStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(BookingStatus status) {
-        this.status = status;
-    }
-
-    public Integer getSeats() {
-        return seats;
-    }
-
-    public void setSeats(Integer seats) {
-        this.seats = seats;
+        FAILED
     }
 }
 

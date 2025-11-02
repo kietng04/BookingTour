@@ -1,13 +1,77 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import SectionTitle from '../components/common/SectionTitle.jsx';
 import TourFilters from '../components/tour/TourFilters.jsx';
 import TourGrid from '../components/tour/TourGrid.jsx';
 import EmptyState from '../components/common/EmptyState.jsx';
-import { tours } from '../data/mockTours.js';
 import { MapPin } from 'lucide-react';
+import { toursAPI } from '../services/api.js';
+
+const DEFAULT_TOUR_IMAGE =
+  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80';
+
+const transformTour = (tour) => {
+  const primaryImage = tour.images?.find((image) => image.isPrimary) ?? tour.images?.[0];
+
+  return {
+    id: tour.slug ?? `tour-${tour.id}`,
+    slug: tour.slug,
+    tourId: tour.id,
+    name: tour.tourName ?? 'Tour chưa đặt tên',
+    destination: tour.mainDestination ?? tour.departurePoint ?? 'Đang cập nhật',
+    duration: tour.days ?? 0,
+    groupSize: tour.groupSize ?? 'Liên hệ concierge',
+    difficulty: (tour.difficulty ?? 'moderate').toLowerCase(),
+    difficultyLabel: tour.difficultyLabel,
+    price: tour.adultPrice ? Number(tour.adultPrice) : 0,
+    rating: tour.rating ?? 4.8,
+    reviewsCount: tour.reviewsCount ?? 0,
+    description: tour.description ?? '',
+    thumbnail: primaryImage?.imageUrl ?? DEFAULT_TOUR_IMAGE
+  };
+};
 
 const Tours = () => {
   const [filters, setFilters] = useState({});
+  const [tours, setTours] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchTours = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await toursAPI.getAll({
+          page: 0,
+          size: 100,
+          status: 'ACTIVE'
+        });
+
+        const source = Array.isArray(response?.content) ? response.content : Array.isArray(response) ? response : [];
+        if (isMounted) {
+          setTours(source.map(transformTour));
+        }
+      } catch (err) {
+        console.error('Không thể tải danh sách tour:', err);
+        if (isMounted) {
+          setError(err.message || 'Không thể tải danh sách tour. Vui lòng thử lại sau.');
+          setTours([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchTours();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const filteredTours = useMemo(() => {
     let results = [...tours];
@@ -35,7 +99,7 @@ const Tours = () => {
       });
     }
     return results;
-  }, [filters]);
+  }, [filters, tours]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-14 md:px-8">
@@ -47,8 +111,13 @@ const Tours = () => {
 
       <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
         <TourFilters onFilter={setFilters} />
-        {filteredTours.length > 0 ? (
-          <TourGrid tours={filteredTours} />
+        {error ? (
+          <div className="rounded-3xl border border-red-200 bg-red-50 px-6 py-8 text-center">
+            <p className="text-sm font-semibold text-red-700">Lỗi tải dữ liệu</p>
+            <p className="mt-2 text-sm text-red-500">{error}</p>
+          </div>
+        ) : filteredTours.length > 0 || loading ? (
+          <TourGrid tours={filteredTours} loading={loading} />
         ) : (
           <EmptyState
             title="Không có tour phù hợp với bộ lọc"

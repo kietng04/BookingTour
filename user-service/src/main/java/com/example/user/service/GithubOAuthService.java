@@ -6,6 +6,8 @@ import com.example.user.dto.github.GithubUserResponse;
 import com.example.user.model.User;
 import com.example.user.repository.UserRepository;
 import com.example.user.util.JwtUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -30,6 +32,7 @@ public class GithubOAuthService {
     private static final String TOKEN_URL = "https://github.com/login/oauth/access_token";
     private static final String USER_URL = "https://api.github.com/user";
     private static final String EMAILS_URL = "https://api.github.com/user/emails";
+    private static final Logger logger = LoggerFactory.getLogger(GithubOAuthService.class);
 
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
@@ -88,7 +91,8 @@ public class GithubOAuthService {
                 user.getEmail(),
                 user.getFullName(),
                 user.getAvatar(),
-                "Login successful"
+                "Login successful",
+                user.getId()
         );
     }
 
@@ -107,8 +111,10 @@ public class GithubOAuthService {
 
         ResponseEntity<GithubAccessTokenResponse> response;
         try {
+            logger.info("Exchanging GitHub code={}", code);
             response = restTemplate.postForEntity(TOKEN_URL, requestEntity, GithubAccessTokenResponse.class);
         } catch (RestClientException ex) {
+            logger.warn("GitHub token exchange failed: {}", ex.getMessage(), ex);
             throw new IllegalStateException("Failed to exchange authorization code with GitHub", ex);
         }
 
@@ -117,6 +123,7 @@ public class GithubOAuthService {
             String errorMessage = body != null && StringUtils.hasText(body.getErrorDescription())
                     ? body.getErrorDescription()
                     : "GitHub token response was empty";
+            logger.warn("GitHub token response invalid: status={} body={}", response.getStatusCode(), body);
             throw new IllegalStateException(errorMessage);
         }
 
@@ -127,6 +134,7 @@ public class GithubOAuthService {
         HttpEntity<Void> entity = new HttpEntity<>(buildAuthHeaders(accessToken));
 
         try {
+            logger.info("Fetching GitHub user profile from GitHub API");
             ResponseEntity<GithubUserResponse> response = restTemplate.exchange(
                     USER_URL,
                     HttpMethod.GET,
@@ -136,10 +144,12 @@ public class GithubOAuthService {
 
             GithubUserResponse body = response.getBody();
             if (body == null || body.id() == null || !StringUtils.hasText(body.login())) {
+                logger.warn("GitHub user profile invalid: status={} body={}", response.getStatusCode(), body);
                 throw new IllegalStateException("GitHub user profile response was invalid");
             }
             return body;
         } catch (RestClientException ex) {
+            logger.warn("GitHub user profile fetch failed: {}", ex.getMessage(), ex);
             throw new IllegalStateException("Failed to fetch GitHub user profile", ex);
         }
     }
@@ -261,4 +271,3 @@ public class GithubOAuthService {
     }
 
 }
-

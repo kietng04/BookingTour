@@ -5,14 +5,16 @@ public class RegisterResponse {
     private String username;
     private String email;
     private String message;
+    private Long userId;
 
     public RegisterResponse() {}
 
-    public RegisterResponse(String token, String username, String email, String message) {
+    public RegisterResponse(String token, String username, String email, String message, Long userId) {
         this.token = token;
         this.username = username;
         this.email = email;
         this.message = message;
+        this.userId = userId;
     }
 
     public String getToken() {
@@ -46,5 +48,12 @@ public class RegisterResponse {
     public void setMessage(String message) {
         this.message = message;
     }
-}
 
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+}

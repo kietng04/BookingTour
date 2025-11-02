@@ -6,6 +6,7 @@ type AuthProfile = {
   fullName?: string | null;
   avatar?: string | null;
   provider?: string | null;
+  userId?: number | null;
 };
 
 type AuthState = {
@@ -29,14 +30,28 @@ const defaultContext: AuthContextValue = {
   logout: () => {}
 };
 
-const STORAGE_KEYS = ['authToken', 'username', 'email', 'fullName', 'avatar', 'authProvider'];
+const STORAGE_KEYS = ['authToken', 'username', 'email', 'fullName', 'avatar', 'authProvider', 'userId'];
+
+const normalizeToken = (rawToken: string | null): string | null => {
+  if (!rawToken) {
+    return null;
+  }
+
+  const normalized = rawToken.trim();
+  if (!normalized) {
+    return null;
+  }
+
+  const invalidTokens = new Set(['null', 'undefined', 'NaN', 'false']);
+  return invalidTokens.has(normalized.toLowerCase()) ? null : normalized;
+};
 
 const readStateFromStorage = (): AuthState => {
   if (typeof window === 'undefined') {
     return { token: null, profile: null };
   }
 
-  const token = window.localStorage.getItem('authToken');
+  const token = normalizeToken(window.localStorage.getItem('authToken'));
   if (!token) {
     return { token: null, profile: null };
   }
@@ -48,6 +63,12 @@ const readStateFromStorage = (): AuthState => {
     avatar: window.localStorage.getItem('avatar'),
     provider: window.localStorage.getItem('authProvider')
   };
+
+  const rawUserId = window.localStorage.getItem('userId');
+  if (rawUserId) {
+      const parsed = Number(rawUserId);
+      profile.userId = Number.isNaN(parsed) ? null : parsed;
+  }
 
   return { token, profile };
 };

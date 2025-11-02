@@ -22,6 +22,46 @@ services:
       timeout: 5s
       retries: 5
 
+  booking-db:
+    image: postgres:15-alpine
+    container_name: booking-db
+    environment:
+      POSTGRES_DB: bookingdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - booking_data:/var/lib/postgresql/data
+      - ./sql-scripts/init-booking-db.sql:/docker-entrypoint-initdb.d/init-booking-db.sql
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  payment-db:
+    image: postgres:15-alpine
+    container_name: payment-db
+    environment:
+      POSTGRES_DB: paymentdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - payment_data:/var/lib/postgresql/data
+      - ./sql-scripts/init-payment-db.sql:/docker-entrypoint-initdb.d/init-payment-db.sql
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   eureka-server:
     build: ./eureka-server
     container_name: eureka-server
@@ -44,7 +84,11 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - LOGGING_LEVEL_ROOT=DEBUG
+      - LOGGING_LEVEL_COM_EXAMPLE=DEBUG
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - LOGGING_LEVEL_ROOT=DEBUG
+      - LOGGING_LEVEL_COM_EXAMPLE=DEBUG
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -70,6 +114,8 @@ services:
       - GOOGLE_CLIENT_ID=647139008177-bn7pulod8unbft0k07c8rde26h8om2no.apps.googleusercontent.com
       - GOOGLE_CLIENT_SECRET=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
       - GOOGLE_REDIRECT_URI=http://localhost:3000/auth/callback
+      - LOGGING_LEVEL_ROOT=DEBUG
+      - LOGGING_LEVEL_COM_EXAMPLE=DEBUG
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -111,6 +157,8 @@ services:
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - LOGGING_LEVEL_ROOT=DEBUG
+      - LOGGING_LEVEL_COM_EXAMPLE=DEBUG
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -134,8 +182,12 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - LOGGING_LEVEL_ROOT=DEBUG
+      - LOGGING_LEVEL_COM_EXAMPLE=DEBUG
     depends_on:
       eureka-server:
+        condition: service_healthy
+      booking-db:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -155,8 +207,12 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - LOGGING_LEVEL_ROOT=DEBUG
+      - LOGGING_LEVEL_COM_EXAMPLE=DEBUG
     depends_on:
       eureka-server:
+        condition: service_healthy
+      payment-db:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -174,7 +230,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=http://localhost:8080
+      - VITE_API_URL=http://localhost:8080
+      - VITE_USER_SERVICE_URL=http://localhost:8081
     depends_on:
       api-gateway:
         condition: service_healthy
@@ -201,3 +258,5 @@ networks:
 
 volumes:
   postgres_data:
+  booking_data:
+  payment_data:

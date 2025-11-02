@@ -3,30 +3,30 @@ import { Facebook, Instagram, Linkedin, Twitter } from 'lucide-react';
 
 const footerLinks = [
   {
-    title: 'Company',
+    title: 'Về chúng tôi',
     links: [
-      { label: 'About', href: '#' },
-      { label: 'Press', href: '#' },
-      { label: 'Careers', href: '#' },
-      { label: 'Privacy', href: '#' },
+      { label: 'Giới thiệu BookingTour', href: '#' },
+      { label: 'Báo chí', href: '#' },
+      { label: 'Tuyển dụng', href: '#' },
+      { label: 'Chính sách bảo mật', href: '#' },
     ],
   },
   {
-    title: 'Discover',
+    title: 'Khám phá',
     links: [
-      { label: 'Destinations', href: '#destinations' },
-      { label: 'Seasonal offers', href: '#offers' },
-      { label: 'Travel guides', href: '#guides' },
-      { label: 'Gift cards', href: '#gifts' },
+      { label: 'Điểm đến nổi bật', href: '#destinations' },
+      { label: 'Ưu đãi theo mùa', href: '#offers' },
+      { label: 'Cẩm nang du lịch', href: '#guides' },
+      { label: 'Quà tặng du lịch', href: '#gifts' },
     ],
   },
   {
-    title: 'Support',
+    title: 'Hỗ trợ',
     links: [
-      { label: 'Help center', href: '#support' },
-      { label: 'Contact', href: '#contact' },
-      { label: 'Travel advisories', href: '#advisories' },
-      { label: 'Travel insurance', href: '#insurance' },
+      { label: 'Trung tâm trợ giúp', href: '#support' },
+      { label: 'Liên hệ tư vấn', href: '#contact' },
+      { label: 'Thông tin lưu ý', href: '#advisories' },
+      { label: 'Bảo hiểm du lịch', href: '#insurance' },
     ],
   },
 ];
@@ -63,13 +63,13 @@ const SiteFooter: React.FC = () => (
             BookingTour
           </a>
           <p className="text-sm text-gray-600">
-            Boutique European journeys designed by local experts. Modern experiences, timeless memories.
+            Chọn lọc những hành trình châu Âu đặc sắc được xây dựng bởi chuyên gia bản địa. Trải nghiệm đẳng cấp, kỷ niệm trọn vẹn.
           </p>
           <div className="flex items-center gap-3">
-            <SocialIcon href="https://facebook.com" label="Visit our Facebook page" icon={Facebook} />
-            <SocialIcon href="https://instagram.com" label="Visit our Instagram profile" icon={Instagram} />
-            <SocialIcon href="https://twitter.com" label="Visit our Twitter profile" icon={Twitter} />
-            <SocialIcon href="https://linkedin.com" label="Visit our LinkedIn profile" icon={Linkedin} />
+            <SocialIcon href="https://facebook.com" label="Theo dõi BookingTour trên Facebook" icon={Facebook} />
+            <SocialIcon href="https://instagram.com" label="Theo dõi BookingTour trên Instagram" icon={Instagram} />
+            <SocialIcon href="https://twitter.com" label="Theo dõi BookingTour trên Twitter" icon={Twitter} />
+            <SocialIcon href="https://linkedin.com" label="Theo dõi BookingTour trên LinkedIn" icon={Linkedin} />
           </div>
         </div>
         {footerLinks.map((section) => (
@@ -93,7 +93,7 @@ const SiteFooter: React.FC = () => (
         ))}
       </div>
       <div className="mt-12 border-t border-gray-100 pt-6 text-sm text-gray-500">
-        <p>© {new Date().getFullYear()} BookingTour. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} BookingTour. Bản quyền thuộc về công ty.</p>
       </div>
     </div>
   </footer>

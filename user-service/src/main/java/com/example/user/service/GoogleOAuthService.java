@@ -90,14 +90,13 @@ public class GoogleOAuthService {
         User user = upsertUser(userResponse);
         String token = jwtUtil.generateToken(user.getUsername(), user.getEmail());
 
-        return new OAuthLoginResult(
-                token,
+        return new OAuthLoginResult(token,
                 user.getUsername(),
                 user.getEmail(),
                 user.getFullName(),
                 user.getAvatar(),
-                "Login successful"
-        );
+                "Login successful",
+                user.getId());
     }
 
     private String exchangeCodeForToken(String code) {
@@ -120,13 +119,16 @@ public class GoogleOAuthService {
 
         ResponseEntity<GoogleAccessTokenResponse> response;
         try {
+            logger.info("Exchanging Google code={}", code);
             response = restTemplate.postForEntity(TOKEN_URL, requestEntity, GoogleAccessTokenResponse.class);
         } catch (RestClientException ex) {
+            logger.warn("Google token exchange failed: {}", ex.getMessage(), ex);
             throw new IllegalStateException("Failed to exchange authorization code with Google", ex);
         }
 
         GoogleAccessTokenResponse responseBody = response.getBody();
         if (responseBody == null || !StringUtils.hasText(responseBody.getAccessToken())) {
+            logger.warn("Google token response invalid: status={} body={}", response.getStatusCode(), responseBody);
             throw new IllegalStateException("Google token response was empty");
         }
 
@@ -141,6 +143,7 @@ public class GoogleOAuthService {
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
         try {
+            logger.info("Fetching Google user profile from Google API");
             ResponseEntity<GoogleUserResponse> response = restTemplate.exchange(
                     USER_INFO_URL,
                     HttpMethod.GET,
@@ -150,10 +153,12 @@ public class GoogleOAuthService {
 
             GoogleUserResponse body = response.getBody();
             if (body == null || !StringUtils.hasText(body.sub())) {
+                logger.warn("Google user profile invalid: status={} body={}", response.getStatusCode(), body);
                 throw new IllegalStateException("Google user profile response was invalid");
             }
             return body;
         } catch (RestClientException ex) {
+            logger.warn("Google user profile fetch failed: {}", ex.getMessage(), ex);
             throw new IllegalStateException("Failed to fetch Google user profile", ex);
         }
     }

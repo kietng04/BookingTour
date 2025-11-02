@@ -6,15 +6,18 @@ public class BookingRequest {
     private Long departureId;
     private Integer seats;
     private Double totalAmount;
+    private String paymentOverride;
 
     public BookingRequest() {}
 
-    public BookingRequest(Long userId, Long tourId, Long departureId, Integer seats, Double totalAmount) {
+    public BookingRequest(Long userId, Long tourId, Long departureId, Integer seats,
+                          Double totalAmount, String paymentOverride) {
         this.userId = userId;
         this.tourId = tourId;
         this.departureId = departureId;
         this.seats = seats;
         this.totalAmount = totalAmount;
+        this.paymentOverride = paymentOverride;
     }
 
     public Long getUserId() {
@@ -55,6 +58,14 @@ public class BookingRequest {
 
     public void setTotalAmount(Double totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public String getPaymentOverride() {
+        return paymentOverride;
+    }
+
+    public void setPaymentOverride(String paymentOverride) {
+        this.paymentOverride = paymentOverride;
     }
 }
 

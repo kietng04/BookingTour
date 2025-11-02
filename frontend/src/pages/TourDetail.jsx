@@ -8,46 +8,208 @@ import ReviewsPanel from '../components/tour/ReviewsPanel.jsx';
 import Card from '../components/common/Card.jsx';
 import Button from '../components/common/Button.jsx';
 import SectionTitle from '../components/common/SectionTitle.jsx';
-import { tours } from '../data/mockTours.js';
 import { reviews } from '../data/mockReviews.js';
 import { formatCurrency } from '../utils/format.js';
 import { toursAPI } from '../services/api.js';
 
+const DEFAULT_TOUR_IMAGE =
+  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80';
+
+const transformScheduleToItinerary = (schedules = []) =>
+  schedules
+    .sort((a, b) => (a.dayNumber ?? 0) - (b.dayNumber ?? 0))
+    .map((schedule) => {
+      const rawItems = schedule.scheduleDescription
+        ? schedule.scheduleDescription
+            .split(/\r?\n/)
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : [];
+
+      const items = rawItems.length > 0 ? rawItems : [schedule.scheduleDescription].filter(Boolean);
+      const fallbackTitle = items[0] ?? `Ngày ${schedule.dayNumber ?? ''}`.trim();
+
+      return {
+        day: schedule.dayNumber ?? 0,
+        title: fallbackTitle,
+        items
+      };
+    });
+
+const buildHighlights = (data) => {
+  const highlights = [];
+  if (data.mainDestination) {
+    highlights.push(`Hành trình khám phá ${data.mainDestination}`);
+  }
+  if (data.departurePoint) {
+    highlights.push(`Khởi hành từ ${data.departurePoint}`);
+  }
+  if (data.days) {
+    highlights.push(`${data.days} ngày ${data.nights ?? 0} đêm trải nghiệm chọn lọc`);
+  }
+  return highlights.length > 0 ? highlights : ['Hành trình được concierge tuyển chọn kỹ lưỡng'];
+};
+
+const transformTourDetail = (data) => {
+  const primaryImage = data.images?.find((image) => image.isPrimary) ?? data.images?.[0];
+  const gallery = (data.images ?? [])
+    .filter((image) => image.imageUrl !== primaryImage?.imageUrl)
+    .map((image) => image.imageUrl);
+
+  const includes = data.includes ?? [
+    'Concierge đồng hành trước - trong - sau chuyến đi',
+    'Hỗ trợ điều chỉnh lịch trình linh hoạt theo nhu cầu',
+    data.departurePoint ? `Đón tại ${data.departurePoint}` : null
+  ].filter(Boolean);
+
+  const excludes = data.excludes ?? [
+    'Chi phí cá nhân và dịch vụ phát sinh ngoài chương trình',
+    'Nâng hạng phòng và dịch vụ cao cấp theo yêu cầu riêng'
+  ];
+
+  return {
+    id: data.slug ?? `tour-${data.id}`,
+    slug: data.slug ?? `tour-${data.id}`,
+    tourId: data.id,
+    name: data.tourName ?? 'Tour chưa đặt tên',
+    destination: data.mainDestination ?? data.departurePoint ?? 'Đang cập nhật',
+    duration: data.days ?? 0,
+    nights: data.nights ?? 0,
+    groupSize: data.groupSize ?? 'Liên hệ concierge',
+    price: data.adultPrice ? Number(data.adultPrice) : 0,
+    description: data.description ?? 'Thông tin chi tiết sẽ được concierge bổ sung.',
+    thumbnail: primaryImage?.imageUrl ?? DEFAULT_TOUR_IMAGE,
+    gallery: gallery.length > 0 ? gallery : [primaryImage?.imageUrl ?? DEFAULT_TOUR_IMAGE],
+    highlights: buildHighlights(data),
+    itinerary: transformScheduleToItinerary(data.schedules),
+    includes,
+    excludes,
+    policies: {
+      cancellation:
+        data.policies?.cancellation ?? 'Chính sách huỷ linh hoạt, liên hệ concierge để được hướng dẫn.',
+      requirements:
+        data.policies?.requirements ?? 'Concierge sẽ tư vấn chi tiết về sức khoẻ và giấy tờ cần thiết.',
+      payment:
+        data.policies?.payment ?? 'Thanh toán linh hoạt: đặt cọc giữ chỗ, phần còn lại trước ngày khởi hành.'
+    }
+  };
+};
+
 const TourDetail = () => {
   const { tourId } = useParams();
-  const tour = useMemo(() => tours.find((item) => item.id === tourId), [tourId]);
+  const [tour, setTour] = useState(null);
+  const [loadingTour, setLoadingTour] = useState(true);
+  const [tourError, setTourError] = useState(null);
   const [departures, setDepartures] = useState([]);
-  const [loadingDepartures, setLoadingDepartures] = useState(true);
+  const [loadingDepartures, setLoadingDepartures] = useState(false);
+  const [departuresError, setDeparturesError] = useState(null);
 
   useEffect(() => {
-    if (!tourId) return;
+    let isMounted = true;
+
+    const fetchTour = async () => {
+      if (!tourId) {
+        setTourError('Không xác định được tour.');
+        setLoadingTour(false);
+        return;
+      }
+
+      try {
+        setLoadingTour(true);
+        setTourError(null);
+        const data = await toursAPI.getBySlug(tourId);
+        if (!isMounted) return;
+        setTour(transformTourDetail(data));
+      } catch (error) {
+        console.error('Failed to load tour by slug:', error);
+        let finalError = error;
+        if (/^\d+$/.test(tourId)) {
+          try {
+            const fallback = await toursAPI.getById(Number(tourId));
+            if (!isMounted) return;
+            setTour(transformTourDetail(fallback));
+            setTourError(null);
+            return;
+          } catch (fallbackError) {
+            console.error('Fallback load tour by id failed:', fallbackError);
+            finalError = fallbackError;
+          }
+        }
+        if (isMounted) {
+          setTour(null);
+          setTourError(finalError.message || 'Không tìm thấy tour.');
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingTour(false);
+        }
+      }
+    };
+
+    fetchTour();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [tourId]);
+
+  useEffect(() => {
+    if (!tour?.tourId) {
+      return;
+    }
+
+    let isMounted = true;
 
     const fetchDepartures = async () => {
       try {
         setLoadingDepartures(true);
-        const data = await toursAPI.getDepartures(tourId);
-        setDepartures(data);
+        setDeparturesError(null);
+        const data = await toursAPI.getDepartures(tour.tourId);
+        if (!isMounted) return;
+        setDepartures(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to load departures:', error);
-        setDepartures([]);
+        if (isMounted) {
+          setDepartures([]);
+          setDeparturesError(error.message || 'Không thể tải lịch khởi hành.');
+        }
       } finally {
-        setLoadingDepartures(false);
+        if (isMounted) {
+          setLoadingDepartures(false);
+        }
       }
     };
 
     fetchDepartures();
-  }, [tourId]);
 
-  if (!tour) {
+    return () => {
+      isMounted = false;
+    };
+  }, [tour?.tourId]);
+
+  const tourReviews = useMemo(
+    () => (tour ? reviews.filter((review) => review.tourId === tour.id) : []),
+    [tour]
+  );
+
+  if (loadingTour) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-20 text-center">
-        <p className="text-sm text-slate-500">Không tìm thấy tour.</p>
-        <Button to="/tours" className="mt-4">Quay lại danh sách tour</Button>
+        <p className="text-sm text-slate-500">Đang tải thông tin tour...</p>
       </div>
     );
   }
 
-  const tourReviews = reviews.filter((review) => review.tourId === tour.id);
+  if (tourError || !tour) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-20 text-center">
+        <p className="text-sm text-slate-500">{tourError || 'Không tìm thấy tour.'}</p>
+        <Button to="/tours" className="mt-4">
+          Quay lại danh sách tour
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-14 md:px-8">
@@ -81,7 +243,7 @@ const TourDetail = () => {
             <p className="text-2xl font-semibold">
               {formatCurrency(tour.price)} <span className="text-sm font-medium text-primary-500">/ khách</span>
             </p>
-            <Button to={`/booking/${tour.id}`} size="sm">
+            <Button to={`/booking/${tour.slug}`} size="sm">
               Đặt tour ngay
             </Button>
           </div>
@@ -101,6 +263,11 @@ const TourDetail = () => {
           <div className="text-center py-12">
             <p className="text-sm text-slate-500">Đang tải lịch khởi hành...</p>
           </div>
+        ) : departuresError ? (
+          <Card className="text-center py-12">
+            <p className="text-sm font-semibold text-red-600">Không thể tải lịch khởi hành</p>
+            <p className="mt-2 text-xs text-red-500">{departuresError}</p>
+          </Card>
         ) : departures.length === 0 ? (
           <Card className="text-center py-12">
             <p className="text-sm text-slate-500">Hiện chưa có ngày khởi hành phù hợp.</p>
@@ -158,7 +325,7 @@ const TourDetail = () => {
 
                   <div className="pt-2 border-t border-slate-200">
                     <Button
-                      to={`/booking/${tour.id}?departureId=${departure.departureId}`}
+                      to={`/booking/${tour.slug}?departureId=${departure.departureId}`}
                       size="sm"
                       className="w-full"
                       disabled={!isAvailable}
@@ -179,7 +346,9 @@ const TourDetail = () => {
             <h2 className="text-lg font-semibold text-slate-900">Trải nghiệm nổi bật</h2>
             <p className="text-sm text-slate-600 leading-relaxed">{tour.description}</p>
             <div className="rounded-2xl bg-slate-100/70 p-4 text-sm text-slate-600">
-              <p>Backend: sử dụng endpoint `/tours/{tour.id}` để lấy dữ liệu đầy đủ. Các khối nội dung khớp trực tiếp với response (highlights, itinerary, policies...).</p>
+              <p>
+                {`Dữ liệu được lấy trực tiếp từ backend qua endpoint \`/tours/by-slug/${tour.slug}\` thông qua API Gateway. Các khối nội dung (điểm nhấn, lịch trình, chính sách) phản ánh đúng response.`}
+              </p>
             </div>
           </Card>
 

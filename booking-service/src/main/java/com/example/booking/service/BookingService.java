@@ -26,5 +26,6 @@ public interface BookingService {
     Page<Booking> getBookingsByStatus(Booking.BookingStatus status, Pageable pageable);
 
     Page<Booking> getBookingsByDepartureId(Long departureId, Pageable pageable);
-}
 
+    Page<Booking> getBookingsByTourId(Long tourId, Pageable pageable);
+}

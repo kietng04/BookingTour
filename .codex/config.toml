@@ -1,0 +1,35 @@
+windows_wsl_setup_acknowledged = true
+model = "gpt-5"
+model_provider = "openai-chat-completions"
+preferred_auth_method = "apikey"
+
+
+[model_providers.openai-chat-completions]
+name = "OpenAI using Chat Completions"
+base_url = "https://agentrouter.org/v1"
+env_key = "AGENT_ROUTER_TOKEN"
+wire_api = "chat"
+query_params = {}
+stream_idle_timeout_ms = 300000
+
+[projects.'\\\\?\\C:\\Users\\Kiet\\Desktop\\BookingTour']
+trust_level = "trusted"
+
+[projects.'C:\\WINDOWS\\system32']
+trust_level = "trusted"
+
+[projects.'C:\\Users\\Kiet']
+trust_level = "trusted"
+
+[projects.'\\\\?\\C:\\Users\\Kiet\\Desktop\\Dotnet_StoreManagement']
+trust_level = "trusted"
+
+[notice]
+hide_full_access_warning = true
+
+[shell_environment_policy]
+include_only = ["PATH","HOME"]
+ 
+ [mcp_servers.playwright]
+ command = "npx"
+ args = ["@playwright/mcp@latest"]

@@ -16,12 +16,12 @@ const Login = () => {
   }, [isAuthenticated, navigate]);
 
   const handleGitHubLogin = () => {
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
     window.location.href = `${apiUrl}/api/users/auth/start-oauth/github`;
   };
 
   const handleGoogleLogin = () => {
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
     window.location.href = `${apiUrl}/api/users/auth/start-oauth/google`;
   };
 

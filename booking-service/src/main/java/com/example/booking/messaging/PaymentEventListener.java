@@ -22,9 +22,18 @@ public class PaymentEventListener {
     @Autowired
     private BookingEventPublisher bookingEventPublisher;
 
+    @Autowired
+    private EventDeduplicator eventDeduplicator;
+
     @RabbitListener(queues = RabbitMQConfig.PAYMENT_EVENTS_QUEUE)
     public void onPaymentResult(PaymentResultMessage message) {
         log.info("[BOOKING-SERVICE] Received payment result: {}", message);
+
+        if (eventDeduplicator.isDuplicate(message.getBookingId() + ":" + message.getStatus())) {
+            log.info("[BOOKING-SERVICE] Duplicate payment result ignored. bookingId={}, status={}",
+                    message.getBookingId(), message.getStatus());
+            return;
+        }
 
         try {
             Long bookingId = Long.parseLong(message.getBookingId());
@@ -40,9 +49,9 @@ public class PaymentEventListener {
 
                 bookingEventPublisher.publishReservationCancel(
                         booking.getId(),
-                        null, // tourId - not needed for cancel
+                        booking.getTourId(),
                         booking.getDepartureId(),
-                        booking.getSeats(),
+                        booking.getNumSeats(),
                         booking.getUserId()
                 );
 

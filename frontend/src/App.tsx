@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
 import TourDetailPage from './pages/TourDetailPage';
 import BookingPage from './pages/BookingPage';
+import PaymentResultPage from './pages/PaymentResultPage';
 import NotFoundPage from './pages/NotFoundPage';
 import SiteHeader from './components/layout/SiteHeader';
 import SiteFooter from './components/layout/SiteFooter';
@@ -23,6 +24,7 @@ const App: React.FC = () => {
             <Route path="/tours" element={<HomePage />} />
             <Route path="/tours/:slug" element={<TourDetailPage />} />
             <Route path="/booking/:slug" element={<BookingPage />} />
+            <Route path="/payment-result" element={<PaymentResultPage />} />
             <Route path="/destinations" element={<PlaceholderPage title="Destinations coming soon" />} />
             <Route path="/experiences" element={<PlaceholderPage title="Unique experiences coming soon" />} />
             <Route path="/stories" element={<PlaceholderPage title="Travel stories coming soon" />} />

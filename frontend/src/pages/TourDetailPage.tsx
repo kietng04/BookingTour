@@ -1,40 +1,160 @@
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ArrowLeft, Clock3, MapPin, ShieldCheck, Sparkles } from 'lucide-react';
 import TourGallery from '../components/tours/TourGallery';
 import TourInfoTabs from '../components/tours/TourInfoTabs';
 import BookingSidebar from '../components/tours/BookingSidebar';
 import OperatorCard from '../components/tours/OperatorCard';
 import ReviewList from '../components/tours/ReviewList';
-import { tours } from '../data/tours';
+import { Tour } from '../data/tours';
+import { toursAPI } from '../services/api';
+import { enrichTourFromApi, ApiTour } from '../services/tourAdapter';
+import Skeleton from '../components/ui/Skeleton';
+
+interface DepartureSummary {
+  id: number;
+  startDate: string;
+  endDate: string;
+  remainingSlots: number;
+  totalSlots: number;
+  status: string;
+}
+
+const DEPARTURE_STATUS_LABELS: Record<string, string> = {
+  CONCHO: 'Còn chỗ',
+  SAPFULL: 'Sắp đầy',
+  FULL: 'Đã đầy',
+  DAKHOIHANH: 'Đã khởi hành',
+};
+
+const mapDepartures = (items: any[]): DepartureSummary[] =>
+  Array.isArray(items)
+    ? items.map((item) => ({
+        id: item.id ?? item.departureId ?? 0,
+        startDate: item.startDate,
+        endDate: item.endDate,
+        remainingSlots: item.remainingSlots ?? 0,
+        totalSlots: item.totalSlots ?? 0,
+        status: item.status ?? 'CONCHO',
+      }))
+    : [];
 
 const TourDetailPage: React.FC = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const tour = tours.find((item) => item.slug === slug);
+  const [tour, setTour] = useState<Tour | null>(null);
+  const [departures, setDepartures] = useState<DepartureSummary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!tour) {
+  const formatDate = useCallback((value?: string) => {
+    if (!value) return 'Đang cập nhật';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return 'Đang cập nhật';
+    }
+    return date.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchData = async () => {
+      if (!slug) {
+        setError('Thông tin tour không hợp lệ.');
+        setTour(null);
+        setDepartures([]);
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const tourResponse = (await toursAPI.getBySlug(slug)) as ApiTour & {
+          departures?: any[];
+        };
+
+        if (cancelled) {
+          return;
+        }
+
+        setTour(enrichTourFromApi(tourResponse as ApiTour));
+
+        let mappedDepartures: DepartureSummary[] = mapDepartures(tourResponse.departures ?? []);
+
+        if (!mappedDepartures.length && tourResponse.id) {
+          try {
+            const fallbackDepartures = await toursAPI.getDepartures(tourResponse.id);
+            mappedDepartures = mapDepartures(fallbackDepartures as any[]);
+          } catch (departureErr) {
+            console.warn('Không thể tải lịch khởi hành:', departureErr);
+          }
+        }
+
+        if (!cancelled) {
+          setDepartures(mappedDepartures);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Failed to fetch tour detail', err);
+          setError('Không thể tải chi tiết tour. Vui lòng thử lại.');
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  const reviewSummary = useMemo(() => {
+    if (!tour) return '';
+    return `${tour.rating.toFixed(2)} · ${tour.reviewCount} đánh giá`;
+  }, [tour]);
+
+  if (isLoading) {
     return (
-    <main id="main-content" className="container min-h-[60vh] py-24">
-        <div className="mx-auto max-w-xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-wide text-brand-500">Tour not found</p>
-          <h1 className="mt-3 text-3xl font-semibold text-gray-900">We can’t find that experience</h1>
-          <p className="mt-3 text-sm text-gray-600">
-            It may have been updated or is no longer available. Explore our curated tours instead.
-          </p>
-          <button
-            onClick={() => navigate('/')}
-            className="mt-6 inline-flex items-center rounded-full bg-brand-500 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-brand-600 focus-visible:bg-brand-600"
-          >
-            Browse tours
-          </button>
+      <main id="main-content" className="container min-h-[60vh] py-24">
+        <div className="mx-auto max-w-2xl space-y-6">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-10 w-3/4" />
+          <Skeleton className="h-96 w-full rounded-3xl" />
         </div>
       </main>
     );
   }
 
-  const reviewSummary = `${tour.rating.toFixed(2)} · ${tour.reviewCount} reviews`;
+  if (!tour) {
+    return (
+      <main id="main-content" className="container min-h-[60vh] py-24">
+        <div className="mx-auto max-w-xl text-center space-y-4">
+          <p className="text-sm font-semibold uppercase tracking-wide text-brand-500">Không tìm thấy tour</p>
+          <h1 className="text-3xl font-semibold text-gray-900">Chúng tôi chưa tìm được trải nghiệm phù hợp</h1>
+          <p className="text-sm text-gray-600">
+            {error ?? 'Tour có thể đã được cập nhật hoặc tạm ngừng mở bán. Bạn hãy khám phá những gợi ý khác nhé!'}
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            className="inline-flex items-center rounded-full bg-brand-500 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-brand-600 focus-visible:bg-brand-600"
+          >
+            Quay lại trang chủ
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main id="main-content" className="bg-gray-25 pb-16">
@@ -45,10 +165,10 @@ const TourDetailPage: React.FC = () => {
           className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 transition hover:text-gray-900 focus-visible:text-gray-900"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Back
+          Quay lại
         </button>
 
-        <motion.header
+        <div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
@@ -61,7 +181,7 @@ const TourDetailPage: React.FC = () => {
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
             <span className="inline-flex items-center gap-2">
               <MapPin className="h-4 w-4 text-brand-500" aria-hidden="true" />
-              Small-group · {tour.groupSize}
+              Nhóm nhỏ · {tour.groupSize}
             </span>
             <span className="inline-flex items-center gap-2">
               <Clock3 className="h-4 w-4 text-brand-500" aria-hidden="true" />
@@ -78,14 +198,14 @@ const TourDetailPage: React.FC = () => {
               </span>
             ))}
           </div>
-        </motion.header>
+        </div>
 
         <TourGallery images={tour.gallery} alt={tour.heroImageAlt} />
 
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.8fr)_minmax(320px,1fr)]">
           <div className="space-y-8">
             <section className="rounded-3xl border border-gray-100 bg-white p-8 shadow-card">
-              <h2 className="text-2xl font-semibold text-gray-900">Experience highlights</h2>
+              <h2 className="text-2xl font-semibold text-gray-900">Điểm nhấn hành trình</h2>
               <p className="mt-3 text-sm text-gray-600">{tour.overview}</p>
               <ul className="mt-6 grid gap-4 lg:grid-cols-2">
                 {tour.highlights.map((highlight) => (
@@ -100,12 +220,41 @@ const TourDetailPage: React.FC = () => {
               </ul>
             </section>
 
+            {departures.length > 0 && (
+              <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-card">
+                <h2 className="text-lg font-semibold text-gray-900">Lịch khởi hành sắp tới</h2>
+                <ul className="mt-4 space-y-3">
+                  {departures.map((departure) => (
+                    <li
+                      key={departure.id}
+                      className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-700"
+                    >
+                      <div>
+                        <p className="font-semibold text-gray-900">
+                          {formatDate(departure.startDate)} → {formatDate(departure.endDate)}
+                        </p>
+                        <p className="text-xs uppercase tracking-widest text-gray-500">
+                          {DEPARTURE_STATUS_LABELS[departure.status] ?? departure.status}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-gray-900">
+                          Còn {departure.remainingSlots}/{departure.totalSlots} chỗ
+                        </p>
+                        <p className="text-xs text-gray-500">Giữ chỗ miễn phí trong 24h</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
             <TourInfoTabs
               defaultTabId="overview"
               tabs={[
                 {
                   id: 'overview',
-                  label: 'Overview',
+                  label: 'Tổng quan',
                   content: (
                     <div className="grid gap-6 lg:grid-cols-2">
                       {tour.quickSummary.map((item) => (
@@ -121,7 +270,7 @@ const TourDetailPage: React.FC = () => {
                 },
                 {
                   id: 'itinerary',
-                  label: 'Itinerary',
+                  label: 'Lịch trình',
                   content: (
                     <div className="space-y-6">
                       {tour.itinerary.map((item) => (
@@ -149,11 +298,11 @@ const TourDetailPage: React.FC = () => {
                 },
                 {
                   id: 'included',
-                  label: 'Included',
+                  label: 'Dịch vụ',
                   content: (
                     <div className="grid gap-6 lg:grid-cols-2">
                       <div>
-                        <h3 className="text-base font-semibold text-gray-900">What&apos;s included</h3>
+                        <h3 className="text-base font-semibold text-gray-900">Giá tour đã bao gồm</h3>
                         <ul className="mt-3 space-y-2 text-sm text-gray-600">
                           {tour.included.map((item) => (
                             <li key={item} className="flex items-start gap-2">
@@ -164,7 +313,7 @@ const TourDetailPage: React.FC = () => {
                         </ul>
                       </div>
                       <div>
-                        <h3 className="text-base font-semibold text-gray-900">What&apos;s not included</h3>
+                        <h3 className="text-base font-semibold text-gray-900">Không bao gồm</h3>
                         <ul className="mt-3 space-y-2 text-sm text-gray-600">
                           {tour.excluded.map((item) => (
                             <li key={item} className="flex items-start gap-2">
@@ -179,9 +328,9 @@ const TourDetailPage: React.FC = () => {
                 },
                 {
                   id: 'reviews',
-                  label: 'Reviews',
+                  label: 'Đánh giá',
                   content: <ReviewList reviews={tour.reviews} />,
-                  description: 'Verified traveler feedback from real BookingTour guests.',
+                  description: 'Nhận xét xác thực từ du khách đã trải nghiệm cùng BookingTour.',
                 },
               ]}
             />
@@ -189,11 +338,11 @@ const TourDetailPage: React.FC = () => {
             <OperatorCard operator={tour.operator} />
 
             <section className="space-y-6 rounded-3xl border border-gray-100 bg-white p-6 shadow-card lg:p-8">
-              <h2 className="text-lg font-semibold text-gray-900">Cancellation policy</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Chính sách hủy</h2>
               <p className="text-sm text-gray-600">{tour.cancellationPolicy}</p>
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
                 <ShieldCheck className="h-5 w-5 text-brand-500" aria-hidden="true" />
-                Flexible terms with instant confirmation · No hidden fees
+                Điều khoản linh hoạt, xác nhận ngay · Không phụ thu ẩn
               </div>
             </section>
           </div>

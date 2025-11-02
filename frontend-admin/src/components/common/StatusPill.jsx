@@ -8,14 +8,26 @@ const STATUS_COLORS = {
   pending: 'bg-warning/10 text-warning',
   confirmed: 'bg-success/10 text-success',
   completed: 'bg-primary-100 text-primary-600',
-  cancelled: 'bg-danger/10 text-danger'
+  cancelled: 'bg-danger/10 text-danger',
+  active: 'bg-success/10 text-success',
+  unactive: 'bg-slate-200 text-slate-600',
+  full: 'bg-warning/10 text-warning',
+  end: 'bg-slate-200 text-slate-500'
 };
 
-const StatusPill = ({ status }) => (
-  <span className={clsx('inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize', STATUS_COLORS[status] || STATUS_COLORS.draft)}>
-    {status.replace('-', ' ')}
-  </span>
-);
+const prettifyStatus = (value) => value
+  .replace(/[_\-]/g, ' ')
+  .toLowerCase()
+  .replace(/^(\w)|\s(\w)/g, (m) => m.toUpperCase());
+
+const StatusPill = ({ status }) => {
+  const normalized = (status || '').toString().toLowerCase();
+  return (
+    <span className={clsx('inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium', STATUS_COLORS[normalized] || STATUS_COLORS.draft)}>
+      {prettifyStatus((status || '').toString())}
+    </span>
+  );
+};
 
 StatusPill.propTypes = {
   status: PropTypes.string.isRequired

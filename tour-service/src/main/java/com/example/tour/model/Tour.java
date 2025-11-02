@@ -8,11 +8,12 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -31,6 +32,9 @@ public class Tour {
 
     @Column(name = "tour_name", nullable = false)
     private String tourName;
+
+    @Column(name = "tour_slug", unique = true)
+    private String slug;
 
     @Column(name = "region_id", nullable = false)
     private Integer regionId;
@@ -90,6 +94,36 @@ public class Tour {
         if (status == null) {
             status = TourStatus.ACTIVE;
         }
+        ensureSlug();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        ensureSlug();
+    }
+
+    private void ensureSlug() {
+        if (slug == null || slug.isBlank()) {
+            String generated = generateSlug(tourName);
+            slug = (generated == null || generated.isBlank())
+                ? UUID.randomUUID().toString()
+                : generated;
+        } else {
+            slug = generateSlug(slug);
+        }
+    }
+
+    private String generateSlug(String source) {
+        if (source == null) {
+            return null;
+        }
+        String normalized = Normalizer.normalize(source, Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .toLowerCase()
+                .replaceAll("[^a-z0-9\\s-]", "")
+                .trim()
+                .replaceAll("\\s+", "-");
+        return normalized.isEmpty() ? null : normalized;
     }
 
     public enum TourStatus {

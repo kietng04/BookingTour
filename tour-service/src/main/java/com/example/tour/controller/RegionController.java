@@ -12,13 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.tour.model.Region;
 import com.example.tour.service.RegionService;
+import com.example.tour.service.ProvinceService;
+import com.example.tour.model.Province;
 
 @RestController
-@RequestMapping("/api/regions")
+@RequestMapping("/tours/regions")
 public class RegionController {
 
     @Autowired
     private RegionService regionService;
+
+    @Autowired
+    private ProvinceService provinceService;
 
     @GetMapping
     public ResponseEntity<List<Region>> getAllRegions() {
@@ -40,6 +45,11 @@ public class RegionController {
     public ResponseEntity<List<Region>> filterRegions(@RequestParam String keyword) {
         List<Region> regions = regionService.filter(keyword);
         return ResponseEntity.ok(regions);
+    }
+
+    @GetMapping("/{regionId}/provinces")
+    public ResponseEntity<List<Province>> getProvincesByRegion(@PathVariable Long regionId) {
+        return ResponseEntity.ok(provinceService.getByRegion(regionId));
     }
 }
 

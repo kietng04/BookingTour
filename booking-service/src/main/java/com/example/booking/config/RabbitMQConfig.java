@@ -25,11 +25,13 @@ public class RabbitMQConfig {
 
     public static final String TOUR_SEAT_RESERVED_QUEUE = "tour.seat.reserved.queue";
     public static final String TOUR_SEAT_FAILED_QUEUE = "tour.seat.failed.queue";
+    public static final String TOUR_SEAT_RELEASED_QUEUE = "tour.seat.released.queue";
 
     public static final String RESERVATION_REQUEST_KEY = "reservation.request";
     public static final String RESERVATION_CANCEL_KEY = "reservation.cancel";
     public static final String TOUR_SEAT_RESERVED_KEY = "tour.seat.reserved";
     public static final String TOUR_SEAT_FAILED_KEY = "tour.seat.reservationFailed";
+    public static final String TOUR_SEAT_RELEASED_KEY = "tour.seat.released";
 
     @Bean
     public MessageConverter jsonMessageConverter() {
@@ -87,6 +89,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue tourSeatReleasedQueue() {
+        return new Queue(TOUR_SEAT_RELEASED_QUEUE, true);
+    }
+
+    @Bean
     public Binding bindingTourSeatReserved() {
         return BindingBuilder.bind(tourSeatReservedQueue())
                 .to(tourEventsExchange())
@@ -98,6 +105,13 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(tourSeatFailedQueue())
                 .to(tourEventsExchange())
                 .with(TOUR_SEAT_FAILED_KEY);
+    }
+
+    @Bean
+    public Binding bindingTourSeatReleased() {
+        return BindingBuilder.bind(tourSeatReleasedQueue())
+                .to(tourEventsExchange())
+                .with(TOUR_SEAT_RELEASED_KEY);
     }
 }
 

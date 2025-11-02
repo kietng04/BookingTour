@@ -1,4 +1,16 @@
 spring:
+  datasource:
+    url: jdbc:postgresql://payment-db:5432/paymentdb
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   rabbitmq:
     host: rabbitmq
 
@@ -7,3 +19,24 @@ eureka:
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
 
+server:
+  port: 8084
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+momo:
+  partnerCode: ${MOMO_PARTNER_CODE:MOMOBKUN20180529}
+  accessKey: ${MOMO_ACCESS_KEY:klm05TvNBzhg7h7j}
+  secretKey: ${MOMO_SECRET_KEY:at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa}
+  environment: ${MOMO_ENVIRONMENT:dev}
+  callbackUrl: ${MOMO_CALLBACK_URL:http://api-gateway:8080/api/payments/momo/webhook}
+  redirectUrl: ${MOMO_REDIRECT_URL:http://localhost:3000/payment-result}
+  partnerName: ${MOMO_PARTNER_NAME:BookingTour}
+  storeName: ${MOMO_STORE_NAME:BookingTourStore}
+  requestType: ${MOMO_REQUEST_TYPE:captureWallet}
+  orderInfo: ${MOMO_ORDER_INFO:BookingTour payment}
+  lang: ${MOMO_LANG:vi}

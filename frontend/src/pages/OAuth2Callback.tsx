@@ -9,16 +9,21 @@ const OAuth2Callback: React.FC = () => {
   const [providerLabel, setProviderLabel] = useState('GitHub');
 
   useEffect(() => {
+    console.log('OAuth callback params', Object.fromEntries(searchParams.entries()));
+
     const token = searchParams.get('token');
     const username = searchParams.get('username');
     const email = searchParams.get('email');
     const fullName = searchParams.get('fullName');
     const avatar = searchParams.get('avatar');
+    const userIdParam = searchParams.get('userId');
     const code = searchParams.get('code');
     const state = searchParams.get('state');
     const providerParam = searchParams.get('provider');
+    const normalizedState = (state || '').toLowerCase();
+    const stateProvider = normalizedState === 'google' || normalizedState === 'github' ? normalizedState : '';
     const rememberedProvider = sessionStorage.getItem('oauthProvider');
-    const resolvedProvider = (providerParam || rememberedProvider || 'github').toLowerCase();
+    const resolvedProvider = (providerParam || stateProvider || rememberedProvider || 'github').toLowerCase();
     const resolvedLabel = resolvedProvider === 'google' ? 'Google' : 'GitHub';
 
     setProviderLabel(resolvedLabel);
@@ -33,6 +38,9 @@ const OAuth2Callback: React.FC = () => {
       }
       if (avatar) {
         localStorage.setItem('avatar', avatar);
+      }
+      if (userIdParam) {
+        localStorage.setItem('userId', userIdParam);
       }
       localStorage.setItem('authProvider', resolvedProvider);
       window.dispatchEvent(new Event('auth-changed'));
@@ -54,7 +62,7 @@ const OAuth2Callback: React.FC = () => {
     const exchangeCodeForToken = async () => {
       try {
         setStatusMessage('Exchanging authorization code with server...');
-        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
         const callbackPath = resolvedProvider === 'google' ? '/api/users/auth/google/callback' : '/api/users/auth/github/callback';
         const response = await fetch(`${apiUrl}${callbackPath}`, {
           method: 'POST',
@@ -70,7 +78,19 @@ const OAuth2Callback: React.FC = () => {
           throw new Error(errorBody || `${resolvedLabel} OAuth exchange failed`);
         }
 
-        const data = await response.json();
+        const rawBody = await response.text();
+        console.debug(`${resolvedLabel} OAuth raw response:`, rawBody);
+        if (!rawBody) {
+          throw new Error(`${resolvedLabel} callback returned empty body`);
+        }
+        let data: Record<string, string>;
+        try {
+          data = JSON.parse(rawBody);
+        } catch (parseErr) {
+          console.error(`${resolvedLabel} callback JSON parse error:`, rawBody);
+          throw new Error(`${resolvedLabel} response was not valid JSON`);
+        }
+        console.debug(`${resolvedLabel} OAuth parsed data:`, data);
 
         localStorage.setItem('authToken', data.token || '');
         localStorage.setItem('username', data.username || '');
@@ -81,6 +101,9 @@ const OAuth2Callback: React.FC = () => {
         if (data.avatar) {
           localStorage.setItem('avatar', data.avatar);
         }
+        if (data.userId !== undefined && data.userId !== null) {
+          localStorage.setItem('userId', String(data.userId));
+        }
         localStorage.setItem('authProvider', resolvedProvider);
         window.dispatchEvent(new Event('auth-changed'));
 
@@ -88,6 +111,10 @@ const OAuth2Callback: React.FC = () => {
         setStatusMessage('Login successful! Redirecting...');
         setTimeout(() => navigate('/'), 800);
       } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          console.debug(`${resolvedLabel} OAuth request aborted`);
+          return;
+        }
         console.error(`${resolvedLabel} OAuth callback error:`, err);
         setHasError(true);
         setStatusMessage(`${resolvedLabel} login failed. Redirecting to login...`);

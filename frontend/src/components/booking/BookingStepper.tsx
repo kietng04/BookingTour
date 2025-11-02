@@ -3,7 +3,6 @@ import clsx from 'clsx';
 
 const steps = [
   { id: 1, label: 'Details' },
-  { id: 2, label: 'Traveler info' },
   { id: 3, label: 'Payment' },
   { id: 4, label: 'Confirmation' },
 ];

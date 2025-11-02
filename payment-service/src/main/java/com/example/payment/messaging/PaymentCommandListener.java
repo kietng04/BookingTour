@@ -1,7 +1,8 @@
 package com.example.payment.messaging;
 
+import com.example.payment.gateway.MoMoGatewayException;
+import com.example.payment.gateway.dto.MoMoCreateOrderResponse;
 import com.example.payment.service.PaymentService;
-import com.example.payment.service.PaymentService.PaymentResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -27,26 +28,23 @@ public class PaymentCommandListener {
     public void onChargeRequest(PaymentChargeMessage message) {
         log.info("[PAYMENT-SERVICE] Received charge request: {}", message);
 
-        PaymentResult result = paymentService.processPayment(
-                message.getBookingId(),
-                message.getAmount(),
-                message.getUserId()
-        );
-
-        if (result.isSuccess()) {
-            PaymentResultMessage completedResult = new PaymentResultMessage(
-                    result.getBookingId(),
-                    "COMPLETED",
-                    result.getMessage()
-            );
-            eventPublisher.publishResult(completedResult, RabbitMQConfig.ROUTING_KEY_COMPLETED);
-        } else {
-            PaymentResultMessage failedResult = new PaymentResultMessage(
-                    result.getBookingId(),
+        try {
+            MoMoCreateOrderResponse response = paymentService.initiateMoMoPayment(message);
+            if (response.getResultCode() == 0 && response.getPayUrl() != null) {
+                log.info("[PAYMENT-SERVICE] MoMo order ready for booking {}. payUrl={}",
+                        message.getBookingId(), response.getPayUrl());
+            }
+        } catch (MoMoGatewayException ex) {
+            log.error("[PAYMENT-SERVICE] MoMo initiation failed for booking {}: {}",
+                    message.getBookingId(), ex.getMessage());
+        } catch (Exception ex) {
+            log.error("[PAYMENT-SERVICE] Unexpected error handling payment for booking {}", message.getBookingId(), ex);
+            PaymentResultMessage failed = new PaymentResultMessage(
+                    message.getBookingId(),
                     "FAILED",
-                    result.getMessage()
+                    "Unexpected error during payment: " + ex.getMessage()
             );
-            eventPublisher.publishResult(failedResult, RabbitMQConfig.ROUTING_KEY_FAILED);
+            eventPublisher.publishResult(failed, RabbitMQConfig.ROUTING_KEY_FAILED);
         }
     }
 }

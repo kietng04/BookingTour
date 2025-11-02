@@ -17,7 +17,9 @@ import java.util.stream.IntStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class TourServiceImpl implements TourService {
@@ -57,6 +59,18 @@ public class TourServiceImpl implements TourService {
         Tour tour = tourRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với id = " + id));
         return tour;
+    }
+
+    @Override
+    public Tour getTourBySlug(String slug) {
+        if (slug == null || slug.isBlank()) {
+            throw new IllegalArgumentException("Slug không được để trống");
+        }
+        String normalized = slug.trim().toLowerCase();
+        return tourRepository.findBySlug(normalized)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Không tìm thấy tour với slug = " + slug));
     }
 
 

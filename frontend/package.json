@@ -11,13 +11,17 @@
   },
   "dependencies": {
     "clsx": "^2.1.0",
+    "framer-motion": "^12.23.24",
     "lucide-react": "^0.424.0",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
+    "react-datepicker": "^8.8.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.65.0",
     "react-router-dom": "^6.21.3"
   },
   "devDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.52.5",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.10",

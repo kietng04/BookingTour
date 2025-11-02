@@ -6,7 +6,7 @@ import InputField from '../common/InputField.jsx';
 import SelectField from '../common/SelectField.jsx';
 import Button from '../common/Button.jsx';
 
-const BookingForm = ({ tour, onSubmit }) => {
+const BookingForm = ({ tour, onSubmit, isSubmitting = false }) => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -22,7 +22,9 @@ const BookingForm = ({ tour, onSubmit }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onSubmit?.(formData);
+    if (!isSubmitting) {
+      onSubmit?.(formData);
+    }
   };
 
   return (
@@ -41,6 +43,7 @@ const BookingForm = ({ tour, onSubmit }) => {
           onChange={handleChange('fullName')}
           icon={User}
           required
+          disabled={isSubmitting}
         />
         <InputField
           label="Email"
@@ -50,6 +53,7 @@ const BookingForm = ({ tour, onSubmit }) => {
           onChange={handleChange('email')}
           icon={Mail}
           required
+          disabled={isSubmitting}
         />
         <InputField
           label="Số điện thoại"
@@ -57,6 +61,7 @@ const BookingForm = ({ tour, onSubmit }) => {
           value={formData.phone}
           onChange={handleChange('phone')}
           icon={Phone}
+          disabled={isSubmitting}
         />
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -71,6 +76,7 @@ const BookingForm = ({ tour, onSubmit }) => {
               { value: '4', label: '4 khách' },
               { value: '5+', label: '5+ khách' }
             ]}
+            disabled={isSubmitting}
           />
           <InputField
             label="Ngày khởi hành dự kiến"
@@ -79,6 +85,7 @@ const BookingForm = ({ tour, onSubmit }) => {
             onChange={handleChange('date')}
             icon={Calendar}
             min={new Date().toISOString().split('T')[0]}
+            disabled={isSubmitting}
           />
         </div>
 
@@ -89,12 +96,18 @@ const BookingForm = ({ tour, onSubmit }) => {
             placeholder="Chế độ ăn kiêng, dịp kỷ niệm, nhu cầu phòng riêng..."
             value={formData.notes}
             onChange={handleChange('notes')}
-            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700 transition focus:border-primary-300 focus:ring-4 focus:ring-primary-100"
+            disabled={isSubmitting}
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700 transition focus:border-primary-300 focus:ring-4 focus:ring-primary-100 disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </label>
 
-        <Button type="submit" size="lg" className="w-full">
-          Gửi yêu cầu đặt tour
+        <Button 
+          type="submit" 
+          size="lg" 
+          className="w-full"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Đang gửi...' : 'Gửi yêu cầu đặt tour'}
         </Button>
         <p className="text-xs text-slate-400">
           Chưa thu tiền ở bước này. Đội ngũ sẽ kiểm tra chỗ, gửi liên kết thanh toán ({tour?.policies?.payment}) và giải đáp mọi thắc mắc trong 12 giờ.
@@ -106,7 +119,8 @@ const BookingForm = ({ tour, onSubmit }) => {
 
 BookingForm.propTypes = {
   tour: PropTypes.object,
-  onSubmit: PropTypes.func
+  onSubmit: PropTypes.func,
+  isSubmitting: PropTypes.bool
 };
 
 export default BookingForm;

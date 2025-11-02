@@ -1,13 +1,20 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 async function fetchAPI(endpoint, options = {}) {
+  const { authToken, headers: customHeaders, ...restOptions } = options;
   const url = `${API_BASE_URL}${endpoint}`;
+  const headers = {
+    'Content-Type': 'application/json',
+    ...customHeaders,
+  };
+
+  if (authToken) {
+    headers.Authorization = `Bearer ${authToken}`;
+  }
+
   const config = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
+    headers,
+    ...restOptions,
   };
 
   try {
@@ -33,6 +40,8 @@ export const toursAPI = {
 
   getById: (tourId) => fetchAPI(`/tours/${tourId}`),
 
+  getBySlug: (slug) => fetchAPI(`/tours/by-slug/${slug}`),
+
   getDepartures: (tourId, params = {}) => {
     const query = new URLSearchParams(params).toString();
     return fetchAPI(`/tours/${tourId}/departures${query ? `?${query}` : ''}`);
@@ -43,12 +52,16 @@ export const toursAPI = {
 };
 
 export const bookingsAPI = {
-  create: (bookingData) => fetchAPI('/bookings', {
-    method: 'POST',
-    body: JSON.stringify(bookingData),
-  }),
+  create: (bookingData, token) => {
+    console.log('[bookingsAPI.create] payload', bookingData);
+    return fetchAPI('/bookings', {
+      method: 'POST',
+      body: JSON.stringify(bookingData),
+      authToken: token,
+    });
+  },
 
-  getById: (bookingId) => fetchAPI(`/bookings/${bookingId}`),
+  getById: (bookingId, token) => fetchAPI(`/bookings/${bookingId}`, token ? { authToken: token } : undefined),
 
   getUserBookings: (userId, params = {}) => {
     const query = new URLSearchParams(params).toString();

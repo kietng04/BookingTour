@@ -42,6 +42,7 @@ CREATE TABLE provinces (
 CREATE TABLE tours (
     tour_id INT AUTO_INCREMENT PRIMARY KEY,
     tour_name VARCHAR(255) NOT NULL,
+    tour_slug VARCHAR(255) UNIQUE,
     region_id INT NOT NULL,
     province_id INT NOT NULL,
     description TEXT,
@@ -91,11 +92,13 @@ CREATE TABLE departures (
 CREATE TABLE bookings (
     booking_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    tour_id INT NOT NULL,
     departure_id INT NOT NULL,
     booking_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     total_amount DECIMAL(12,2) NOT NULL,
     status ENUM('Pending', 'Confirmed', 'Cancelled', 'Completed') DEFAULT 'Pending',
     FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (tour_id) REFERENCES tours(tour_id),
     FOREIGN KEY (departure_id) REFERENCES departures(departure_id)
 );
 
@@ -143,3 +146,19 @@ CREATE TABLE tour_discounts (
     end_date DATE NOT NULL,
     FOREIGN KEY (tour_id) REFERENCES tours(tour_id)
 );
+
+-- Migration hỗ trợ thêm slug cho bảng tours (MySQL 8+)
+ALTER TABLE tours ADD COLUMN IF NOT EXISTS tour_slug VARCHAR(255) UNIQUE;
+
+UPDATE tours
+SET tour_slug = IFNULL(
+    tour_slug,
+    LOWER(
+        REPLACE(
+            REGEXP_REPLACE(tour_name, '[^[:alnum:][:space:]-]', ''),
+            ' ',
+            '-'
+        )
+    )
+)
+WHERE tour_slug IS NULL;
