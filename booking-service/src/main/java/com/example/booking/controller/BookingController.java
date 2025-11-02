@@ -36,16 +36,17 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<Map<String, Object>> createBooking(@RequestBody BookingRequest request) {
         log.info("[BOOKING-SERVICE] Creating booking for user {} (PENDING)", request.getUserId());
-        log.info("   Tour ID: {}, Departure ID: {}, Seats: {}, Amount: {}",
-                request.getTourId(), request.getDepartureId(), request.getSeats(), request.getTotalAmount());
+        log.info("   Tour ID: {}, Departure ID: {}, Seats: {}, Amount: {}, Override: {}",
+                request.getTourId(), request.getDepartureId(), request.getSeats(), request.getTotalAmount(), request.getPaymentOverride());
 
         Booking booking = bookingService.createBooking(request);
         bookingEventPublisher.publishReservationRequest(
                 booking.getId(),
                 request.getTourId(),
                 booking.getDepartureId(),
-                booking.getSeats(),
-                booking.getUserId()
+                booking.getNumSeats(),
+                booking.getUserId(),
+                booking.getPaymentOverride()
         );
 
         Map<String, Object> response = new HashMap<>();
@@ -54,10 +55,11 @@ public class BookingController {
         response.put("status", booking.getStatus().name());
         response.put("message", "Booking created, processing seat reservation");
         response.put("userId", booking.getUserId());
+        response.put("tourId", booking.getTourId());
         response.put("departureId", booking.getDepartureId());
-        response.put("seats", booking.getSeats());
+        response.put("seats", booking.getNumSeats());
         response.put("totalAmount", booking.getTotalAmount());
-        response.put("bookingDate", booking.getBookingDate());
+        response.put("bookingDate", booking.getCreatedAt());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -76,7 +78,7 @@ public class BookingController {
             @RequestParam(defaultValue = "10") int size) {
 
         log.info("[BOOKING-SERVICE] Getting bookings for user {}", userId);
-        Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Booking> bookings = bookingService.getUserBookings(userId, pageable);
         return ResponseEntity.ok(bookings);
     }
@@ -84,17 +86,21 @@ public class BookingController {
     @GetMapping
     public ResponseEntity<Page<Booking>> getAllBookings(
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long tourId,
             @RequestParam(required = false) Long departureId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        log.info("[BOOKING-SERVICE] Getting bookings (status: {}, departureId: {})", status, departureId);
-        Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+        log.info("[BOOKING-SERVICE] Getting bookings (status: {}, tourId: {}, departureId: {})",
+                status, tourId, departureId);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         Page<Booking> bookings;
 
         if (departureId != null) {
             bookings = bookingService.getBookingsByDepartureId(departureId, pageable);
+        } else if (tourId != null) {
+            bookings = bookingService.getBookingsByTourId(tourId, pageable);
         } else if (status != null && !status.isEmpty()) {
             BookingStatus bookingStatus = BookingStatus.valueOf(status.toUpperCase());
             bookings = bookingService.getBookingsByStatus(bookingStatus, pageable);
@@ -112,7 +118,7 @@ public class BookingController {
             @RequestParam(defaultValue = "10") int size) {
 
         log.info("[BOOKING-SERVICE] Getting bookings for departure {}", departureId);
-        Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Booking> bookings = bookingService.getBookingsByDepartureId(departureId, pageable);
         return ResponseEntity.ok(bookings);
     }
@@ -126,9 +132,9 @@ public class BookingController {
 
         bookingEventPublisher.publishReservationCancel(
                 booking.getId(),
-                null,
+                booking.getTourId(),
                 booking.getDepartureId(),
-                booking.getSeats(),
+                booking.getNumSeats(),
                 booking.getUserId()
         );
 

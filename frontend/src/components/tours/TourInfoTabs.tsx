@@ -19,7 +19,7 @@ const TourInfoTabs: React.FC<TourInfoTabsProps> = ({ tabs, defaultTabId }) => {
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0];
 
   return (
-    <section aria-label="Tour information" className="rounded-3xl border border-gray-100 bg-white shadow-card">
+    <section aria-label="Thông tin tour" className="rounded-3xl border border-gray-100 bg-white shadow-card">
       <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 px-6 py-4 md:gap-4">
         {tabs.map((tab) => {
           const isActive = tab.id === activeTabId;

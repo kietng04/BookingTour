@@ -15,8 +15,16 @@ public class ReservationRequestListener {
     @Autowired
     private TourEventPublisher eventPublisher;
 
+    @Autowired
+    private EventDeduplicator eventDeduplicator;
+
     @RabbitListener(queues = RabbitMQConfig.TOUR_RESERVATION_REQUEST_QUEUE)
     public void onBookingCreated(ReservationEvent event) {
+        String dedupKey = event.getEventId() != null ? event.getEventId() : event.getCorrelationId();
+        if (eventDeduplicator.isDuplicate(dedupKey)) {
+            System.out.println("Duplicate reservation request ignored. eventId=" + event.getEventId());
+            return;
+        }
         try {
             departureService.reserveSlots(event.getDepartureId(), event.getRequestedSeats());
 
@@ -25,7 +33,8 @@ public class ReservationRequestListener {
                     event.getTourId(),
                     event.getDepartureId(),
                     event.getRequestedSeats(),
-                    event.getCorrelationId()
+                    event.getCorrelationId(),
+                    event.getPaymentOverride()
             );
 
             System.out.println("Seats reserved successfully for booking: " + event.getBookingId());
@@ -37,7 +46,8 @@ public class ReservationRequestListener {
                     event.getDepartureId(),
                     event.getRequestedSeats(),
                     event.getCorrelationId(),
-                    e.getMessage()
+                    e.getMessage(),
+                    event.getPaymentOverride()
             );
 
             System.err.println("Failed to reserve seats for booking: " + event.getBookingId() 

@@ -15,8 +15,16 @@ public class ReleaseRequestListener {
     @Autowired
     private TourEventPublisher eventPublisher;
 
+    @Autowired
+    private EventDeduplicator eventDeduplicator;
+
     @RabbitListener(queues = RabbitMQConfig.TOUR_RELEASE_REQUEST_QUEUE)
     public void onBookingCancelled(ReservationEvent event) {
+        String dedupKey = event.getEventId() != null ? event.getEventId() : event.getCorrelationId();
+        if (eventDeduplicator.isDuplicate(dedupKey)) {
+            System.out.println("Duplicate release request ignored. eventId=" + event.getEventId());
+            return;
+        }
         try {
             departureService.releaseSlots(event.getDepartureId(), event.getRequestedSeats());
 
@@ -25,7 +33,8 @@ public class ReleaseRequestListener {
                     event.getTourId(),
                     event.getDepartureId(),
                     event.getRequestedSeats(),
-                    event.getCorrelationId()
+                    event.getCorrelationId(),
+                    event.getPaymentOverride()
             );
 
             System.out.println("Seats released successfully for booking: " + event.getBookingId());

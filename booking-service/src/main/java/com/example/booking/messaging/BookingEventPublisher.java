@@ -20,7 +20,7 @@ public class BookingEventPublisher {
     private RabbitTemplate rabbitTemplate;
 
     public void publishReservationRequest(Long bookingId, Long tourId, Long departureId,
-                                          Integer seats, Long userId) {
+                                          Integer seats, Long userId, String paymentOverride) {
         String correlationId = UUID.randomUUID().toString();
 
         ReservationEvent event = new ReservationEvent(
@@ -31,7 +31,8 @@ public class BookingEventPublisher {
                 tourId,
                 departureId,
                 seats,
-                userId
+                userId,
+                paymentOverride
         );
 
         log.info("[BOOKING-SERVICE] Publishing reservation request for booking {}, departure {}, seats: {}",
@@ -58,7 +59,8 @@ public class BookingEventPublisher {
                 tourId,
                 departureId,
                 seats,
-                userId
+                userId,
+                null
         );
 
         log.info("[BOOKING-SERVICE] Publishing reservation cancel for booking {}, departure {}, seats: {}",

@@ -14,7 +14,7 @@ import com.example.tour.model.Province;
 import com.example.tour.service.ProvinceService;
 
 @RestController
-@RequestMapping("/api/provinces")
+@RequestMapping("/tours/provinces")
 public class ProvinceController {
 
     @Autowired

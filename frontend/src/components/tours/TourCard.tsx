@@ -12,13 +12,13 @@ interface TourCardProps {
 }
 
 const TourCard: React.FC<TourCardProps> = ({ tour, onWishlist, wishlisted }) => {
-  const priceFormatted = new Intl.NumberFormat('en-GB', {
+  const priceFormatted = new Intl.NumberFormat('vi-VN', {
     style: 'currency',
-    currency: 'EUR',
+    currency: 'VND',
     maximumFractionDigits: 0,
   }).format(tour.priceFrom);
 
-  const ratingLabel = `${tour.rating.toFixed(2)} (${tour.reviewCount} reviews)`;
+  const ratingLabel = `${tour.rating.toFixed(2)} (${tour.reviewCount} đánh giá)`;
 
   return (
     <motion.article
@@ -78,15 +78,15 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onWishlist, wishlisted }) => 
         </ul>
         <div className="mt-auto flex items-center justify-between pt-4">
           <div>
-            <p className="text-xs uppercase tracking-wide text-gray-500">From</p>
+            <p className="text-xs uppercase tracking-wide text-gray-500">Giá từ</p>
             <p className="text-lg font-semibold text-gray-900">{priceFormatted}</p>
           </div>
           <Link
             to={`/tours/${tour.slug}`}
             className="inline-flex items-center rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-brand-600 focus-visible:bg-brand-600"
-            aria-label={`View details of ${tour.title}`}
+            aria-label={`Xem chi tiết tour ${tour.title}`}
           >
-            View details
+            Xem chi tiết
           </Link>
         </div>
       </div>

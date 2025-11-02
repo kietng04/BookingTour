@@ -62,12 +62,16 @@ export const departuresAPI = {
       const allDepartures = [];
       for (const tour of tours) {
         try {
-          const departures = await fetchAPI(`/tours/${tour.tourId}/departures`);
+          const tourId = tour.id ?? tour.tourId;
+          if (!tourId) continue;
+
+          const departures = await fetchAPI(`/tours/${tourId}/departures`);
           departures.forEach(dep => {
             allDepartures.push({
               ...dep,
+              departureId: dep.id ?? dep.departureId,
               tourName: tour.tourName,
-              tourId: tour.tourId,
+              tourId,
             });
           });
         } catch (err) {

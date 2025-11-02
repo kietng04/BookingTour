@@ -11,13 +11,14 @@ public class ReservationEvent {
     private Long departureId;
     private Integer requestedSeats;
     private Long userId;
+    private String paymentOverride;
 
     public ReservationEvent() {
     }
 
     public ReservationEvent(String eventId, String correlationId, LocalDateTime timestamp,
                              Long bookingId, Long tourId, Long departureId,
-                             Integer requestedSeats, Long userId) {
+                             Integer requestedSeats, Long userId, String paymentOverride) {
         this.eventId = eventId;
         this.correlationId = correlationId;
         this.timestamp = timestamp;
@@ -26,6 +27,7 @@ public class ReservationEvent {
         this.departureId = departureId;
         this.requestedSeats = requestedSeats;
         this.userId = userId;
+        this.paymentOverride = paymentOverride;
     }
 
     public String getEventId() {
@@ -90,6 +92,14 @@ public class ReservationEvent {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getPaymentOverride() {
+        return paymentOverride;
+    }
+
+    public void setPaymentOverride(String paymentOverride) {
+        this.paymentOverride = paymentOverride;
     }
 }
 

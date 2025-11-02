@@ -141,7 +141,8 @@ public class AuthController {
                 result.getEmail(),
                 result.getFullName(),
                 result.getAvatar(),
-                result.getMessage()
+                result.getMessage(),
+                result.getUserId()
         );
     }
 
@@ -154,6 +155,10 @@ public class AuthController {
                 .queryParam("username", result.getUsername())
                 .queryParam("email", result.getEmail())
                 .queryParam("provider", provider);
+
+        if (result.getUserId() != null) {
+            builder.queryParam("userId", result.getUserId());
+        }
 
         if (result.getFullName() != null) {
             builder.queryParam("fullName", result.getFullName());

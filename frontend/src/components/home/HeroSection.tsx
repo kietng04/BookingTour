@@ -52,27 +52,27 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
           className="max-w-3xl"
         >
           <div className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white/90 backdrop-blur">
-            Curated by local experts
+            Tuyển chọn bởi chuyên gia bản địa
           </div>
           <h1 className="mt-6 text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
-            Discover Europe&apos;s most loved experiences.
+            Khám phá những trải nghiệm châu Âu được yêu thích nhất.
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-white/80 sm:text-xl">
-            Thoughtfully designed tours with flexible booking, trusted guides, and exclusive access. Feel confident planning your next escape.
+            Lịch trình linh hoạt, hướng dẫn viên đáng tin cậy và quyền lợi độc quyền dành cho thành viên. An tâm lên kế hoạch cho hành trình tiếp theo ngay hôm nay.
           </p>
           <dl className="mt-6 flex flex-wrap gap-6 text-sm text-white/70">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-brand-200" aria-hidden="true" />
               <div>
-                <dt className="font-medium text-white">Secure payments</dt>
-                <dd>Protected by European banks</dd>
+                <dt className="font-medium text-white">Thanh toán an toàn</dt>
+                <dd>Bảo mật theo chuẩn ngân hàng châu Âu</dd>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-brand-200" aria-hidden="true" />
               <div>
-                <dt className="font-medium text-white">Trusted by travelers</dt>
-                <dd>98% 5-star reviews</dd>
+                <dt className="font-medium text-white">Được tín nhiệm</dt>
+                <dd>98% đánh giá 5 sao từ du khách</dd>
               </div>
             </div>
           </dl>
@@ -84,24 +84,24 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.6, ease: 'easeOut' }}
         className="relative z-20 mx-6 -mt-12 max-w-5xl rounded-2xl bg-white p-6 shadow-card lg:mx-auto lg:p-8"
-        aria-label="Search tours"
+        aria-label="Tìm kiếm tour"
       >
         <div className="grid gap-4 md:grid-cols-4">
           <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Destination</span>
+            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Điểm đến</span>
             <div className="relative flex items-center">
               <MapPin className="pointer-events-none absolute left-4 h-4 w-4 text-gray-400" aria-hidden="true" />
               <input
                 type="text"
                 {...register('destination')}
-                placeholder="Where to?"
+                placeholder="Bạn muốn đi đâu?"
                 className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-11 pr-4 text-sm font-medium text-gray-900 shadow-inner focus:border-brand-300"
-                aria-label="Destination"
+                aria-label="Điểm đến"
               />
             </div>
           </label>
           <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Dates</span>
+            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Ngày khởi hành</span>
             <div className="relative flex items-center">
               <CalendarDays className="pointer-events-none absolute left-4 h-4 w-4 text-gray-400" aria-hidden="true" />
               <DatePicker
@@ -114,7 +114,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
                   }
                 }}
                 minDate={new Date()}
-                placeholderText="Select dates"
+                placeholderText="Chọn khoảng ngày"
                 className="w-full rounded-xl border border-gray-200 py-3 pl-11 pr-4 text-sm font-medium text-gray-900 focus:border-brand-300"
                 calendarClassName="rounded-xl border border-gray-100 shadow-card"
               />
@@ -136,7 +136,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
                 destinationValue ? 'hover:bg-brand-600' : 'hover:bg-brand-500'
               )}
             >
-              Search tours
+              Tìm tour phù hợp
             </button>
           </div>
         </div>

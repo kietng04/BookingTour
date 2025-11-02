@@ -4,59 +4,65 @@ import { Edit3 } from 'lucide-react';
 import Table from '../common/Table.jsx';
 import StatusPill from '../common/StatusPill.jsx';
 import Button from '../common/Button.jsx';
-import { formatCurrency } from '../../utils/format.js';
+import { formatCurrency, formatDate } from '../../utils/format.js';
+
+const buildDurationLabel = (tour) => {
+  const days = tour?.days ?? null;
+  const nights = tour?.nights ?? null;
+  if (!days && !nights) {
+    return tour?.duration || 'Chưa cập nhật lịch trình';
+  }
+  if (days && nights !== null) {
+    return `${days} ngày${nights ? ` ${nights} đêm` : ''}`;
+  }
+  if (days) {
+    return `${days} ngày`;
+  }
+  if (nights) {
+    return `${nights} đêm`;
+  }
+  return 'Chưa cập nhật lịch trình';
+};
 
 const TourTable = ({ tours }) => {
   const columns = [
     {
-      key: 'name',
+      key: 'tourName',
       label: 'Tour',
       render: (_, row) => (
         <div>
-          <p className="font-medium text-slate-800">{row.name}</p>
-          <p className="text-xs text-slate-400">{row.duration}</p>
+          <p className="font-medium text-slate-800">{row.tourName}</p>
+          <p className="text-xs text-slate-400">{buildDurationLabel(row)}</p>
+          {row.mainDestination && (
+            <p className="text-xs text-slate-400">Điểm đến chính: {row.mainDestination}</p>
+          )}
         </div>
       )
     },
     {
       key: 'status',
       label: 'Status',
-      render: (value) => <StatusPill status={value} />
+      render: (value) => <StatusPill status={value?.toString() ?? ''} />
     },
     {
-      key: 'price',
-      label: 'Base price',
-      render: (value) => formatCurrency(value)
+      key: 'adultPrice',
+      label: 'Giá người lớn',
+      render: (value) => formatCurrency(value ?? 0)
     },
     {
-      key: 'seatsLeft',
-      label: 'Seats left',
-      render: (value) => (
-        <span className={`font-medium ${value <= 4 ? 'text-danger' : 'text-slate-600'}`}>
-          {value} seats
-        </span>
-      )
+      key: 'childPrice',
+      label: 'Giá trẻ em',
+      render: (value) => formatCurrency(value ?? 0)
     },
     {
-      key: 'rating',
-      label: 'Rating'
+      key: 'provinceId',
+      label: 'Province',
+      render: (_, row) => row.provinceId ?? '—'
     },
     {
-      key: 'tags',
-      label: 'Tags',
-      render: (value) => (
-        <div className="flex flex-wrap gap-1.5">
-          {value.map((tag) => (
-            <span key={tag} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
-              {tag}
-            </span>
-          ))}
-        </div>
-      )
-    },
-    {
-      key: 'lastUpdated',
-      label: 'Updated'
+      key: 'createdAt',
+      label: 'Created',
+      render: (value) => (value ? formatDate(value) : '—')
     }
   ];
 
