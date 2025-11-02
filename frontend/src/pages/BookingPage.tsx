@@ -50,6 +50,7 @@ const BookingPage: React.FC = () => {
   const [bookingError, setBookingError] = useState<string | null>(null);
 
   const contactForm = useForm<ContactFormValues>({
+    mode: 'onChange',
     defaultValues: {
       fullName: user?.fullName ?? '',
       email: user?.email ?? '',
@@ -224,6 +225,11 @@ const BookingPage: React.FC = () => {
                               className={`rounded-2xl border px-4 py-3 text-left text-sm transition hover:border-brand-300 hover:bg-brand-50 ${
                                 isSelected ? 'border-brand-400 bg-brand-50 text-brand-700' : 'border-gray-200 bg-gray-25'
                               }`}
+                              aria-pressed={isSelected}
+                              aria-label={`Khởi hành ${format(new Date(departure.startDate), 'dd/MM/yyyy')} đến ${format(
+                                new Date(departure.endDate),
+                                'dd/MM/yyyy'
+                              )}`}
                             >
                               <span className="block font-semibold text-gray-900">
                                 {format(new Date(departure.startDate), 'dd/MM/yyyy')} →{' '}
@@ -325,7 +331,7 @@ const BookingPage: React.FC = () => {
                       </button>
                       <button
                         type="submit"
-                      disabled={!selectedDepartureId}
+                      disabled={!selectedDepartureId || !contactForm.formState.isValid}
                       className="rounded-full bg-brand-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600 focus-visible:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                       Tiếp tục thanh toán

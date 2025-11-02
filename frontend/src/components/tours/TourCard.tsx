@@ -19,6 +19,12 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onWishlist, wishlisted }) => 
   }).format(tour.priceFrom);
 
   const ratingLabel = `${tour.rating.toFixed(2)} (${tour.reviewCount} đánh giá)`;
+  const handleKeyWishlist = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onWishlist?.(tour.id);
+    }
+  };
 
   return (
     <motion.article
@@ -38,6 +44,7 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onWishlist, wishlisted }) => 
         <button
           type="button"
           onClick={() => onWishlist?.(tour.id)}
+          onKeyDown={handleKeyWishlist}
           aria-label={`Save ${tour.title}`}
           className={clsx(
             'absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md transition focus-visible:ring-2 focus-visible:ring-brand-400',
