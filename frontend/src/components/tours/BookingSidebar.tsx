@@ -113,15 +113,15 @@ const BookingSidebar: React.FC<BookingSidebarProps> = ({
         </div>
         <div className="rounded-2xl bg-gray-25 p-4 text-sm text-gray-600">
           <div className="flex items-center justify-between">
-            <span>Giá cơ bản</span>
+            <span aria-label="Giá cơ bản">Giá cơ bản</span>
             <span>{priceFormatter.format(priceFrom)}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Phụ thu khách ({guests ?? 1})</span>
+            <span aria-label="Phụ thu khách">Phụ thu khách ({guests ?? 1})</span>
             <span>{priceFormatter.format(priceFrom * 0.12 * (guests ?? 1))}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Số đêm ({nights})</span>
+            <span aria-label="Số đêm">Số đêm ({nights})</span>
             <span>{priceFormatter.format(nights * 120)}</span>
           </div>
           <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3 text-base font-semibold text-gray-900">

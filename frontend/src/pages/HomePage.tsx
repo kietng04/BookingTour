@@ -30,6 +30,7 @@ const HomePage: React.FC = () => {
   const [tours, setTours] = useState<Tour[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastKeyword, setLastKeyword] = useState<string>('');
   const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
@@ -93,8 +94,10 @@ const HomePage: React.FC = () => {
   };
 
   const handleSearch = (values: SearchState) => {
+    const keyword = values.destination?.trim() ? values.destination.trim() : '';
     setSearchState(values);
-    loadTours(values.destination?.trim() ? values.destination.trim() : undefined);
+    setLastKeyword(keyword);
+    loadTours(keyword || undefined);
   };
 
   const handleFilterApply = (newFilters: FilterState) => {
@@ -184,7 +187,27 @@ const HomePage: React.FC = () => {
 
         {error && !isLoading && (
           <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-600">
-            {error}
+            <div className="flex items-center justify-between gap-4">
+              <span>{error}</span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => loadTours(lastKeyword || undefined)}
+                  className="rounded-full bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700 focus-visible:bg-red-700"
+                >
+                  Thử tải lại
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setError(null);
+                  }}
+                  className="rounded-full border border-red-300 px-4 py-2 text-xs font-semibold text-red-700 transition hover:border-red-400 focus-visible:border-red-400"
+                >
+                  Ẩn thông báo
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
