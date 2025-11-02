@@ -27,3 +27,5 @@ Thumbs.db
 frontend-admin/node_modules/
 frontend-admin/dist/
 frontend-admin/.vite/
+
+.codex
