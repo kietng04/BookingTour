@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import OAuth2Callback from './pages/OAuth2Callback';
 import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
+import ToursPageExplore from './pages/ToursPageExplore';
 import TourDetailPage from './pages/TourDetailPage';
 import BookingPage from './pages/BookingPage';
 import PaymentResultPage from './pages/PaymentResultPage';
@@ -21,7 +22,7 @@ const App: React.FC = () => {
         <div className="flex-1">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/tours" element={<HomePage />} />
+            <Route path="/tours" element={<ToursPageExplore />} />
             <Route path="/tours/:slug" element={<TourDetailPage />} />
             <Route path="/booking/:slug" element={<BookingPage />} />
             <Route path="/payment-result" element={<PaymentResultPage />} />

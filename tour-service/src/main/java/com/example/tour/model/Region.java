@@ -1,4 +1,7 @@
+
 package com.example.tour.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,6 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="regions")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Region {
     
     @Id
@@ -45,5 +49,6 @@ public class Region {
     public void setName(String name) {
         this.name = name;
     }
+    // ...existing code...
 }
 

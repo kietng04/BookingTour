@@ -31,10 +31,15 @@ export interface ApiTour {
   schedules?: ApiTourSchedule[];
 }
 
+const DEFAULT_TOUR_IMAGE =
+  (typeof import.meta.env.VITE_DEFAULT_TOUR_IMAGE === 'string' &&
+    import.meta.env.VITE_DEFAULT_TOUR_IMAGE.trim()) ||
+  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80';
+
 const DEFAULT_OPERATOR = {
   name: 'BookingTour',
-  avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=160&h=160&q=80',
-  rating: 4.8,
+  avatar:
+    'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=160&h=160&q=80',
   tourCount: 24,
   responseTime: 'Trong 2 giờ',
   founded: '2018',
@@ -62,7 +67,7 @@ const mapSchedulesToItinerary = (schedules: Nullable<ApiTourSchedule[]>) => {
       day: `Ngày ${item.dayNumber}`,
       title: `Hoạt động ngày ${item.dayNumber}`,
       description: item.scheduleDescription,
-      image: 'https://images.unsplash.com/photo-1468824357306-a439d58ccb1c?auto=format&fit=crop&w=800&q=80',
+      image: DEFAULT_TOUR_IMAGE,
     }));
 };
 
@@ -93,33 +98,23 @@ const buildQuickSummary = (tour: ApiTour, fallback?: string[]): string[] => {
 const buildIncluded = (fallback?: string[]): string[] =>
   fallback?.length
     ? fallback
-    : [
-        'Xe đưa đón theo chương trình',
-        'Hướng dẫn viên chuyên nghiệp',
-        '01 bữa ăn đặc sản địa phương',
-      ];
+    : ['Xe đưa đón theo chương trình', 'Hướng dẫn viên chuyên nghiệp', 'Một bữa ăn địa phương'];
 
 const buildExcluded = (fallback?: string[]): string[] =>
   fallback?.length
     ? fallback
-    : [
-        'Chi phí cá nhân ngoài chương trình',
-        'Thuế VAT (nếu có yêu cầu xuất hóa đơn)',
-        'Tiền tip cho hướng dẫn viên và tài xế',
-      ];
+    : ['Chi phí cá nhân ngoài chương trình', 'Thuế VAT (nếu cần xuất hóa đơn)', 'Tiền tip cho tổ lái'];
 
 const pickImages = (apiImages?: ApiTourImage[]) => {
   const apiGallery = ensureArray(apiImages).map((image) => image.imageUrl);
   const gallery = dedupeArray(apiGallery);
 
   const heroImage =
-    apiImages?.find((image) => image.isPrimary)?.imageUrl ??
-    gallery[0] ??
-    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80';
+    apiImages?.find((image) => image.isPrimary)?.imageUrl ?? gallery[0] ?? DEFAULT_TOUR_IMAGE;
 
   return {
     heroImage,
-    heroImageAlt: 'Beautiful travel landscape',
+    heroImageAlt: 'Hình ảnh tour du lịch',
     gallery: gallery.length ? gallery : [heroImage],
   };
 };
@@ -145,21 +140,22 @@ export const enrichTourFromApi = (apiTour: ApiTour): Tour => {
     title: apiTour.tourName,
     destination: apiTour.mainDestination ?? 'Việt Nam',
     country: 'Việt Nam',
+    regionId: apiTour.regionId !== undefined ? String(apiTour.regionId) : undefined,
+    provinceId: apiTour.provinceId !== undefined ? String(apiTour.provinceId) : undefined,
     duration: buildDuration(apiTour),
     groupSize: 'Nhóm nhỏ tối đa 20 khách',
     priceFrom: normalizedPrice,
-    rating: 4.6,
     reviewCount: itinerary.length ? itinerary.length * 6 : 24,
     heroImage,
     heroImageAlt,
     gallery,
     quickSummary: buildQuickSummary(apiTour),
     highlights: buildHighlights(apiTour, itinerary),
-    overview: apiTour.description ?? 'Đang cập nhật mô tả chi tiết cho hành trình này.',
+    overview: apiTour.description ?? 'Thông tin chi tiết đang được cập nhật.',
     itinerary,
     included: buildIncluded(),
     excluded: buildExcluded(),
-    cancellationPolicy: 'Miễn phí hủy trước 7 ngày khởi hành.',
+    cancellationPolicy: 'Miễn phí huỷ trước 7 ngày khởi hành.',
     operator: DEFAULT_OPERATOR,
     reviews: [],
     tags: apiTour.mainDestination ? [apiTour.mainDestination] : [],
@@ -168,3 +164,4 @@ export const enrichTourFromApi = (apiTour: ApiTour): Tour => {
 
 export const enrichToursFromApi = (apiTours: ApiTour[] = []): Tour[] =>
   apiTours.map(enrichTourFromApi);
+
