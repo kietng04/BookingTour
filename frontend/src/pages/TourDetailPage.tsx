@@ -121,7 +121,8 @@ const TourDetailPage: React.FC = () => {
 
   const reviewSummary = useMemo(() => {
     if (!tour) return '';
-    return `${tour.rating.toFixed(2)} · ${tour.reviewCount} đánh giá`;
+    const totalReviews = tour.reviewCount ?? tour.reviews?.length ?? 0;
+    return totalReviews > 0 ? `${totalReviews} đánh giá từ du khách` : '';
   }, [tour]);
 
   if (isLoading) {
@@ -187,9 +188,11 @@ const TourDetailPage: React.FC = () => {
               <Clock3 className="h-4 w-4 text-brand-500" aria-hidden="true" />
               {tour.duration}
             </span>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-semibold text-gray-700 shadow-inner">
-              {reviewSummary}
-            </span>
+            {reviewSummary && (
+              <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-semibold text-gray-700 shadow-inner">
+                {reviewSummary}
+              </span>
+            )}
           </div>
           <div className="flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-widest text-gray-500">
             {tour.tags.map((tag) => (

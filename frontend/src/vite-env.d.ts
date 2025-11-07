@@ -3,6 +3,7 @@
 interface ImportMetaEnv {
   readonly VITE_API_URL?: string;
   readonly VITE_USER_SERVICE_URL?: string;
+  readonly VITE_DEFAULT_TOUR_IMAGE?: string;
 }
 
 interface ImportMeta {

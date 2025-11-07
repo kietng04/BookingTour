@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, Clock3, Star } from 'lucide-react';
+import { Heart, Clock3 } from 'lucide-react';
 import clsx from 'clsx';
 import { Tour } from '../../data/tours';
 
@@ -18,7 +18,6 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onWishlist, wishlisted }) => 
     maximumFractionDigits: 0,
   }).format(tour.priceFrom);
 
-  const ratingLabel = `${tour.rating.toFixed(2)} (${tour.reviewCount} đánh giá)`;
   const handleKeyWishlist = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -67,13 +66,6 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onWishlist, wishlisted }) => 
             </p>
             <h3 className="mt-1 line-clamp-2 text-xl font-semibold text-gray-900">{tour.title}</h3>
           </div>
-          <div className="flex flex-col items-end text-right">
-            <div className="flex items-center gap-1 text-sm font-semibold text-gray-900">
-              <Star className="h-4 w-4 text-amber-400" aria-hidden="true" />
-              {tour.rating.toFixed(2)}
-            </div>
-            <p className="text-xs text-gray-500">{tour.reviewCount} reviews</p>
-          </div>
         </div>
         <ul className="space-y-2 text-sm text-gray-600">
           {tour.quickSummary.map((item) => (
@@ -97,7 +89,6 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onWishlist, wishlisted }) => 
           </Link>
         </div>
       </div>
-      <span className="sr-only">{ratingLabel}</span>
     </motion.article>
   );
 };

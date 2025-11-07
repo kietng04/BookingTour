@@ -1,40 +1,7 @@
-import React, { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import DatePicker from 'react-datepicker';
-import { Users, MapPin, CalendarDays, ShieldCheck } from 'lucide-react';
+import React from 'react';
+import { Users, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
-import clsx from 'clsx';
-import GuestSelector from '../forms/GuestSelector';
-
-type SearchFormValues = {
-  destination: string;
-  guests: number;
-};
-
-interface HeroSectionProps {
-  onSearch: (search: { destination: string; dateRange: { startDate?: Date; endDate?: Date }; guests: number }) => void;
-}
-
-const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
-  const { register, handleSubmit, control, watch } = useForm<SearchFormValues>({
-    defaultValues: {
-      destination: '',
-      guests: 2,
-    },
-  });
-  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
-  const [startDate, endDate] = dateRange;
-
-  const submitSearch = handleSubmit((values) => {
-    onSearch({
-      destination: values.destination,
-      dateRange: { startDate: startDate ?? undefined, endDate: endDate ?? undefined },
-      guests: Number(values.guests),
-    });
-  });
-
-  const destinationValue = watch('destination');
-
+const HeroSection: React.FC = () => {
   return (
     <section className="relative overflow-hidden rounded-3xl bg-gray-900 text-white shadow-card lg:h-[520px]">
       <img
@@ -77,70 +44,20 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
             </div>
           </dl>
         </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
+          className="mt-10 max-w-xl rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-lg shadow-xl"
+        >
+          <h2 className="text-xl font-semibold text-white">Đặc quyền thành viên BookingTour+</h2>
+          <ul className="mt-4 space-y-3 text-sm text-white/80">
+            <li>• Ưu đãi chỉ dành cho thành viên đối với hơn 120 hành trình tuyển chọn.</li>
+            <li>• Hỗ trợ điều phối viên riêng từ lúc lên kế hoạch đến sau chuyến đi.</li>
+            <li>• Quyền đổi lịch linh hoạt và bảo hiểm du lịch toàn diện.</li>
+          </ul>
+        </motion.div>
       </div>
-      <motion.form
-        onSubmit={submitSearch}
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.6, ease: 'easeOut' }}
-        className="relative z-20 mx-6 -mt-12 max-w-5xl rounded-2xl bg-white p-6 shadow-card lg:mx-auto lg:p-8"
-        aria-label="Tìm kiếm tour"
-      >
-        <div className="grid gap-4 md:grid-cols-4">
-          <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Điểm đến</span>
-            <div className="relative flex items-center">
-              <MapPin className="pointer-events-none absolute left-4 h-4 w-4 text-gray-400" aria-hidden="true" />
-              <input
-                type="text"
-                {...register('destination')}
-                placeholder="Bạn muốn đi đâu?"
-                className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-11 pr-4 text-sm font-medium text-gray-900 shadow-inner focus:border-brand-300"
-                aria-label="Điểm đến"
-              />
-            </div>
-          </label>
-          <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Ngày khởi hành</span>
-            <div className="relative flex items-center">
-              <CalendarDays className="pointer-events-none absolute left-4 h-4 w-4 text-gray-400" aria-hidden="true" />
-              <DatePicker
-                selectsRange
-                startDate={startDate}
-                endDate={endDate}
-                onChange={(update) => {
-                  if (Array.isArray(update)) {
-                    setDateRange([update[0], update[1]]);
-                  }
-                }}
-                minDate={new Date()}
-                placeholderText="Chọn khoảng ngày"
-                className="w-full rounded-xl border border-gray-200 py-3 pl-11 pr-4 text-sm font-medium text-gray-900 focus:border-brand-300"
-                calendarClassName="rounded-xl border border-gray-100 shadow-card"
-              />
-            </div>
-          </label>
-          <Controller
-            control={control}
-            name="guests"
-            rules={{ required: true, min: 1, max: 12 }}
-            render={({ field: { value, onChange } }) => (
-              <GuestSelector value={value ?? 2} onChange={onChange} min={1} max={12} />
-            )}
-          />
-          <div className="flex items-end">
-            <button
-              type="submit"
-              className={clsx(
-                'flex w-full items-center justify-center rounded-xl bg-brand-500 py-3 text-sm font-semibold text-white shadow-lg transition focus-visible:bg-brand-600',
-                destinationValue ? 'hover:bg-brand-600' : 'hover:bg-brand-500'
-              )}
-            >
-              Tìm tour phù hợp
-            </button>
-          </div>
-        </div>
-      </motion.form>
     </section>
   );
 };
