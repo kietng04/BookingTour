@@ -9,7 +9,6 @@ export const tours = [
     difficulty: 'adventure',
     difficultyLabel: 'Phiêu lưu mạo hiểm',
     price: 8290000,
-    rating: 4.9,
     reviewsCount: 186,
     thumbnail: 'https://images.unsplash.com/photo-1517821365732-61113c912358?auto=format&fit=crop&w=1200&q=80',
     gallery: [
@@ -91,7 +90,6 @@ export const tours = [
     difficulty: 'easy',
     difficultyLabel: 'Thư giãn cao cấp',
     price: 9450000,
-    rating: 4.8,
     reviewsCount: 204,
     thumbnail: 'https://images.unsplash.com/photo-1526481280695-3c4693f26e90?auto=format&fit=crop&w=1200&q=80',
     gallery: [
@@ -164,7 +162,6 @@ export const tours = [
     difficulty: 'moderate',
     difficultyLabel: 'Khám phá nhẹ nhàng',
     price: 7590000,
-    rating: 4.7,
     reviewsCount: 167,
     thumbnail: 'https://images.unsplash.com/photo-1533636721434-0e2d61030955?auto=format&fit=crop&w=1200&q=80',
     gallery: [
@@ -246,7 +243,6 @@ export const tours = [
     difficulty: 'moderate',
     difficultyLabel: 'Khám phá thiên nhiên',
     price: 6890000,
-    rating: 4.8,
     reviewsCount: 128,
     thumbnail: 'https://images.unsplash.com/photo-1518152006812-edab29b069ac?auto=format&fit=crop&w=1200&q=80',
     gallery: [
@@ -340,3 +336,4 @@ export const curatedCollections = [
     )
   }
 ];
+

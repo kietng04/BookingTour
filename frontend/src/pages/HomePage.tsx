@@ -1,19 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Filter, Shield, Award, Clock3, Compass, Map, Sparkles } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowRight, Shield, Award, Clock3, Compass, Map, Sparkles } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import HeroSection from '../components/home/HeroSection';
 import TourGrid from '../components/tours/TourGrid';
 import { Tour } from '../data/tours';
-import FiltersDrawer, { FilterState } from '../components/home/FiltersDrawer';
 import { toursAPI } from '../services/api';
 import { enrichToursFromApi, ApiTour } from '../services/tourAdapter';
-
-const DEFAULT_FILTERS: FilterState = {
-  priceRange: [0, 10000000],
-  minRating: 4.5,
-  tags: [],
-};
 
 interface SearchState {
   destination: string;
@@ -22,6 +15,7 @@ interface SearchState {
 }
 
 const HomePage: React.FC = () => {
+  const navigate = useNavigate();
   const [searchState, setSearchState] = useState<SearchState>({
     destination: '',
     dateRange: {},
@@ -32,8 +26,6 @@ const HomePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastKeyword, setLastKeyword] = useState<string>('');
   const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   const loadTours = useCallback(
     async (keyword?: string) => {
@@ -62,12 +54,6 @@ const HomePage: React.FC = () => {
     loadTours();
   }, [loadTours]);
 
-  const availableTags = useMemo(() => {
-    const tagSet = new Set<string>();
-    tours.forEach((tour) => tour.tags.forEach((tag) => tagSet.add(tag)));
-    return Array.from(tagSet).sort();
-  }, [tours]);
-
   const filteredTours = useMemo(() => {
     return tours.filter((tour) => {
       const matchesDestination = searchState.destination
@@ -77,17 +63,9 @@ const HomePage: React.FC = () => {
             .includes(searchState.destination.toLowerCase())
         : true;
 
-      const withinPriceRange =
-        tour.priceFrom >= filters.priceRange[0] && tour.priceFrom <= filters.priceRange[1];
-
-      const meetsRating = tour.rating >= filters.minRating;
-
-      const matchesTags =
-        filters.tags.length === 0 || filters.tags.every((tag) => tour.tags.includes(tag));
-
-      return matchesDestination && withinPriceRange && meetsRating && matchesTags;
+      return matchesDestination;
     });
-  }, [filters.minRating, filters.priceRange, filters.tags, searchState.destination, tours]);
+  }, [searchState.destination, tours]);
 
   const handleWishlist = (tourId: string) => {
     setWishlist((prev) => ({ ...prev, [tourId]: !prev[tourId] }));
@@ -100,22 +78,10 @@ const HomePage: React.FC = () => {
     loadTours(keyword || undefined);
   };
 
-  const handleFilterApply = (newFilters: FilterState) => {
-    setFilters({ ...newFilters });
-  };
-
-  const activeFiltersCount =
-    Number(filters.tags.length > 0) +
-    Number(filters.minRating !== DEFAULT_FILTERS.minRating) +
-    Number(
-      filters.priceRange[0] !== DEFAULT_FILTERS.priceRange[0] ||
-        filters.priceRange[1] !== DEFAULT_FILTERS.priceRange[1]
-    );
-
   return (
     <main id="main-content" className="bg-white">
       <section className="container py-10 lg:py-16">
-        <HeroSection onSearch={handleSearch} />
+  <HeroSection />
       </section>
 
       <section className="border-y border-gray-100 bg-gray-25">
@@ -172,16 +138,11 @@ const HomePage: React.FC = () => {
           </div>
           <button
             type="button"
-            onClick={() => setIsFiltersOpen(true)}
+            onClick={() => navigate('/tours')}
             className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-brand-300 hover:text-gray-900 focus-visible:border-brand-300"
           >
-            <Filter className="h-4 w-4 text-brand-500" aria-hidden="true" />
-            Bộ lọc
-            {activeFiltersCount > 0 && (
-              <span className="ml-1 inline-flex h-5 min-w-[1.5rem] items-center justify-center rounded-full bg-brand-500 px-1 text-xs font-semibold text-white">
-                {activeFiltersCount}
-              </span>
-            )}
+            <ArrowRight className="h-4 w-4 text-brand-500" aria-hidden="true" />
+            Xem thêm tour
           </button>
         </div>
 
@@ -316,17 +277,11 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
         </div>
-      </section>
-      <FiltersDrawer
-        isOpen={isFiltersOpen}
-        onClose={() => setIsFiltersOpen(false)}
-        onApply={handleFilterApply}
-        defaultValues={filters}
-        baseline={DEFAULT_FILTERS}
-        availableTags={availableTags}
-      />
-    </main>
+      </section>\n</main>
   );
 };
 
 export default HomePage;
+
+
+

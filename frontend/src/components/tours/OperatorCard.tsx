@@ -1,11 +1,10 @@
 import React from 'react';
-import { ShieldCheck, Award, Star } from 'lucide-react';
+import { ShieldCheck, Award } from 'lucide-react';
 
 interface OperatorCardProps {
   operator: {
     name: string;
     avatar: string;
-    rating: number;
     tourCount: number;
     responseTime: string;
     founded: string;
@@ -31,10 +30,6 @@ const OperatorCard: React.FC<OperatorCardProps> = ({ operator }) => (
           Đối tác uy tín từ năm {operator.founded} · Hơn {operator.tourCount}+ hành trình được thiết kế riêng
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-600">
-          <span className="inline-flex items-center gap-2">
-            <Star className="h-4 w-4 text-amber-400" aria-hidden="true" />
-            {operator.rating.toFixed(2)} điểm hài lòng
-          </span>
           <span className="inline-flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-brand-500" aria-hidden="true" />
             Phản hồi trong {operator.responseTime}

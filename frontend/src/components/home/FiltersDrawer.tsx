@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, SlidersHorizontal, Star } from 'lucide-react';
+import { X, SlidersHorizontal } from 'lucide-react';
 import clsx from 'clsx';
 
-export interface FilterState {
+interface FilterState {
   priceRange: [number, number];
-  minRating: number;
   tags: string[];
 }
+
+
 
 interface FiltersDrawerProps {
   isOpen: boolean;
@@ -37,7 +38,6 @@ const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
     }
   }, [defaultValues, isOpen, reset]);
 
-  const selectedMinRating = watch('minRating');
   const selectedTags = watch('tags');
   const selectedPriceRange = watch('priceRange');
 
@@ -147,34 +147,6 @@ const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
 
                 <fieldset className="space-y-3 rounded-2xl border border-gray-100 p-4">
                   <legend className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-                    Điểm đánh giá tối thiểu
-                  </legend>
-                  <div className="flex flex-wrap gap-2">
-                    {[4, 4.5, 4.7, 4.9].map((rating) => (
-                      <label
-                        key={rating}
-                        className={clsx(
-                          'inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition',
-                          selectedMinRating === rating
-                            ? 'border-brand-300 bg-brand-50 text-brand-600'
-                            : 'border-gray-200 text-gray-600 hover:border-brand-300 hover:text-gray-900'
-                        )}
-                      >
-                        <input
-                          type="radio"
-                          value={rating}
-                          {...register('minRating', { valueAsNumber: true })}
-                          className="sr-only"
-                        />
-                        <Star className="h-4 w-4 text-amber-400" aria-hidden="true" />
-                        {rating}+
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-
-                <fieldset className="space-y-3 rounded-2xl border border-gray-100 p-4">
-                  <legend className="text-xs font-semibold uppercase tracking-widest text-gray-500">
                     Trải nghiệm
                   </legend>
                   <div className="flex flex-wrap gap-2">
@@ -234,3 +206,5 @@ const FiltersDrawer: React.FC<FiltersDrawerProps> = ({
 };
 
 export default FiltersDrawer;
+
+

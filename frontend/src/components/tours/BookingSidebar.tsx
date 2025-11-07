@@ -10,7 +10,7 @@ import GuestSelector from '../forms/GuestSelector';
 interface BookingSidebarProps {
   priceFrom: number;
   duration: string;
-  reviewSummary: string;
+  reviewSummary?: string;
   onBook?: (data: { startDate?: Date; endDate?: Date; guests: number }) => void;
 }
 
@@ -62,7 +62,10 @@ const BookingSidebar: React.FC<BookingSidebarProps> = ({
       <div>
         <p className="text-sm uppercase tracking-wide text-gray-500">Giá từ</p>
         <p className="text-3xl font-semibold text-gray-900">{priceFormatter.format(priceFrom)}</p>
-        <p className="text-sm text-gray-500">{duration} · {reviewSummary}</p>
+        <p className="text-sm text-gray-500">
+          {duration}
+          {reviewSummary ? ` · ${reviewSummary}` : ''}
+        </p>
       </div>
 
       <form

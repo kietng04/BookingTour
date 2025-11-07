@@ -3,14 +3,13 @@ import { Link } from 'react-router-dom';
 import { Clock, MapPin, Users } from 'lucide-react';
 import Card from '../common/Card.jsx';
 import Badge from '../common/Badge.jsx';
-import RatingStars from '../common/RatingStars.jsx';
 import Button from '../common/Button.jsx';
 import { formatCurrency } from '../../utils/format.js';
 
 const difficultyLabels = {
   easy: 'Thư giãn',
   moderate: 'Khám phá nhẹ nhàng',
-  adventure: 'Phiêu lưu mạo hiểm'
+  adventure: 'Phiêu lưu mạo hiểm',
 };
 
 const TourCard = ({ tour }) => (
@@ -24,18 +23,24 @@ const TourCard = ({ tour }) => (
       />
       <div className="absolute left-4 top-4 flex gap-2">
         <Badge>{tour.destination}</Badge>
-        <Badge variant="outline">{tour.difficultyLabel ?? difficultyLabels[tour.difficulty] ?? tour.difficulty}</Badge>
+        <Badge variant="outline">
+          {tour.difficultyLabel ?? difficultyLabels[tour.difficulty] ?? tour.difficulty}
+        </Badge>
       </div>
     </div>
 
     <div className="flex flex-1 flex-col gap-4 p-6">
       <div className="flex items-center justify-between gap-2">
-        <RatingStars rating={tour.rating} />
-        <span className="text-xs font-medium text-slate-400">{tour.reviewsCount}+ đánh giá</span>
+        <span className="text-xs font-medium text-slate-400">
+          {(tour.reviewsCount ?? 0).toLocaleString('vi-VN')}+ đánh giá
+        </span>
       </div>
 
       <div>
-        <Link to={`/tours/${tour.id}`} className="text-xl font-semibold text-slate-900 hover:text-primary-600">
+        <Link
+          to={`/tours/${tour.id}`}
+          className="text-xl font-semibold text-slate-900 hover:text-primary-600"
+        >
           {tour.name}
         </Link>
         <p className="mt-2 text-sm text-slate-500">{tour.description}</p>
@@ -79,11 +84,11 @@ TourCard.propTypes = {
     difficulty: PropTypes.string.isRequired,
     difficultyLabel: PropTypes.string,
     price: PropTypes.number.isRequired,
-    rating: PropTypes.number.isRequired,
     thumbnail: PropTypes.string.isRequired,
-    reviewsCount: PropTypes.number.isRequired,
-    description: PropTypes.string.isRequired
-  }).isRequired
+    reviewsCount: PropTypes.number,
+    description: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default TourCard;
+

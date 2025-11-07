@@ -21,11 +21,12 @@ export interface Tour {
   title: string;
   destination: string;
   country: string;
+  regionId?: string;
+  provinceId?: string;
   duration: string;
   groupSize: string;
   priceFrom: number;
-  rating: number;
-  reviewCount: number;
+  reviewCount?: number;
   heroImage: string;
   heroImageAlt: string;
   gallery: string[];
@@ -39,11 +40,11 @@ export interface Tour {
   operator: {
     name: string;
     avatar: string;
-    rating: number;
     tourCount: number;
     responseTime: string;
     founded: string;
     certifications: string[];
+    rating?: number;
   };
   reviews: TourReview[];
   tags: string[];
@@ -59,7 +60,6 @@ export const tours: Tour[] = [
     duration: '5 days',
     groupSize: 'Max 10 guests',
     priceFrom: 1899,
-    rating: 4.9,
     reviewCount: 216,
     heroImage:
       'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=80',
@@ -186,7 +186,6 @@ export const tours: Tour[] = [
     duration: '7 days',
     groupSize: 'Max 8 guests',
     priceFrom: 2290,
-    rating: 4.8,
     reviewCount: 182,
     heroImage:
       'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1600&q=80',
@@ -328,7 +327,6 @@ export const tours: Tour[] = [
     duration: '6 days',
     groupSize: 'Max 12 guests',
     priceFrom: 2495,
-    rating: 4.95,
     reviewCount: 148,
     heroImage:
       'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1600&q=80',
@@ -462,7 +460,6 @@ export const tours: Tour[] = [
     duration: '6 days',
     groupSize: 'Max 12 guests',
     priceFrom: 2140,
-    rating: 4.97,
     reviewCount: 164,
     heroImage:
       'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1600&q=80',
@@ -588,3 +585,4 @@ export const tours: Tour[] = [
     tags: ['Culture', 'Wellness', 'Small Group'],
   },
 ];
+
