@@ -29,7 +29,7 @@ const FilterPanel = ({
     if (!value.region) {
       return [];
     }
-    return provinces.filter((province) => province.regionId === value.region);
+    return provinces.filter((province) => !province.regionId || province.regionId === value.region);
   }, [provinces, value.region]);
 
   const selectedRegion = useMemo(
@@ -47,10 +47,6 @@ const FilterPanel = ({
       <header className="space-y-1">
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">Bộ lọc nâng cao</p>
         <h2 className="text-xl font-semibold text-gray-900">Tìm tour phù hợp hơn</h2>
-        <p className="text-sm text-gray-500">
-          Chọn cách sắp xếp, thời gian khởi hành và khu vực. Phần xử lý dữ liệu có thể nối với API thật
-          sau khi bạn đã sẵn sàng.
-        </p>
       </header>
 
       <section className="space-y-3">
@@ -274,6 +270,12 @@ const ToursPageExplore = () => {
       if (keyword.trim()) {
         params.keyword = keyword.trim();
       }
+      if (filters.startDate) {
+        params.startDate = filters.startDate;
+      }
+      if (filters.endDate) {
+        params.endDate = filters.endDate;
+      }
 
       try {
         const response = await toursAPI.getAll(params);
@@ -305,7 +307,7 @@ const ToursPageExplore = () => {
     return () => {
       active = false;
     };
-  }, [filters.region, filters.province, keyword]);
+  }, [filters.region, filters.province, filters.startDate, filters.endDate, keyword]);
 
   useEffect(() => {
     let active = true;
@@ -369,14 +371,18 @@ const ToursPageExplore = () => {
               .map((province) => ({
                 id: String(province.id),
                 name: province?.name ?? 'Không tên',
-                regionId:
-                  province.regionId !== undefined
-                    ? String(province.regionId)
-                    : province.region?.id !== undefined
-                    ? String(province.region.id)
-                    : province.region?.regionId !== undefined
-                    ? String(province.region.regionId)
-                    : '',
+                regionId: (() => {
+                  if (province.regionId !== undefined && province.regionId !== null) {
+                    return String(province.regionId);
+                  }
+                  if (province.region?.id !== undefined && province.region?.id !== null) {
+                    return String(province.region.id);
+                  }
+                  if (province.region?.regionId !== undefined && province.region?.regionId !== null) {
+                    return String(province.region.regionId);
+                  }
+                  return String(filters.region);
+                })(),
               }))
           );
         }
@@ -400,38 +406,29 @@ const ToursPageExplore = () => {
   }, [filters.region]);
 
   useEffect(() => {
+    const trimmedKeyword = searchInput.trim();
+    const handler = setTimeout(() => {
+      setKeyword((previous) => (previous === trimmedKeyword ? previous : trimmedKeyword));
+    }, 250);
+
+    return () => clearTimeout(handler);
+  }, [searchInput]);
+
+  useEffect(() => {
     setCurrentPage(1);
   }, [keyword, filters.priceOrder, filters.startDate, filters.endDate, filters.region, filters.province]);
 
   const filteredTours = useMemo(() => {
-    const normalizedKeyword = keyword.toLowerCase();
-
-    let results = allTours.filter((tour) => {
-      if (!normalizedKeyword) {
-        return true;
-      }
-      return [tour.title, tour.destination, tour.country, ...(tour.tags || [])]
-        .join(' ')
-        .toLowerCase()
-        .includes(normalizedKeyword);
-    });
-
-    if (filters.region) {
-      results = results.filter((tour) => tour.regionId === filters.region);
-    }
-
-    if (filters.province) {
-      results = results.filter((tour) => tour.provinceId === filters.province);
-    }
+    let results = [...allTours];
 
     if (filters.priceOrder === 'asc') {
-      results = [...results].sort((a, b) => (a.priceFrom ?? 0) - (b.priceFrom ?? 0));
+      results = results.sort((a, b) => (a.priceFrom ?? 0) - (b.priceFrom ?? 0));
     } else if (filters.priceOrder === 'desc') {
-      results = [...results].sort((a, b) => (b.priceFrom ?? 0) - (a.priceFrom ?? 0));
+      results = results.sort((a, b) => (b.priceFrom ?? 0) - (a.priceFrom ?? 0));
     }
 
     return results;
-  }, [allTours, keyword, filters.priceOrder, filters.region, filters.province]);
+  }, [allTours, filters.priceOrder]);
 
   const totalPages = Math.max(1, Math.ceil(filteredTours.length / PAGE_SIZE) || 1);
   const safePage = Math.min(currentPage, totalPages);
@@ -443,7 +440,6 @@ const ToursPageExplore = () => {
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-    setKeyword(searchInput.trim());
   };
 
   const handlePageChange = (page) => {
@@ -468,6 +464,8 @@ const ToursPageExplore = () => {
   const handleResetFilters = () => {
     setFilters({ ...DEFAULT_FILTERS });
     setProvinces([]);
+    setSearchInput('');
+    setKeyword('');
   };
 
   const emptyStateVisible = !loading && paginatedTours.length === 0;
@@ -479,10 +477,6 @@ const ToursPageExplore = () => {
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-widest text-brand-600">Khám phá</p>
             <h1 className="text-3xl font-semibold text-gray-900 md:text-4xl">Tour dành cho bạn</h1>
-            <p className="max-w-2xl text-sm text-gray-600">
-              Dễ dàng tìm kiếm và lọc những hành trình phù hợp nhất với nhu cầu. Khi backend sẵn sàng, chỉ
-              cần ghép logic xử lý bộ lọc vào API hiện tại.
-            </p>
           </div>
 
           <form
@@ -504,10 +498,11 @@ const ToursPageExplore = () => {
               />
             </div>
             <button
-              type="submit"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-500 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-600 focus-visible:bg-brand-600"
+              type="button"
+              onClick={() => setSearchInput('')}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 transition hover:border-brand-300 hover:text-gray-900 focus-visible:border-brand-300"
             >
-              Tìm tour
+              Xóa từ khóa
             </button>
           </form>
         </div>
@@ -526,11 +521,7 @@ const ToursPageExplore = () => {
         />
 
         <div className="space-y-8">
-          {error && (
-            <div className="rounded-3xl border border-red-200 bg-red-50 p-6 text-sm text-red-600">
-              {error}
-            </div>
-          )}
+          {error && null}
 
           <TourGrid tours={paginatedTours} isLoading={loading} />
 

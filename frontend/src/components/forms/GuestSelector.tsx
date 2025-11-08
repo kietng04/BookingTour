@@ -3,53 +3,45 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, Minus, Plus } from 'lucide-react';
 import clsx from 'clsx';
 
-interface GuestSelectorProps {
-  label?: string;
-  value: number;
-  onChange: (totalGuests: number) => void;
-  min?: number;
-  max?: number;
+export interface GuestDistribution {
+  adults: number;
+  children: number;
 }
 
-type GuestCategory = 'adults' | 'youth' | 'children';
+interface GuestSelectorProps {
+  label?: string;
+  value: GuestDistribution;
+  onChange: (distribution: GuestDistribution) => void;
+  minAdults?: number;
+  maxTotal?: number;
+}
+
+type GuestCategory = 'adults' | 'children';
 
 const GuestSelector: React.FC<GuestSelectorProps> = ({
   label = 'Số khách',
   value,
   onChange,
-  min = 1,
-  max = 12,
+  minAdults = 1,
+  maxTotal = 12,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [distribution, setDistribution] = useState(() => {
-    const initialAdults = Math.min(Math.max(value || min, min), max);
-    return { adults: initialAdults, youth: 0, children: 0 };
-  });
+  const [distribution, setDistribution] = useState<GuestDistribution>(() => ({
+    adults: Math.max(value?.adults ?? minAdults, minAdults),
+    children: Math.max(value?.children ?? 0, 0),
+  }));
 
   useEffect(() => {
     setDistribution((prev) => {
-      const prevTotal = prev.adults + prev.youth + prev.children;
-      if (value === prevTotal) {
+      const nextAdults = Math.max(value?.adults ?? minAdults, minAdults);
+      const nextChildren = Math.max(value?.children ?? 0, 0);
+      if (prev.adults === nextAdults && prev.children === nextChildren) {
         return prev;
       }
-      if (value <= 0) {
-        return { adults: min, youth: 0, children: 0 };
-      }
-      const adjusted = { ...prev };
-      let remaining = value;
-      adjusted.adults = Math.max(min, Math.min(remaining, value));
-      remaining -= adjusted.adults;
-      adjusted.youth = Math.max(0, Math.min(prev.youth, remaining));
-      remaining -= adjusted.youth;
-      adjusted.children = Math.max(0, Math.min(prev.children, remaining));
-      remaining -= adjusted.children;
-      if (remaining > 0) {
-        adjusted.adults += remaining;
-      }
-      return adjusted;
+      return { adults: nextAdults, children: nextChildren };
     });
-  }, [min, value]);
+  }, [minAdults, value?.adults, value?.children]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -63,33 +55,33 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const totalGuests = useMemo(
-    () => distribution.adults + distribution.youth + distribution.children,
-    [distribution]
-  );
+  const totalGuests = useMemo(() => distribution.adults + distribution.children, [distribution]);
 
   useEffect(() => {
-    onChange(totalGuests);
-  }, [onChange, totalGuests]);
+    onChange(distribution);
+  }, [distribution, onChange]);
 
   const adjustGuests = (category: GuestCategory, delta: number) => {
     setDistribution((prev) => {
       const next = { ...prev };
-      next[category] = Math.max(0, prev[category] + delta);
-      const nextTotal = next.adults + next.youth + next.children;
-      if (nextTotal < min) {
+      const proposed = Math.max(0, prev[category] + delta);
+      if (category === 'adults') {
+        next.adults = Math.max(minAdults, proposed);
+      } else {
+        next.children = proposed;
+      }
+
+      const total = next.adults + next.children;
+      if (total > maxTotal) {
         return prev;
       }
-      if (nextTotal > max) {
-        return prev;
-      }
+
       return next;
     });
   };
 
   const categories: Array<{ key: GuestCategory; label: string; description: string; minCount: number }> = [
-    { key: 'adults', label: 'Người lớn', description: 'Từ 18 tuổi trở lên', minCount: 1 },
-    { key: 'youth', label: 'Thanh thiếu niên', description: 'Từ 13 - 17 tuổi', minCount: 0 },
+    { key: 'adults', label: 'Người lớn', description: 'Từ 18 tuổi trở lên', minCount: minAdults },
     { key: 'children', label: 'Trẻ em', description: 'Từ 2 - 12 tuổi', minCount: 0 },
   ];
 
@@ -107,7 +99,10 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
       >
         <div className="flex flex-col items-start">
           <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">{label}</span>
-          <span>{totalGuests} khách</span>
+          <span>
+            {totalGuests} khách
+            {distribution.children > 0 ? ` · ${distribution.children} trẻ em` : ''}
+          </span>
         </div>
         <ChevronDown className={clsx('h-4 w-4 text-gray-400 transition-transform', isOpen && 'rotate-180')} />
       </button>
@@ -133,7 +128,11 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
                       type="button"
                       className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-brand-300 hover:text-gray-900 focus-visible:border-brand-300"
                       onClick={() => adjustGuests(category.key, -1)}
-                      disabled={distribution[category.key] <= category.minCount}
+                      disabled={
+                        category.key === 'adults'
+                          ? distribution.adults <= category.minCount
+                          : distribution.children <= category.minCount
+                      }
                     >
                       <Minus className="h-4 w-4" aria-hidden="true" />
                       <span className="sr-only">Giảm {category.label}</span>
@@ -145,7 +144,7 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
                       type="button"
                       className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-brand-300 hover:text-gray-900 focus-visible:border-brand-300"
                       onClick={() => adjustGuests(category.key, 1)}
-                      disabled={totalGuests >= max}
+                      disabled={totalGuests >= maxTotal}
                     >
                       <Plus className="h-4 w-4" aria-hidden="true" />
                       <span className="sr-only">Tăng {category.label}</span>
@@ -155,13 +154,13 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
               ))}
             </div>
             <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 text-xs text-gray-500">
-              <span>Tối đa {max} khách mỗi lần đặt</span>
+              <span>Tối đa {maxTotal} khách mỗi lần đặt</span>
               <button
                 type="button"
                 className="font-semibold text-brand-600 hover:underline"
                 onClick={() => {
-                  const baseAdults = Math.min(Math.max(value || min, min), max);
-                  setDistribution({ adults: baseAdults, youth: 0, children: 0 });
+                  const baseAdults = Math.max(value?.adults ?? minAdults, minAdults);
+                  setDistribution({ adults: baseAdults, children: 0 });
                   setIsOpen(false);
                 }}
               >

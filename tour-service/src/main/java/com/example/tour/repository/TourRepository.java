@@ -42,6 +42,15 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
               OR LOWER(t.tourName) LIKE LOWER(CONCAT('%', :keyword, '%'))
               OR LOWER(t.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
        )
+       AND (
+              :applyDateFilter = false
+              OR EXISTS (
+                     SELECT 1 FROM Departure d
+                     WHERE d.tour = t
+                     AND (:applyStartDateFilter = false OR d.startDate >= :startDate)
+                     AND (:applyEndDateFilter = false OR d.endDate <= :endDate)
+              )
+       )
        ORDER BY t.createdAt DESC
        """)
        Page<Tour> findByFilters(
@@ -49,6 +58,11 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
               @Param("provinceId") Integer provinceId,
               @Param("status") Tour.TourStatus status,
               @Param("keyword") String keyword,
+              @Param("applyDateFilter") boolean applyDateFilter,
+              @Param("applyStartDateFilter") boolean applyStartDateFilter,
+              @Param("applyEndDateFilter") boolean applyEndDateFilter,
+              @Param("startDate") java.time.LocalDate startDate,
+              @Param("endDate") java.time.LocalDate endDate,
               Pageable pageable);
 
 }
