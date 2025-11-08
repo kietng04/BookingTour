@@ -131,6 +131,7 @@ export const enrichTourFromApi = (apiTour: ApiTour): Tour => {
   const baseSlug = apiTour.slug ?? slugify(apiTour.tourName);
   const { heroImage, heroImageAlt, gallery } = pickImages(apiTour.images);
   const normalizedPrice = Number(apiTour.adultPrice ?? 0);
+  const normalizedChildPrice = apiTour.childPrice !== undefined ? Number(apiTour.childPrice) : undefined;
 
   const itinerary = mapSchedulesToItinerary(apiTour.schedules) ?? [];
 
@@ -145,6 +146,7 @@ export const enrichTourFromApi = (apiTour: ApiTour): Tour => {
     duration: buildDuration(apiTour),
     groupSize: 'Nhóm nhỏ tối đa 20 khách',
     priceFrom: normalizedPrice,
+    childPrice: normalizedChildPrice,
     reviewCount: itinerary.length ? itinerary.length * 6 : 24,
     heroImage,
     heroImageAlt,
@@ -156,6 +158,7 @@ export const enrichTourFromApi = (apiTour: ApiTour): Tour => {
     included: buildIncluded(),
     excluded: buildExcluded(),
     cancellationPolicy: 'Miễn phí huỷ trước 7 ngày khởi hành.',
+    departurePoint: apiTour.departurePoint,
     operator: DEFAULT_OPERATOR,
     reviews: [],
     tags: apiTour.mainDestination ? [apiTour.mainDestination] : [],

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
-import GuestSelector from '../components/forms/GuestSelector';
+import GuestSelector, { GuestDistribution } from '../components/forms/GuestSelector';
 import MoMoPaymentButton from '../components/payment/MoMoPaymentButton';
 import { toursAPI, bookingsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -14,6 +14,8 @@ interface Departure {
   endDate: string;
   remainingSlots: number;
   totalSlots?: number;
+  status?: string;
+  price?: number;
 }
 
 interface TourResponse {
@@ -22,6 +24,7 @@ interface TourResponse {
   description: string;
   mainDestination: string;
   adultPrice: number;
+  childPrice?: number;
   images: Array<{ imageUrl: string; isPrimary: boolean }>;
   departures: Departure[];
 }
@@ -34,6 +37,37 @@ interface ContactFormValues {
 
 type Step = 1 | 2;
 
+const CURRENCY_FORMATTER = new Intl.NumberFormat('vi-VN', {
+  style: 'currency',
+  currency: 'VND',
+  maximumFractionDigits: 0,
+});
+
+const STATUS_LABELS: Record<string, string> = {
+  CONCHO: 'Còn chỗ',
+  SAPFULL: 'Sắp đầy',
+  FULL: 'Đã đầy',
+  DAKHOIHANH: 'Đã khởi hành',
+};
+
+const STATUS_STYLES: Record<string, string> = {
+  CONCHO: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+  SAPFULL: 'bg-amber-50 text-amber-600 border border-amber-100',
+  FULL: 'bg-gray-100 text-gray-500 border border-gray-200',
+  DAKHOIHANH: 'bg-gray-100 text-gray-500 border border-gray-200',
+};
+
+const formatDate = (value?: string) => {
+  if (!value) {
+    return 'Đang cập nhật';
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return 'Đang cập nhật';
+  }
+  return format(date, 'dd/MM/yyyy');
+};
+
 const BookingPage: React.FC = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -43,7 +77,7 @@ const BookingPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<Step>(1);
-  const [guests, setGuests] = useState(2);
+  const [guestCounts, setGuestCounts] = useState<GuestDistribution>({ adults: 2, children: 0 });
   const [selectedDepartureId, setSelectedDepartureId] = useState<number | null>(null);
   const [contactInfo, setContactInfo] = useState<ContactFormValues | null>(null);
   const [creatingBooking, setCreatingBooking] = useState(false);
@@ -69,9 +103,33 @@ const BookingPage: React.FC = () => {
       try {
         setLoading(true);
         const response = await toursAPI.getBySlug(slug);
-        setTour(response);
-        if (response?.departures?.length) {
-          setSelectedDepartureId(response.departures[0].id);
+
+        const normalizedTour: TourResponse = {
+          ...(response as TourResponse),
+          departures: Array.isArray(response?.departures) ? (response.departures as Departure[]) : [],
+        };
+
+        if (!normalizedTour.departures.length && response?.id) {
+          try {
+            const fallbackDepartures = await toursAPI.getDepartures(response.id);
+            normalizedTour.departures = Array.isArray(fallbackDepartures)
+              ? (fallbackDepartures as Departure[])
+              : [];
+          } catch (departureError) {
+            console.warn('Không thể tải lịch khởi hành bổ sung:', departureError);
+          }
+        }
+
+        setTour(normalizedTour);
+        if (normalizedTour.departures.length) {
+          const firstAvailable = normalizedTour.departures.find((departure) => {
+            if (departure.status === 'FULL' || departure.status === 'DAKHOIHANH') {
+              return false;
+            }
+            return (departure.remainingSlots ?? 0) > 0;
+          });
+
+          setSelectedDepartureId(firstAvailable?.id ?? null);
         }
       } catch (err) {
         console.error('Failed to fetch tour', err);
@@ -86,14 +144,17 @@ const BookingPage: React.FC = () => {
 
   const selectedDeparture: Departure | undefined = useMemo(() => {
     if (!tour || selectedDepartureId == null) return undefined;
-    return tour.departures.find((departure) => departure.id === selectedDepartureId);
+    return tour.departures.find((departure: Departure) => departure.id === selectedDepartureId);
   }, [tour, selectedDepartureId]);
+
+  const totalGuests = useMemo(() => guestCounts.adults + guestCounts.children, [guestCounts]);
 
   const estimatedTotal = useMemo(() => {
     if (!tour) return 0;
-    const basePrice = Number(tour.adultPrice) || 0;
-    return Math.max(1, guests) * basePrice;
-  }, [tour, guests]);
+    const adultPrice = Number(tour.adultPrice) || 0;
+    const childPrice = Number(tour.childPrice ?? adultPrice);
+    return guestCounts.adults * adultPrice + guestCounts.children * childPrice;
+  }, [tour, guestCounts]);
 
   const handleContactSubmit = (values: ContactFormValues) => {
     setContactInfo(values);
@@ -111,9 +172,13 @@ const BookingPage: React.FC = () => {
       const payload = {
         userId: user?.userId ?? 1,
         tourId: tour.id,
-          departureId: selectedDeparture.id,
-        seats: guests,
+        departureId: selectedDeparture.id,
+        seats: Math.max(1, totalGuests),
         totalAmount: estimatedTotal,
+        guestDetails: {
+          adults: guestCounts.adults,
+          children: guestCounts.children,
+        },
       };
 
       console.log('[BookingPage] Creating booking payload', payload);
@@ -183,10 +248,7 @@ const BookingPage: React.FC = () => {
               <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-card">
                 <CalendarDays className="h-4 w-4 text-brand-500" />
                 {selectedDeparture
-                  ? `${format(new Date(selectedDeparture.startDate), 'dd/MM/yyyy')} - ${format(
-                      new Date(selectedDeparture.endDate),
-                      'dd/MM/yyyy'
-                    )}`
+                  ? `${formatDate(selectedDeparture.startDate)} - ${formatDate(selectedDeparture.endDate)}`
                   : 'Chọn ngày khởi hành'}
               </span>
               <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-card">
@@ -210,50 +272,84 @@ const BookingPage: React.FC = () => {
                   </p>
                 </header>
 
-                <div className="space-y-4">
-                      <div className="space-y-2">
+                <div className="space-y-5">
+                  <section className="space-y-2">
                     <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">Ngày khởi hành</p>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {tour.departures?.length ? (
-                        tour.departures.map((departure) => {
+                    {tour.departures?.length ? (
+                      <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
+                        {tour.departures.map((departure: Departure) => {
                           const isSelected = departure.id === selectedDepartureId;
+                          const statusLabel = STATUS_LABELS[departure.status ?? ''] ?? 'Đang cập nhật';
+                          const statusStyle = STATUS_STYLES[departure.status ?? ''] ??
+                            'border border-gray-200 bg-gray-100 text-gray-500';
+                          const remainingInfo = (departure.totalSlots ?? 0) > 0
+                            ? `${departure.remainingSlots}/${departure.totalSlots} chỗ`
+                            : `${departure.remainingSlots} chỗ`;
+                          const isUnavailable =
+                            (departure.remainingSlots ?? 0) <= 0 ||
+                            departure.status === 'FULL' ||
+                            departure.status === 'DAKHOIHANH';
                           return (
                             <button
                               type="button"
                               key={departure.id}
-                              onClick={() => setSelectedDepartureId(departure.id)}
-                              className={`rounded-2xl border px-4 py-3 text-left text-sm transition hover:border-brand-300 hover:bg-brand-50 ${
-                                isSelected ? 'border-brand-400 bg-brand-50 text-brand-700' : 'border-gray-200 bg-gray-25'
-                              }`}
+                              onClick={() => {
+                                if (!isUnavailable) {
+                                  setSelectedDepartureId(departure.id);
+                                }
+                              }}
+                              disabled={isUnavailable}
+                              className={`w-full rounded-2xl border px-4 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 hover:border-brand-300 hover:bg-brand-50 ${
+                                isSelected
+                                  ? 'border-brand-400 bg-brand-50 text-brand-700 shadow-inner'
+                                  : 'border-gray-200 bg-white text-gray-700'
+                              } ${isUnavailable ? 'cursor-not-allowed opacity-60 hover:bg-white hover:border-gray-200' : ''}`}
                               aria-pressed={isSelected}
-                              aria-label={`Khởi hành ${format(new Date(departure.startDate), 'dd/MM/yyyy')} đến ${format(
-                                new Date(departure.endDate),
-                                'dd/MM/yyyy'
+                              aria-label={`Khởi hành ${formatDate(departure.startDate)} đến ${formatDate(
+                                departure.endDate
                               )}`}
                             >
-                              <span className="block font-semibold text-gray-900">
-                                {format(new Date(departure.startDate), 'dd/MM/yyyy')} →{' '}
-                                {format(new Date(departure.endDate), 'dd/MM/yyyy')}
-                              </span>
-                              <span className="mt-1 block text-xs text-gray-500">
-                                Còn lại {departure.remainingSlots}{' '}
-                                {(departure.totalSlots ?? 0) > 0 ? `/ ${(departure.totalSlots ?? 0)}` : 'chỗ'}
-                        </span>
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <p className="text-sm font-semibold text-gray-900">
+                                    {formatDate(departure.startDate)} → {formatDate(departure.endDate)}
+                                  </p>
+                                  <p className="mt-1 text-xs text-gray-500">Còn lại {remainingInfo}</p>
+                                  {typeof departure.price === 'number' && departure.price >= 0 && (
+                                    <p className="mt-1 text-xs font-semibold text-brand-600">
+                                      {CURRENCY_FORMATTER.format(departure.price)} / khách
+                                    </p>
+                                  )}
+                                </div>
+                                <span
+                                  className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-widest ${statusStyle}`}
+                                >
+                                  {statusLabel}
+                                </span>
+                              </div>
                             </button>
                           );
-                        })
-                      ) : (
-                        <p className="rounded-2xl border border-dashed border-gray-200 bg-gray-25 p-4 text-sm text-gray-500">
-                          Tour chưa có lịch khởi hành công khai.
-                          </p>
-                        )}
+                        })}
                       </div>
-                    </div>
+                    ) : (
+                      <p className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">
+                        Tour chưa có lịch khởi hành công khai.
+                      </p>
+                    )}
+                  </section>
 
-                    <div className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">Số khách</p>
-                    <GuestSelector value={guests} onChange={setGuests} />
-                    </div>
+                  <section className="space-y-3">
+                    <header className="flex items-center justify-between">
+                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">Số khách</p>
+                      <span className="text-xs font-medium text-gray-400">
+                        Giá người lớn: {CURRENCY_FORMATTER.format(Number(tour.adultPrice ?? 0))}
+                        {typeof tour.childPrice === 'number' && tour.childPrice >= 0 && (
+                          <> · Trẻ em: {CURRENCY_FORMATTER.format(Number(tour.childPrice))}</>
+                        )}
+                      </span>
+                    </header>
+                    <GuestSelector value={guestCounts} onChange={setGuestCounts} />
+                  </section>
 
                   <div className="grid gap-4 sm:grid-cols-2">
                       <div>
@@ -311,16 +407,7 @@ const BookingPage: React.FC = () => {
                       </div>
                     </div>
 
-                <div className="flex items-center justify-between border-t border-gray-100 pt-4 text-sm">
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Tổng tạm tính</p>
-                    <p className="text-xl font-semibold text-gray-900">
-                      {estimatedTotal.toLocaleString('vi-VN')} ₫
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Giá dành cho {guests} khách. Phí thanh toán MoMo được miễn.
-                    </p>
-                    </div>
+                <div className="flex items-center justify-end border-t border-gray-100 pt-4 text-sm">
                   <div className="flex gap-3">
                       <button
                         type="button"
@@ -331,10 +418,15 @@ const BookingPage: React.FC = () => {
                       </button>
                       <button
                         type="submit"
-                      disabled={!selectedDepartureId || !contactForm.formState.isValid}
-                      className="rounded-full bg-brand-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600 focus-visible:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled={
+                          !selectedDepartureId ||
+                          !contactForm.formState.isValid ||
+                          guestCounts.adults < 1 ||
+                          totalGuests < 1
+                        }
+                        className="rounded-full bg-brand-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600 focus-visible:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                      Tiếp tục thanh toán
+                        Tiếp tục thanh toán
                       </button>
                   </div>
                     </div>
@@ -366,31 +458,30 @@ const BookingPage: React.FC = () => {
                     <span>Ngày khởi hành</span>
                     <span className="font-medium text-gray-900">
                       {selectedDeparture
-                        ? `${format(new Date(selectedDeparture.startDate), 'dd/MM/yyyy')} - ${format(
-                            new Date(selectedDeparture.endDate),
-                            'dd/MM/yyyy'
-                          )}`
+                        ? `${formatDate(selectedDeparture.startDate)} - ${formatDate(selectedDeparture.endDate)}`
                         : 'Chưa chọn'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span>Số khách</span>
-                    <span className="font-medium text-gray-900">{guests}</span>
+                    <span className="font-medium text-gray-900">
+                      {totalGuests} (NL {guestCounts.adults} · TE {guestCounts.children})
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-base font-semibold text-gray-900">
                     <span>Tổng thanh toán</span>
-                    <span>{estimatedTotal.toLocaleString('vi-VN')} ₫</span>
+                    <span>{CURRENCY_FORMATTER.format(estimatedTotal)}</span>
                   </div>
                     </div>
 
                 <div className="space-y-3">
                     <MoMoPaymentButton
-                    amount={estimatedTotal}
-                    tourName={tour.tourName}
-                    onCreateBooking={handleCreateBooking}
-                    userId={user?.userId}
-                    onProcessingChange={setCreatingBooking}
-                      onError={(message) => setBookingError(message)}
+                      amount={estimatedTotal}
+                      tourName={tour.tourName}
+                      onCreateBooking={handleCreateBooking}
+                      userId={user?.userId}
+                      onProcessingChange={setCreatingBooking}
+                      onError={(message: string) => setBookingError(message)}
                     />
                   {bookingError && (
                     <p className="rounded-2xl border border-error/20 bg-error/5 px-4 py-3 text-sm text-error">
@@ -436,17 +527,27 @@ const BookingPage: React.FC = () => {
                   <span>Khởi hành</span>
                   <span className="font-medium text-gray-900">
                     {selectedDeparture
-                      ? format(new Date(selectedDeparture.startDate), 'dd/MM/yyyy')
+                      ? `${formatDate(selectedDeparture.startDate)} → ${formatDate(selectedDeparture.endDate)}`
                       : 'Chưa chọn'}
                   </span>
                       </div>
+                {selectedDeparture?.status && (
+                  <div className="flex items-center justify-between">
+                    <span>Tình trạng</span>
+                    <span className="font-medium text-gray-900">
+                      {STATUS_LABELS[selectedDeparture.status] ?? selectedDeparture.status}
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between">
                   <span>Số khách</span>
-                  <span className="font-medium text-gray-900">{guests}</span>
+                  <span className="font-medium text-gray-900">
+                    {totalGuests} (NL {guestCounts.adults} · TE {guestCounts.children})
+                  </span>
                     </div>
                 <div className="flex items-center justify-between text-base font-semibold text-gray-900">
                   <span>Tạm tính</span>
-                  <span>{estimatedTotal.toLocaleString('vi-VN')} ₫</span>
+                    <span>{CURRENCY_FORMATTER.format(estimatedTotal)}</span>
                     </div>
                 <p className="text-xs text-gray-500">
                   Miễn phí hủy trong 24h, hoàn tiền nhanh nếu thanh toán thất bại.

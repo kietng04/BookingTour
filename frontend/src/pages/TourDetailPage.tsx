@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Clock3, MapPin, ShieldCheck, Sparkles } from 'lucide-react';
 import TourGallery from '../components/tours/TourGallery';
 import TourInfoTabs from '../components/tours/TourInfoTabs';
 import BookingSidebar from '../components/tours/BookingSidebar';
-import OperatorCard from '../components/tours/OperatorCard';
 import ReviewList from '../components/tours/ReviewList';
 import { Tour } from '../data/tours';
 import { toursAPI } from '../services/api';
@@ -19,13 +18,6 @@ interface DepartureSummary {
   totalSlots: number;
   status: string;
 }
-
-const DEPARTURE_STATUS_LABELS: Record<string, string> = {
-  CONCHO: 'Còn chỗ',
-  SAPFULL: 'Sắp đầy',
-  FULL: 'Đã đầy',
-  DAKHOIHANH: 'Đã khởi hành',
-};
 
 const mapDepartures = (items: any[]): DepartureSummary[] =>
   Array.isArray(items)
@@ -46,19 +38,6 @@ const TourDetailPage: React.FC = () => {
   const [departures, setDepartures] = useState<DepartureSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const formatDate = useCallback((value?: string) => {
-    if (!value) return 'Đang cập nhật';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return 'Đang cập nhật';
-    }
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -118,12 +97,6 @@ const TourDetailPage: React.FC = () => {
       cancelled = true;
     };
   }, [slug]);
-
-  const reviewSummary = useMemo(() => {
-    if (!tour) return '';
-    const totalReviews = tour.reviewCount ?? tour.reviews?.length ?? 0;
-    return totalReviews > 0 ? `${totalReviews} đánh giá từ du khách` : '';
-  }, [tour]);
 
   if (isLoading) {
     return (
@@ -188,11 +161,6 @@ const TourDetailPage: React.FC = () => {
               <Clock3 className="h-4 w-4 text-brand-500" aria-hidden="true" />
               {tour.duration}
             </span>
-            {reviewSummary && (
-              <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-semibold text-gray-700 shadow-inner">
-                {reviewSummary}
-              </span>
-            )}
           </div>
           <div className="flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-widest text-gray-500">
             {tour.tags.map((tag) => (
@@ -222,36 +190,6 @@ const TourDetailPage: React.FC = () => {
                 ))}
               </ul>
             </section>
-
-            {departures.length > 0 && (
-              <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-card">
-                <h2 className="text-lg font-semibold text-gray-900">Lịch khởi hành sắp tới</h2>
-                <ul className="mt-4 space-y-3">
-                  {departures.map((departure) => (
-                    <li
-                      key={departure.id}
-                      className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-700"
-                    >
-                      <div>
-                        <p className="font-semibold text-gray-900">
-                          {formatDate(departure.startDate)} → {formatDate(departure.endDate)}
-                        </p>
-                        <p className="text-xs uppercase tracking-widest text-gray-500">
-                          {DEPARTURE_STATUS_LABELS[departure.status] ?? departure.status}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-semibold text-gray-900">
-                          Còn {departure.remainingSlots}/{departure.totalSlots} chỗ
-                        </p>
-                        <p className="text-xs text-gray-500">Giữ chỗ miễn phí trong 24h</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
             <TourInfoTabs
               defaultTabId="overview"
               tabs={[
@@ -338,8 +276,6 @@ const TourDetailPage: React.FC = () => {
               ]}
             />
 
-            <OperatorCard operator={tour.operator} />
-
             <section className="space-y-6 rounded-3xl border border-gray-100 bg-white p-6 shadow-card lg:p-8">
               <h2 className="text-lg font-semibold text-gray-900">Chính sách hủy</h2>
               <p className="text-sm text-gray-600">{tour.cancellationPolicy}</p>
@@ -352,8 +288,11 @@ const TourDetailPage: React.FC = () => {
 
           <BookingSidebar
             priceFrom={tour.priceFrom}
+            childPrice={tour.childPrice}
             duration={tour.duration}
-            reviewSummary={reviewSummary}
+            departurePoint={tour.departurePoint}
+            destination={tour.destination}
+            departures={departures}
             onBook={() => navigate(`/booking/${tour.slug}`)}
           />
         </div>
