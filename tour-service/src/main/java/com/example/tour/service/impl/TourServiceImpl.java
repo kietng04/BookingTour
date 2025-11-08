@@ -29,7 +29,14 @@ public class TourServiceImpl implements TourService {
 
 
     @Override
-    public Page<Tour> listTours(Integer regionId, Integer provinceId, String status, String keyword, Pageable pageable) {
+    public Page<Tour> listTours(
+            Integer regionId,
+            Integer provinceId,
+            String status,
+            String keyword,
+            java.time.LocalDate startDate,
+            java.time.LocalDate endDate,
+            Pageable pageable) {
         Tour.TourStatus tourStatus = null;
         if (status != null && !status.isBlank()) {
             try {
@@ -41,6 +48,10 @@ public class TourServiceImpl implements TourService {
             }
         }
 
+        if (startDate != null && endDate != null && endDate.isBefore(startDate)) {
+            throw new IllegalArgumentException("Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu");
+        }
+
         String searchKeyword = null;
         if (keyword != null && !keyword.trim().isEmpty()) {
             searchKeyword = keyword.trim().toLowerCase()
@@ -48,7 +59,21 @@ public class TourServiceImpl implements TourService {
                     .replaceAll("\\s+", " ");
         }
 
-        return tourRepository.findByFilters(regionId, provinceId, tourStatus, searchKeyword, pageable);
+    boolean applyStartDateFilter = startDate != null;
+    boolean applyEndDateFilter = endDate != null;
+    boolean applyDateFilter = applyStartDateFilter || applyEndDateFilter;
+
+        return tourRepository.findByFilters(
+                regionId,
+                provinceId,
+                tourStatus,
+                searchKeyword,
+        applyDateFilter,
+        applyStartDateFilter,
+        applyEndDateFilter,
+                startDate,
+                endDate,
+                pageable);
     }
 
 

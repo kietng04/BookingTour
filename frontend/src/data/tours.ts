@@ -26,6 +26,7 @@ export interface Tour {
   duration: string;
   groupSize: string;
   priceFrom: number;
+  childPrice?: number;
   reviewCount?: number;
   heroImage: string;
   heroImageAlt: string;
@@ -37,6 +38,7 @@ export interface Tour {
   included: string[];
   excluded: string[];
   cancellationPolicy: string;
+  departurePoint?: string;
   operator: {
     name: string;
     avatar: string;

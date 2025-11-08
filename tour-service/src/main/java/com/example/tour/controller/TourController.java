@@ -25,12 +25,18 @@ public class TourController {
             @RequestParam(required = false) Integer provinceId,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false)
+            @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+            java.time.LocalDate startDate,
+            @RequestParam(required = false)
+            @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+            java.time.LocalDate endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         Pageable pageable = PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
 
-        Page<Tour> tours = tourService.listTours(regionId, provinceId, status, keyword, pageable);
+        Page<Tour> tours = tourService.listTours(regionId, provinceId, status, keyword, startDate, endDate, pageable);
         return ResponseEntity.ok(tours);
     }
 
