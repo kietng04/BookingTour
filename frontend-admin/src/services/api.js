@@ -1,17 +1,44 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+// Dùng đường dẫn tương đối để trình duyệt gửi same-origin tới Vite dev server
+// và proxy qua gateway → tránh CORS khi chạy MCP Playwright
+const API_BASE_URL = '/api';
 
-async function fetchAPI(endpoint, options = {}) {
+// Get admin token from storage
+const getAdminToken = () => {
+  return localStorage.getItem('bt-admin-token');
+};
+
+const getAdminHeaders = () => {
+  const token = getAdminToken();
+  return token ? {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  } : {
+    'Content-Type': 'application/json',
+  };
+};
+
+async function fetchAdminAPI(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
   const config = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers: getAdminHeaders(),
     ...options,
   };
 
   try {
     const response = await fetch(url, config);
+
+    if (response.status === 401) {
+      // Unauthorized - clear token and redirect to login
+      console.warn('Unauthorized access, redirecting to login...');
+      localStorage.removeItem('bt-admin-token');
+      window.location.href = '/auth/login';
+      return;
+    }
+
+    if (response.status === 403) {
+      // Forbidden - insufficient permissions
+      throw new Error('Insufficient permissions for this action');
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Request failed' }));
@@ -20,9 +47,14 @@ async function fetchAPI(endpoint, options = {}) {
 
     return await response.json();
   } catch (error) {
-    console.error(`API Error (${endpoint}):`, error);
+    console.error(`Admin API Error (${endpoint}):`, error);
     throw error;
   }
+}
+
+// Legacy function for backward compatibility
+async function fetchAPI(endpoint, options = {}) {
+  return fetchAdminAPI(endpoint, options);
 }
 
 export const toursAPI = {
@@ -134,9 +166,61 @@ export const usersAPI = {
   getById: (userId) => fetchAPI(`/users/${userId}`),
 };
 
+// Tour schedules CRUD
+export const schedulesAPI = {
+  getAll: (tourId) => fetchAPI(`/tours/${tourId}/schedules`),
+  create: (tourId, data) => fetchAPI(`/tours/${tourId}/schedules`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  update: (tourId, scheduleId, data) => fetchAPI(`/tours/${tourId}/schedules/${scheduleId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  delete: (tourId, scheduleId) => fetchAPI(`/tours/${tourId}/schedules/${scheduleId}`, {
+    method: 'DELETE',
+  }),
+};
+
+// Tour images CRUD
+export const imagesAPI = {
+  getAll: (tourId) => fetchAPI(`/tours/${tourId}/images`),
+  create: (tourId, data) => fetchAPI(`/tours/${tourId}/images`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  update: (tourId, imageId, data) => fetchAPI(`/tours/${tourId}/images/${imageId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  delete: (tourId, imageId) => fetchAPI(`/tours/${tourId}/images/${imageId}`, {
+    method: 'DELETE',
+  }),
+};
+
+// Tour discounts CRUD
+export const discountsAPI = {
+  getAll: (tourId) => fetchAPI(`/tours/${tourId}/discounts`),
+  create: (tourId, data) => fetchAPI(`/tours/${tourId}/discounts`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  update: (tourId, discountId, data) => fetchAPI(`/tours/${tourId}/discounts/${discountId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  delete: (tourId, discountId) => fetchAPI(`/tours/${tourId}/discounts/${discountId}`, {
+    method: 'DELETE',
+  }),
+};
+
 export default {
   tours: toursAPI,
   departures: departuresAPI,
   bookings: bookingsAPI,
   users: usersAPI,
+  schedules: schedulesAPI,
+  images: imagesAPI,
+  discounts: discountsAPI,
+  fetchAdminAPI, // Export the new auth-aware function
 };

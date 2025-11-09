@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { forwardRef } from 'react';
 import clsx from 'clsx';
 
-const Select = forwardRef(({ label, options, className, error, ...props }, ref) => (
+const Select = forwardRef(({ label, options = [], className, error, children, ...props }, ref) => (
   <label className={clsx('flex flex-col gap-2 text-sm text-slate-600', className)}>
     {label && <span className="font-medium text-slate-700">{label}</span>}
     <select
@@ -13,7 +13,8 @@ const Select = forwardRef(({ label, options, className, error, ...props }, ref) 
       )}
       {...props}
     >
-      {options.map((option) => (
+      {children && children}
+      {!children && options.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}
         </option>
@@ -30,9 +31,10 @@ Select.propTypes = {
   options: PropTypes.arrayOf(PropTypes.shape({
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     label: PropTypes.string.isRequired
-  })).isRequired,
+  })),
   className: PropTypes.string,
-  error: PropTypes.string
+  error: PropTypes.string,
+  children: PropTypes.node
 };
 
 export default Select;
