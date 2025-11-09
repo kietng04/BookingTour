@@ -31,7 +31,7 @@ const defaultValues = {
   highlights: [{ value: '' }]
 };
 
-const TourForm = ({ onSubmit, initialValues, mode }) => {
+const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
   const { register, control, handleSubmit, formState: { errors } } = useForm({
     defaultValues: { ...defaultValues, ...initialValues }
   });
@@ -56,12 +56,14 @@ const TourForm = ({ onSubmit, initialValues, mode }) => {
             placeholder="Ex: Aurora Escape in Iceland"
             {...register('name', { required: 'Name is required' })}
             error={errors.name?.message}
+            disabled={submitting}
           />
           <Input
             label="Slug"
             placeholder="aurora-escape"
             {...register('slug', { required: 'Slug is required' })}
             error={errors.slug?.message}
+            disabled={submitting}
           />
           <Select
             label="Status"
@@ -75,6 +77,7 @@ const TourForm = ({ onSubmit, initialValues, mode }) => {
               min={0}
               {...register('price', { required: 'Price is required' })}
               error={errors.price?.message}
+              disabled={submitting}
             />
             <Input
               label="Duration (days)"
@@ -82,6 +85,7 @@ const TourForm = ({ onSubmit, initialValues, mode }) => {
               min={1}
               {...register('duration', { required: 'Duration is required' })}
               error={errors.duration?.message}
+              disabled={submitting}
             />
           </div>
           <div className="grid gap-4 md:grid-cols-2">
@@ -89,8 +93,8 @@ const TourForm = ({ onSubmit, initialValues, mode }) => {
               label="Capacity"
               type="number"
               min={1}
-              {...register('seats', { required: 'Capacity is required' })}
-              error={errors.seats?.message}
+              {...register('seats')}
+              disabled={submitting}
             />
             <Select
               label="Difficulty"
@@ -102,6 +106,7 @@ const TourForm = ({ onSubmit, initialValues, mode }) => {
             label="Hero image URL"
             placeholder="https://..."
             {...register('heroImage')}
+            disabled={submitting}
           />
         </Card>
 
@@ -114,13 +119,15 @@ const TourForm = ({ onSubmit, initialValues, mode }) => {
                 <Input
                   className="flex-1"
                   placeholder="Describe premium experience"
-                  {...register(`highlights.${index}.value`, { required: true })}
+                  {...register(`highlights.${index}.value`)}
+                  disabled={submitting}
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   onClick={() => removeHighlight(index)}
+                  disabled={submitting}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -130,6 +137,7 @@ const TourForm = ({ onSubmit, initialValues, mode }) => {
               type="button"
               variant="secondary"
               onClick={() => appendHighlight({ value: '' })}
+              disabled={submitting}
             >
               <Plus className="h-4 w-4" />
               Add highlight
@@ -147,13 +155,15 @@ const TourForm = ({ onSubmit, initialValues, mode }) => {
               <div key={field.id} className="flex items-center gap-3">
                 <Input
                   placeholder="Luxury"
-                  {...register(`tags.${index}.value`, { required: true })}
+                  {...register(`tags.${index}.value`)}
+                  disabled={submitting}
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   onClick={() => removeTag(index)}
+                  disabled={submitting}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -163,6 +173,7 @@ const TourForm = ({ onSubmit, initialValues, mode }) => {
               type="button"
               variant="secondary"
               onClick={() => appendTag({ value: '' })}
+              disabled={submitting}
             >
               <Plus className="h-4 w-4" />
               Add tag
@@ -173,7 +184,7 @@ const TourForm = ({ onSubmit, initialValues, mode }) => {
         <Card className="space-y-4">
           <h3 className="text-lg font-semibold text-slate-900">Save tour</h3>
           <p className="text-sm text-slate-500">Submit triggers backend `POST/PUT /tours`. Draft status keeps it hidden from customers.</p>
-          <Button type="submit" size="lg" className="w-full">
+          <Button type="submit" size="lg" className="w-full" disabled={submitting}>
             {mode === 'edit' ? 'Update tour' : 'Create tour'}
           </Button>
         </Card>
@@ -185,7 +196,8 @@ const TourForm = ({ onSubmit, initialValues, mode }) => {
 TourForm.propTypes = {
   onSubmit: PropTypes.func,
   initialValues: PropTypes.object,
-  mode: PropTypes.oneOf(['create', 'edit'])
+  mode: PropTypes.oneOf(['create', 'edit']),
+  submitting: PropTypes.bool
 };
 
 export default TourForm;

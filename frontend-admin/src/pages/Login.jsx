@@ -1,13 +1,18 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
+import { useAdminAuth } from '../context/AdminAuthContext.jsx';
 import Button from '../components/common/Button.jsx';
 import Input from '../components/common/Input.jsx';
+import LoginWithGoogle from '../components/auth/LoginWithGoogle.jsx';
+import LoginWithGithub from '../components/auth/LoginWithGithub.jsx';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
+// Use relative path to hit Vite proxy and avoid CORS
+const API_BASE_URL = '';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login, isAuthenticated, refresh } = useAdminAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -15,11 +20,10 @@ const Login = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('bt-admin-token');
-    if (storedToken) {
+    if (isAuthenticated) {
       navigate('/', { replace: true });
     }
-  }, [navigate]);
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = useCallback(
     async (event) => {
@@ -33,10 +37,8 @@ const Login = () => {
 
       setSubmitting(true);
       try {
-        const response = await fetch(`${API_BASE_URL}/api/users/auth/login`, {
+        const response = await fetch(`/api/users/auth/login`, {
           method: 'POST',
-          mode: 'cors',
-          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json'
@@ -54,24 +56,44 @@ const Login = () => {
           throw new Error(message);
         }
 
-        const { token, username, email: contactEmail, fullName, avatar } = payload;
+        const { token, username, email: contactEmail, fullName, avatar, role = 'ADMIN', userId } = payload;
 
+        // Store admin data using AdminAuthContext pattern
         localStorage.setItem('bt-admin-token', token);
-        localStorage.setItem(
-          'bt-admin-profile',
-          JSON.stringify({
-            username,
-            email: contactEmail,
-            fullName,
-            avatar
-          })
-        );
+        localStorage.setItem('bt-admin-username', username || '');
+        localStorage.setItem('bt-admin-email', contactEmail || '');
+        localStorage.setItem('bt-admin-fullName', fullName || '');
+        localStorage.setItem('bt-admin-avatar', avatar || '');
+        localStorage.setItem('bt-admin-role', role);
+        localStorage.setItem('bt-admin-userId', userId?.toString() || '');
+        localStorage.setItem('bt-admin-lastActivity', Date.now().toString());
+
+        // Set default admin permissions
+        const defaultPermissions = [
+          'TOUR_READ',
+          'TOUR_CREATE',
+          'TOUR_UPDATE',
+          'TOUR_DELETE',
+          'BOOKING_READ',
+          'BOOKING_UPDATE',
+          'BOOKING_CANCEL',
+          'USER_READ',
+          'USER_UPDATE',
+          'DASHBOARD_READ'
+        ];
+        localStorage.setItem('bt-admin-permissions', JSON.stringify(defaultPermissions));
 
         if (!rememberMe) {
           sessionStorage.setItem('bt-admin-session-token', token);
         } else {
           sessionStorage.removeItem('bt-admin-session-token');
         }
+
+        // Trigger auth state refresh
+        refresh();
+
+        // Dispatch auth changed event
+        window.dispatchEvent(new Event('admin-auth-changed'));
 
         navigate('/', { replace: true });
       } catch (err) {
@@ -126,6 +148,24 @@ const Login = () => {
             Ghi nhớ đăng nhập
           </label>
           {error && <p className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-2 text-xs font-medium text-danger">{error}</p>}
+
+          {/* OAuth2 Login Options */}
+          <div className="mt-6 space-y-3">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-600" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-slate-800 px-2 text-slate-300">Hoặc đăng nhập với</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <LoginWithGoogle />
+              <LoginWithGithub />
+            </div>
+          </div>
+
           <Button type="submit" size="lg" className="w-full" disabled={submitting}>
             {submitting ? 'Đang xử lý...' : 'Đăng nhập'}
           </Button>
