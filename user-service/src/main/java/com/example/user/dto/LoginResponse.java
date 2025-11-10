@@ -5,17 +5,19 @@ public class LoginResponse {
     private String username;
     private String email;
     private String fullName;
+    private String phoneNumber;
     private String avatar;
     private String message;
     private Long userId;
 
     public LoginResponse() {}
 
-    public LoginResponse(String token, String username, String email, String fullName, String avatar, String message, Long userId) {
+    public LoginResponse(String token, String username, String email, String fullName, String phoneNumber, String avatar, String message, Long userId) {
         this.token = token;
         this.username = username;
         this.email = email;
         this.fullName = fullName;
+        this.phoneNumber = phoneNumber;
         this.avatar = avatar;
         this.message = message;
         this.userId = userId;
@@ -51,6 +53,14 @@ public class LoginResponse {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public String getAvatar() {

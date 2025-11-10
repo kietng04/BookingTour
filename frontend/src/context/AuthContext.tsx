@@ -4,6 +4,7 @@ type AuthProfile = {
   username?: string | null;
   email?: string | null;
   fullName?: string | null;
+  phoneNumber?: string | null;
   avatar?: string | null;
   provider?: string | null;
   userId?: number | null;
@@ -30,7 +31,7 @@ const defaultContext: AuthContextValue = {
   logout: () => {}
 };
 
-const STORAGE_KEYS = ['authToken', 'username', 'email', 'fullName', 'avatar', 'authProvider', 'userId'];
+const STORAGE_KEYS = ['authToken', 'username', 'email', 'fullName', 'phoneNumber', 'avatar', 'authProvider', 'userId'];
 
 const normalizeToken = (rawToken: string | null): string | null => {
   if (!rawToken) {
@@ -60,6 +61,7 @@ const readStateFromStorage = (): AuthState => {
     username: window.localStorage.getItem('username'),
     email: window.localStorage.getItem('email'),
     fullName: window.localStorage.getItem('fullName'),
+    phoneNumber: window.localStorage.getItem('phoneNumber'),
     avatar: window.localStorage.getItem('avatar'),
     provider: window.localStorage.getItem('authProvider')
   };

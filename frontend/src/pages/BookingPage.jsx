@@ -1,41 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { format } from 'date-fns';
-import GuestSelector, { GuestDistribution } from '../components/forms/GuestSelector';
+import { format, isBefore, startOfDay } from 'date-fns';
+import GuestSelector from '../components/forms/GuestSelector';
 import MoMoPaymentButton from '../components/payment/MoMoPaymentButton';
 import { toursAPI, bookingsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Loader2, CalendarDays, MapPin } from 'lucide-react';
-
-interface Departure {
-  id: number;
-  startDate: string;
-  endDate: string;
-  remainingSlots: number;
-  totalSlots?: number;
-  status?: string;
-  price?: number;
-}
-
-interface TourResponse {
-  id: number;
-  tourName: string;
-  description: string;
-  mainDestination: string;
-  adultPrice: number;
-  childPrice?: number;
-  images: Array<{ imageUrl: string; isPrimary: boolean }>;
-  departures: Departure[];
-}
-
-interface ContactFormValues {
-  fullName: string;
-  email: string;
-  phone: string;
-}
-
-type Step = 1 | 2;
 
 const CURRENCY_FORMATTER = new Intl.NumberFormat('vi-VN', {
   style: 'currency',
@@ -43,21 +14,21 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat('vi-VN', {
   maximumFractionDigits: 0,
 });
 
-const STATUS_LABELS: Record<string, string> = {
+const STATUS_LABELS = {
   CONCHO: 'Còn chỗ',
   SAPFULL: 'Sắp đầy',
   FULL: 'Đã đầy',
   DAKHOIHANH: 'Đã khởi hành',
 };
 
-const STATUS_STYLES: Record<string, string> = {
+const STATUS_STYLES = {
   CONCHO: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
   SAPFULL: 'bg-amber-50 text-amber-600 border border-amber-100',
   FULL: 'bg-gray-100 text-gray-500 border border-gray-200',
   DAKHOIHANH: 'bg-gray-100 text-gray-500 border border-gray-200',
 };
 
-const formatDate = (value?: string) => {
+const formatDate = (value) => {
   if (!value) {
     return 'Đang cập nhật';
   }
@@ -68,22 +39,48 @@ const formatDate = (value?: string) => {
   return format(date, 'dd/MM/yyyy');
 };
 
-const BookingPage: React.FC = () => {
+const getRemainingSeats = (departure) => {
+  if (!departure) return undefined;
+  const candidates = [
+    departure.remainingSlots,
+    departure.availableSeats,
+    departure.remainingSeats,
+    departure.seatsAvailable,
+    departure.seatAvailable,
+    departure.remaining,
+  ];
+  return candidates.find((value) => typeof value === 'number' && !Number.isNaN(value)) ?? undefined;
+};
+
+const getTotalSeats = (departure) => {
+  if (!departure) return undefined;
+  const candidates = [
+    departure.totalSlots,
+    departure.totalSeats,
+    departure.capacity,
+    departure.seatCapacity,
+  ];
+  return candidates.find((value) => typeof value === 'number' && !Number.isNaN(value)) ?? undefined;
+};
+
+const BookingPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { token, user } = useAuth();
 
-  const [tour, setTour] = useState<TourResponse | null>(null);
+  const [tour, setTour] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [step, setStep] = useState<Step>(1);
-  const [guestCounts, setGuestCounts] = useState<GuestDistribution>({ adults: 2, children: 0 });
-  const [selectedDepartureId, setSelectedDepartureId] = useState<number | null>(null);
-  const [contactInfo, setContactInfo] = useState<ContactFormValues | null>(null);
+  const [error, setError] = useState(null);
+  const [step, setStep] = useState(1);
+  const [guestCounts, setGuestCounts] = useState({ adults: 2, children: 0 });
+  const [selectedDepartureId, setSelectedDepartureId] = useState(null);
+  const [contactInfo, setContactInfo] = useState(null);
   const [creatingBooking, setCreatingBooking] = useState(false);
-  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [bookingError, setBookingError] = useState(null);
 
-  const contactForm = useForm<ContactFormValues>({
+  const today = useMemo(() => startOfDay(new Date()), []);
+
+  const contactForm = useForm({
     mode: 'onChange',
     defaultValues: {
       fullName: user?.fullName ?? '',
@@ -104,16 +101,16 @@ const BookingPage: React.FC = () => {
         setLoading(true);
         const response = await toursAPI.getBySlug(slug);
 
-        const normalizedTour: TourResponse = {
-          ...(response as TourResponse),
-          departures: Array.isArray(response?.departures) ? (response.departures as Departure[]) : [],
+        const normalizedTour = {
+          ...response,
+          departures: Array.isArray(response?.departures) ? response.departures : [],
         };
 
         if (!normalizedTour.departures.length && response?.id) {
           try {
             const fallbackDepartures = await toursAPI.getDepartures(response.id);
             normalizedTour.departures = Array.isArray(fallbackDepartures)
-              ? (fallbackDepartures as Departure[])
+              ? fallbackDepartures
               : [];
           } catch (departureError) {
             console.warn('Không thể tải lịch khởi hành bổ sung:', departureError);
@@ -124,6 +121,10 @@ const BookingPage: React.FC = () => {
         if (normalizedTour.departures.length) {
           const firstAvailable = normalizedTour.departures.find((departure) => {
             if (departure.status === 'FULL' || departure.status === 'DAKHOIHANH') {
+              return false;
+            }
+            const departureEndDate = departure.endDate ? startOfDay(new Date(departure.endDate)) : null;
+            if (departureEndDate && isBefore(departureEndDate, today)) {
               return false;
             }
             return (departure.remainingSlots ?? 0) > 0;
@@ -142,12 +143,64 @@ const BookingPage: React.FC = () => {
     fetchTour();
   }, [slug]);
 
-  const selectedDeparture: Departure | undefined = useMemo(() => {
+  const selectedDeparture = useMemo(() => {
     if (!tour || selectedDepartureId == null) return undefined;
-    return tour.departures.find((departure: Departure) => departure.id === selectedDepartureId);
+    return tour.departures.find((departure) => departure.id === selectedDepartureId);
   }, [tour, selectedDepartureId]);
 
   const totalGuests = useMemo(() => guestCounts.adults + guestCounts.children, [guestCounts]);
+
+  const seatsRemaining = useMemo(() => {
+    const remaining = getRemainingSeats(selectedDeparture);
+    console.log('BookingPage - seatsRemaining:', {
+      selectedDeparture,
+      remaining,
+      remainingSlots: selectedDeparture?.remainingSlots,
+      availableSeats: selectedDeparture?.availableSeats
+    });
+    return remaining;
+  }, [selectedDeparture]);
+
+  const maxSelectableGuests = useMemo(() => {
+    console.log('BookingPage - maxSelectableGuests calculation:', {
+      seatsRemaining,
+      result: typeof seatsRemaining === 'number' ? Math.max(0, seatsRemaining) : undefined
+    });
+    if (typeof seatsRemaining === 'number') {
+      return Math.max(0, seatsRemaining);
+    }
+    return undefined;
+  }, [seatsRemaining]);
+
+  useEffect(() => {
+    if (typeof maxSelectableGuests !== 'number') {
+      return;
+    }
+
+    if (maxSelectableGuests <= 0) {
+      setGuestCounts(() => {
+        // Nếu không còn chỗ, reset về 1 adult
+        return { adults: 1, children: 0 };
+      });
+      return;
+    }
+
+    if (totalGuests <= maxSelectableGuests) {
+      return;
+    }
+
+    setGuestCounts((prev) => {
+      const cappedAdults = Math.max(1, Math.min(prev.adults, maxSelectableGuests));
+      const cappedChildren = Math.max(0, Math.min(prev.children, maxSelectableGuests - cappedAdults));
+      if (cappedAdults === prev.adults && cappedChildren === prev.children) {
+        return prev;
+      }
+      return {
+        adults: cappedAdults,
+        children: cappedChildren,
+      };
+    });
+  }, [maxSelectableGuests, totalGuests]);
 
   const estimatedTotal = useMemo(() => {
     if (!tour) return 0;
@@ -156,7 +209,14 @@ const BookingPage: React.FC = () => {
     return guestCounts.adults * adultPrice + guestCounts.children * childPrice;
   }, [tour, guestCounts]);
 
-  const handleContactSubmit = (values: ContactFormValues) => {
+  const exceedsAvailability = useMemo(() => {
+    if (!selectedDeparture || typeof selectedDeparture.remainingSlots !== 'number') {
+      return false;
+    }
+    return totalGuests > selectedDeparture.remainingSlots;
+  }, [selectedDeparture, totalGuests]);
+
+  const handleContactSubmit = (values) => {
     setContactInfo(values);
     setStep(2);
   };
@@ -166,6 +226,16 @@ const BookingPage: React.FC = () => {
       throw new Error('Thiếu thông tin tour hoặc ngày khởi hành.');
     }
 
+    const seatsRequested = Math.max(1, totalGuests);
+    if (
+      typeof selectedDeparture.remainingSlots === 'number' &&
+      seatsRequested > selectedDeparture.remainingSlots
+    ) {
+      const message = 'Số khách vượt quá số chỗ còn lại cho lịch khởi hành này.';
+      setBookingError(message);
+      throw new Error(message);
+    }
+
     setBookingError(null);
     setCreatingBooking(true);
     try {
@@ -173,7 +243,7 @@ const BookingPage: React.FC = () => {
         userId: user?.userId ?? 1,
         tourId: tour.id,
         departureId: selectedDeparture.id,
-        seats: Math.max(1, totalGuests),
+        seats: seatsRequested,
         totalAmount: estimatedTotal,
         guestDetails: {
           adults: guestCounts.adults,
@@ -277,18 +347,27 @@ const BookingPage: React.FC = () => {
                     <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">Ngày khởi hành</p>
                     {tour.departures?.length ? (
                       <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
-                        {tour.departures.map((departure: Departure) => {
+                        {tour.departures.map((departure) => {
                           const isSelected = departure.id === selectedDepartureId;
-                          const statusLabel = STATUS_LABELS[departure.status ?? ''] ?? 'Đang cập nhật';
-                          const statusStyle = STATUS_STYLES[departure.status ?? ''] ??
-                            'border border-gray-200 bg-gray-100 text-gray-500';
-                          const remainingInfo = (departure.totalSlots ?? 0) > 0
-                            ? `${departure.remainingSlots}/${departure.totalSlots} chỗ`
-                            : `${departure.remainingSlots} chỗ`;
+                          const endDateValue = departure.endDate ? startOfDay(new Date(departure.endDate)) : null;
+                          const isPastDeparture = endDateValue ? isBefore(endDateValue, today) : false;
+                          const rawStatus = departure.status ?? '';
+                          const normalizedStatus = isPastDeparture && rawStatus !== 'DAKHOIHANH' ? 'DAKHOIHANH' : rawStatus;
+                          const statusLabel = STATUS_LABELS[normalizedStatus] ?? 'Đang cập nhật';
+                          const statusStyle =
+                            STATUS_STYLES[normalizedStatus] ?? 'border border-gray-200 bg-gray-100 text-gray-500';
+                          const departureRemaining = getRemainingSeats(departure);
+                          const departureTotal = getTotalSeats(departure);
+                          const remainingInfo =
+                            typeof departureTotal === 'number'
+                              ? `${departureRemaining ?? 0}/${departureTotal} chỗ`
+                              : typeof departureRemaining === 'number'
+                                ? `${departureRemaining} chỗ`
+                                : 'Đang cập nhật';
                           const isUnavailable =
-                            (departure.remainingSlots ?? 0) <= 0 ||
-                            departure.status === 'FULL' ||
-                            departure.status === 'DAKHOIHANH';
+                            (departureRemaining ?? 0) <= 0 ||
+                            normalizedStatus === 'FULL' ||
+                            normalizedStatus === 'DAKHOIHANH';
                           return (
                             <button
                               type="button"
@@ -320,6 +399,11 @@ const BookingPage: React.FC = () => {
                                       {CURRENCY_FORMATTER.format(departure.price)} / khách
                                     </p>
                                   )}
+                                  {isPastDeparture && (
+                                    <p className="mt-1 text-xs font-medium text-gray-500">
+                                      Lịch khởi hành này đã kết thúc.
+                                    </p>
+                                  )}
                                 </div>
                                 <span
                                   className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-widest ${statusStyle}`}
@@ -348,7 +432,25 @@ const BookingPage: React.FC = () => {
                         )}
                       </span>
                     </header>
-                    <GuestSelector value={guestCounts} onChange={setGuestCounts} />
+                    <GuestSelector
+                      value={guestCounts}
+                      onChange={setGuestCounts}
+                      maxTotal={typeof maxSelectableGuests === 'number' && maxSelectableGuests > 0 ? maxSelectableGuests : undefined}
+                    />
+                    {selectedDeparture && (typeof seatsRemaining === 'number' || typeof getTotalSeats(selectedDeparture) === 'number') && (
+                      <p className="text-xs text-gray-500">
+                        {typeof seatsRemaining === 'number' ? `Còn tối đa ${seatsRemaining} chỗ` : 'Số chỗ đang cập nhật'}
+                        {typeof seatsRemaining === 'number' && typeof getTotalSeats(selectedDeparture) === 'number'
+                          ? ` (còn ${seatsRemaining}/${getTotalSeats(selectedDeparture)} chỗ)`
+                          : ''}
+                        .
+                      </p>
+                    )}
+                    {exceedsAvailability && (
+                      <p className="text-xs font-semibold text-error">
+                        Số khách bạn chọn vượt quá số chỗ còn lại.
+                      </p>
+                    )}
                   </section>
 
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -395,7 +497,14 @@ const BookingPage: React.FC = () => {
                         </label>
                           <input
                             type="tel"
-                      {...contactForm.register('phone', { required: 'Vui lòng nhập số điện thoại.' })}
+                      {...contactForm.register('phone', {
+                        required: 'Vui lòng nhập số điện thoại.',
+                        setValueAs: (value) => (typeof value === 'string' ? value.replace(/\s+/g, '') : value),
+                        pattern: {
+                          value: /^(?:\+?84|0)(?:\d{9,10})$/,
+                          message: 'Số điện thoại không hợp lệ. Vui lòng sử dụng định dạng Việt Nam.',
+                        },
+                      })}
                       className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-900 focus:border-brand-300"
                       placeholder="(+84) 123 456 789"
                     />
@@ -422,7 +531,9 @@ const BookingPage: React.FC = () => {
                           !selectedDepartureId ||
                           !contactForm.formState.isValid ||
                           guestCounts.adults < 1 ||
-                          totalGuests < 1
+                          totalGuests < 1 ||
+                          exceedsAvailability ||
+                          (selectedDeparture && maxSelectableGuests <= 0)
                         }
                         className="rounded-full bg-brand-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600 focus-visible:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
                       >
@@ -481,7 +592,7 @@ const BookingPage: React.FC = () => {
                       onCreateBooking={handleCreateBooking}
                       userId={user?.userId}
                       onProcessingChange={setCreatingBooking}
-                      onError={(message: string) => setBookingError(message)}
+                      onError={(message) => setBookingError(message)}
                     />
                   {bookingError && (
                     <p className="rounded-2xl border border-error/20 bg-error/5 px-4 py-3 text-sm text-error">

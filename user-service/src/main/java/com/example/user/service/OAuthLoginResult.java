@@ -5,6 +5,7 @@ public class OAuthLoginResult {
     private final String username;
     private final String email;
     private final String fullName;
+    private final String phoneNumber;
     private final String avatar;
     private final String message;
     private final Long userId;
@@ -13,6 +14,7 @@ public class OAuthLoginResult {
                             String username,
                             String email,
                             String fullName,
+                            String phoneNumber,
                             String avatar,
                             String message,
                             Long userId) {
@@ -20,6 +22,7 @@ public class OAuthLoginResult {
         this.username = username;
         this.email = email;
         this.fullName = fullName;
+        this.phoneNumber = phoneNumber;
         this.avatar = avatar;
         this.message = message;
         this.userId = userId;
@@ -39,6 +42,10 @@ public class OAuthLoginResult {
 
     public String getFullName() {
         return fullName;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
     public String getAvatar() {

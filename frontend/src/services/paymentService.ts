@@ -19,6 +19,7 @@ interface PaymentDetailsResponse {
   qrCodeUrl?: string;
   paymentMethod?: string;
   message?: string;
+  createdAt?: string;
 }
 
 const defaultHeaders = {
