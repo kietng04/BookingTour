@@ -5,9 +5,11 @@ import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
 import ToursPageExplore from './pages/ToursPageExplore';
 import TourDetailPage from './pages/TourDetailPage';
-import BookingPage from './pages/BookingPage';
+import BookingPage from './pages/BookingPage.jsx';
+import BookingHistory from './pages/BookingHistory.jsx';
 import PaymentResultPage from './pages/PaymentResultPage';
 import NotFoundPage from './pages/NotFoundPage';
+import Profile from './pages/Profile';
 import SiteHeader from './components/layout/SiteHeader';
 import SiteFooter from './components/layout/SiteFooter';
 import ScrollToTop from './components/layout/ScrollToTop';
@@ -25,11 +27,10 @@ const App: React.FC = () => {
             <Route path="/tours" element={<ToursPageExplore />} />
             <Route path="/tours/:slug" element={<TourDetailPage />} />
             <Route path="/booking/:slug" element={<BookingPage />} />
+            <Route path="/booking-history" element={<BookingHistory />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/payment-result" element={<PaymentResultPage />} />
             <Route path="/destinations" element={<PlaceholderPage title="Destinations coming soon" />} />
-            <Route path="/experiences" element={<PlaceholderPage title="Unique experiences coming soon" />} />
-            <Route path="/stories" element={<PlaceholderPage title="Travel stories coming soon" />} />
-            <Route path="/support" element={<PlaceholderPage title="Support center" description="Chat with our travel concierge or browse FAQs while we finish this space." />} />
             <Route path="/auth/callback" element={<OAuth2Callback />} />
             <Route path="/auth/login" element={<LoginPage />} />
             <Route path="*" element={<NotFoundPage />} />
