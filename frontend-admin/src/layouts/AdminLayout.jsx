@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
-import { BarChart2, BookOpen, CalendarClock, LayoutDashboard, LogOut, Settings, Star, Users, Calendar } from 'lucide-react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { BarChart2, BookOpen, CalendarClock, LayoutDashboard, LogOut, Settings, Star, Users, Calendar, User, ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
+import { useAdminAuth } from '../context/AdminAuthContext.jsx';
 import Button from '../components/common/Button.jsx';
 
 const navigation = [
@@ -10,12 +11,25 @@ const navigation = [
   { icon: Calendar, label: 'Departures', to: '/departures' },
   { icon: CalendarClock, label: 'Bookings', to: '/bookings' },
   { icon: Users, label: 'Users', to: '/users' },
-  { icon: Star, label: 'Reviews', to: '/reviews' },
+  // { icon: Star, label: 'Reviews', to: '/reviews' }, // Tạm ẩn Reviews
   { icon: Settings, label: 'Settings', to: '/settings' }
 ];
 
 const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const { user, logout, isAuthenticated } = useAdminAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/auth/login');
+  };
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    navigate('/auth/login');
+    return null;
+  }
 
   return (
     <div className={clsx('grid min-h-screen bg-slate-100 text-slate-900 lg:grid-cols-[260px_1fr]', collapsed && 'sidebar-collapsed lg:grid-cols-[90px_1fr]')}>
@@ -52,7 +66,7 @@ const AdminLayout = () => {
           ))}
         </nav>
 
-        <Button variant="ghost" className="justify-start">
+        <Button variant="ghost" className="justify-start" onClick={handleLogout}>
           <LogOut className="h-4 w-4" />
           <span className="sidebar-label">Log out</span>
         </Button>
@@ -79,6 +93,21 @@ const AdminLayout = () => {
               <div className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-500 md:flex">
                 <span className="inline-flex h-2 w-2 rounded-full bg-success" />
                 Live sync
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="hidden text-right md:block">
+                  <p className="text-sm font-semibold text-slate-800">{user?.fullName || user?.username || 'Admin'}</p>
+                  <p className="text-xs text-slate-400">{user?.role || 'ADMIN'}</p>
+                </div>
+                <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt="Avatar" className="h-8 w-8 rounded-full object-cover" />
+                  ) : (
+                    <span className="text-sm font-medium text-primary-600">
+                      {(user?.fullName || user?.username || 'A').charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
               </div>
               <Button to="/auth/login" variant="ghost" size="sm">
                 Switch account
