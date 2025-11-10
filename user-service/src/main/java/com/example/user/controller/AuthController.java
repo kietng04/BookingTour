@@ -140,6 +140,7 @@ public class AuthController {
                 result.getUsername(),
                 result.getEmail(),
                 result.getFullName(),
+                result.getPhoneNumber(),
                 result.getAvatar(),
                 result.getMessage(),
                 result.getUserId()

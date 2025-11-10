@@ -23,7 +23,7 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
   value,
   onChange,
   minAdults = 1,
-  maxTotal = 12,
+  maxTotal,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -63,16 +63,33 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
 
   const adjustGuests = (category: GuestCategory, delta: number) => {
     setDistribution((prev) => {
-      const next = { ...prev };
-      const proposed = Math.max(0, prev[category] + delta);
+      // Tính toán giá trị đề xuất
+      let proposed = prev[category] + delta;
+      
+      // Enforce minimum constraints
       if (category === 'adults') {
-        next.adults = Math.max(minAdults, proposed);
+        proposed = Math.max(minAdults, proposed);
       } else {
-        next.children = proposed;
+        proposed = Math.max(0, proposed);
       }
 
+      // Create next state
+      const next = { ...prev };
+      next[category] = proposed;
+
+      // Check total constraint
       const total = next.adults + next.children;
-      if (total > maxTotal) {
+      console.log(`adjustGuests - category: ${category}, delta: ${delta}`, {
+        prev,
+        proposed,
+        next,
+        total,
+        maxTotal,
+        wouldExceed: maxTotal !== undefined && total > maxTotal
+      });
+      
+      if (maxTotal !== undefined && total > maxTotal) {
+        console.log('Blocked: total exceeds maxTotal');
         return prev;
       }
 
@@ -100,9 +117,11 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
         <div className="flex flex-col items-start">
           <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">{label}</span>
           <span>
-            {totalGuests} khách
-            {distribution.children > 0 ? ` · ${distribution.children} trẻ em` : ''}
+            {totalGuests} khách{maxTotal ? ` (còn ${Math.max(0, maxTotal - totalGuests)} chỗ)` : ''}
           </span>
+          {distribution.children > 0 && (
+            <span className="text-xs text-gray-500">{distribution.adults} người lớn, {distribution.children} trẻ em</span>
+          )}
         </div>
         <ChevronDown className={clsx('h-4 w-4 text-gray-400 transition-transform', isOpen && 'rotate-180')} />
       </button>
@@ -142,9 +161,19 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
                     </span>
                     <button
                       type="button"
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-brand-300 hover:text-gray-900 focus-visible:border-brand-300"
-                      onClick={() => adjustGuests(category.key, 1)}
-                      disabled={totalGuests >= maxTotal}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-brand-300 hover:text-gray-900 focus-visible:border-brand-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => {
+                        console.log(`Before adding ${category.key}:`, {
+                          totalGuests,
+                          maxTotal,
+                          distribution,
+                          wouldExceed: totalGuests + 1 > maxTotal
+                        });
+                        adjustGuests(category.key, 1);
+                      }}
+                      disabled={
+                        maxTotal !== undefined && totalGuests >= maxTotal
+                      }
                     >
                       <Plus className="h-4 w-4" aria-hidden="true" />
                       <span className="sr-only">Tăng {category.label}</span>
@@ -153,8 +182,7 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
                 </div>
               ))}
             </div>
-            <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 text-xs text-gray-500">
-              <span>Tối đa {maxTotal} khách mỗi lần đặt</span>
+            <div className="flex items-center justify-end border-t border-gray-100 px-4 py-3 text-xs text-gray-500">
               <button
                 type="button"
                 className="font-semibold text-brand-600 hover:underline"

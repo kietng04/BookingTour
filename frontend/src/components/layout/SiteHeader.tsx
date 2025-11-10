@@ -1,15 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, X, Globe2, PhoneCall, User, LogOut } from 'lucide-react';
+import { Menu, X, Globe2, PhoneCall, User, LogOut, Calendar } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../../context/AuthContext';
 
 const navItems = [
   { label: 'Tour', to: '/tours' },
   { label: 'Điểm đến', to: '/destinations' },
-  { label: 'Trải nghiệm', to: '/experiences' },
-  { label: 'Câu chuyện', to: '/stories' },
-  { label: 'Hỗ trợ', to: '/support' },
 ];
 
 const primaryNavClass =
@@ -117,6 +114,14 @@ const SiteHeader: React.FC = () => {
                       <User className="h-4 w-4" aria-hidden="true" />
                       Hồ sơ của tôi
                     </Link>
+                    <Link
+                      to="/booking-history"
+                      className="inline-flex items-center gap-2 rounded-xl px-3 py-2 transition hover:bg-brand-50 hover:text-brand-600"
+                      onClick={() => setProfileMenuOpen(false)}
+                    >
+                      <Calendar className="h-4 w-4" aria-hidden="true" />
+                      Lịch sử đặt tour
+                    </Link>
                     <button
                       type="button"
                       onClick={() => {
@@ -191,6 +196,14 @@ const SiteHeader: React.FC = () => {
                 >
                   <User className="h-4 w-4" aria-hidden="true" />
                   Hồ sơ của tôi
+                </Link>
+                <Link
+                  to="/booking-history"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-brand-200 hover:text-gray-900 focus-visible:border-brand-300"
+                >
+                  <Calendar className="h-4 w-4" aria-hidden="true" />
+                  Lịch sử đặt tour
                 </Link>
                 <button
                   type="button"

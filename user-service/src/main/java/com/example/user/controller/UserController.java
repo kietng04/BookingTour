@@ -1,7 +1,9 @@
 package com.example.user.controller;
 
+import com.example.user.dto.UpdateProfileRequest;
 import com.example.user.model.User;
 import com.example.user.repository.UserRepository;
+import com.example.user.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,9 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
@@ -62,6 +67,50 @@ public class UserController {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String token,
+                                           @RequestBody UpdateProfileRequest request) {
+        try {
+            // Extract token from Bearer
+            String jwtToken = token.substring(7);
+            String email = jwtUtil.extractEmail(jwtToken);
+            
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Update allowed fields for OAuth users
+            if (request.getFullName() != null && !request.getFullName().trim().isEmpty()) {
+                user.setFullName(request.getFullName().trim());
+            }
+            
+            if (request.getPhoneNumber() != null && !request.getPhoneNumber().trim().isEmpty()) {
+                user.setPhoneNumber(request.getPhoneNumber().trim());
+            }
+
+            userRepository.save(user);
+
+            return ResponseEntity.ok().body("{\"message\": \"Profile updated successfully\"}");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"error\": \"" + e.getMessage() + "\"}");
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String token) {
+        try {
+            // Extract token from Bearer
+            String jwtToken = token.substring(7);
+            String email = jwtUtil.extractEmail(jwtToken);
+            
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"error\": \"" + e.getMessage() + "\"}");
+        }
     }
 
     @GetMapping("/health")

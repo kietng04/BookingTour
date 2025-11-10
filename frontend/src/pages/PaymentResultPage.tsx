@@ -6,6 +6,7 @@ import { bookingsAPI } from '../services/api';
 import { formatCurrency, formatDate } from '../utils/format';
 
 const PAYMENT_SESSION_KEY = 'bookingTour:lastPayment';
+const PAYMENT_REOPEN_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
 type ResultState = 'success' | 'pending' | 'failed';
 
@@ -18,14 +19,30 @@ const PaymentResultPage: React.FC = () => {
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetailsResponse | null>(null);
   const [bookingDetails, setBookingDetails] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [canReopenPayment, setCanReopenPayment] = useState(false);
+  const [reopenMessage, setReopenMessage] = useState<string | null>(null);
 
   const query = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
   useEffect(() => {
     const orderIdParam = query.get('orderId') || query.get('orderID');
-    const requestIdParam = query.get('requestId');
-    const resultCodeParam = query.get('resultCode');
-    const messageParam = query.get('message');
+  const resultCodeParam = query.get('resultCode');
+
+    let sessionCreatedAtMs: number | null = null;
+    const sessionRaw = sessionStorage.getItem(PAYMENT_SESSION_KEY);
+    if (sessionRaw) {
+      try {
+        const parsed = JSON.parse(sessionRaw);
+        if (parsed?.createdAt) {
+          const parsedCreatedAt = Date.parse(parsed.createdAt);
+          if (!Number.isNaN(parsedCreatedAt)) {
+            sessionCreatedAtMs = parsedCreatedAt;
+          }
+        }
+      } catch {
+        // ignore invalid session
+      }
+    }
 
     const parseBookingId = (): number | null => {
       if (orderIdParam) {
@@ -35,7 +52,6 @@ const PaymentResultPage: React.FC = () => {
         }
       }
 
-      const sessionRaw = sessionStorage.getItem(PAYMENT_SESSION_KEY);
       if (sessionRaw) {
         try {
           const parsed = JSON.parse(sessionRaw);
@@ -78,6 +94,28 @@ const PaymentResultPage: React.FC = () => {
           }
         }
         setStatus(derivedStatus);
+
+        const paymentCreatedAtMs = payment?.createdAt ? Date.parse(payment.createdAt) : null;
+        const referenceTimestamp = !Number.isNaN(paymentCreatedAtMs ?? NaN)
+          ? paymentCreatedAtMs
+          : sessionCreatedAtMs;
+
+        if (derivedStatus === 'success') {
+          setCanReopenPayment(false);
+          setReopenMessage('Thanh toán đã hoàn tất. Liên kết MoMo không còn khả dụng.');
+        } else if (referenceTimestamp != null && !Number.isNaN(referenceTimestamp)) {
+          const expiresAt = referenceTimestamp + PAYMENT_REOPEN_WINDOW_MS;
+          if (Date.now() <= expiresAt) {
+            setCanReopenPayment(true);
+            setReopenMessage(null);
+          } else {
+            setCanReopenPayment(false);
+            setReopenMessage('Liên kết thanh toán đã hết hạn sau 15 phút. Vui lòng tạo lại yêu cầu thanh toán để tiếp tục.');
+          }
+        } else {
+          setCanReopenPayment(true);
+          setReopenMessage(null);
+        }
 
         try {
           const booking = await bookingsAPI.getById(bookingId);
@@ -206,7 +244,7 @@ const PaymentResultPage: React.FC = () => {
                   </div>
                 )}
               </dl>
-              {paymentDetails?.payUrl && (
+              {paymentDetails?.payUrl && canReopenPayment && (
                 <div className="flex flex-wrap gap-3 pt-2">
                   <a
                     href={paymentDetails.payUrl}
@@ -226,9 +264,12 @@ const PaymentResultPage: React.FC = () => {
                   )}
                 </div>
               )}
+              {reopenMessage && (
+                <p className="text-xs text-gray-500">{reopenMessage}</p>
+              )}
             </section>
 
-            {paymentDetails?.qrCodeUrl && status !== 'success' && (
+            {paymentDetails?.qrCodeUrl && status !== 'success' && canReopenPayment && (
               <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-card space-y-3 text-center">
                 <h3 className="text-lg font-semibold text-gray-900">Quét lại mã QR</h3>
                 <p className="text-sm text-gray-600">

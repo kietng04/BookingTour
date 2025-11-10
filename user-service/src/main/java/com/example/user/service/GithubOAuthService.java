@@ -90,6 +90,7 @@ public class GithubOAuthService {
                 user.getUsername(),
                 user.getEmail(),
                 user.getFullName(),
+                user.getPhoneNumber(),
                 user.getAvatar(),
                 "Login successful",
                 user.getId()
