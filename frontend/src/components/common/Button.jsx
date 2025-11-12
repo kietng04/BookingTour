@@ -6,7 +6,7 @@ import clsx from 'clsx';
 const baseStyles = 'inline-flex items-center justify-center gap-2 rounded-full font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 disabled:pointer-events-none disabled:opacity-60';
 
 const variants = {
-  primary: 'bg-primary-600 text-white hover:bg-primary-500 shadow-accent',
+  primary: 'bg-primary-600 text-white hover:bg-primary-500',
   secondary: 'bg-white text-primary-600 border border-primary-100 hover:border-primary-200 hover:shadow-soft',
   ghost: 'bg-transparent text-slate-600 hover:bg-slate-100',
   danger: 'bg-danger text-white hover:bg-danger/90'

@@ -117,11 +117,8 @@ const LoginPage: React.FC = () => {
                   Đăng nhập tài khoản
                 </p>
                 <h2 className="text-2xl font-semibold text-slate-900">
-                  Cùng tiếp tục hành trình của bạn
+                  Đăng nhập BookingTour
                 </h2>
-                <p className="text-sm text-slate-500">
-                  Nhập thông tin để quản lý đơn, thanh toán và nhận ưu đãi. Chúng tôi bảo vệ dữ liệu của bạn bằng chuẩn mã hóa AES-256.
-                </p>
               </div>
 
               {error && (
@@ -142,7 +139,7 @@ const LoginPage: React.FC = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-900 placeholder:text-gray-400 transition focus:border-brand-300 focus:ring-2 focus:ring-brand-200"
-                    placeholder="ví dụ: linh.tran"
+                    placeholder="Username"
                     required
                   />
                 </div>
@@ -152,9 +149,6 @@ const LoginPage: React.FC = () => {
                     <label htmlFor="password" className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
                       Mật khẩu
                     </label>
-                    <a href="#" className="text-xs font-medium text-brand-500 hover:text-brand-600">
-                      Quên mật khẩu?
-                    </a>
                   </div>
                   <input
                     id="password"
@@ -168,10 +162,20 @@ const LoginPage: React.FC = () => {
                   />
                 </div>
 
+                <div className="flex items-center justify-end mb-4">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/forgot-password')}
+                    className="text-sm text-brand-500 hover:text-brand-600 font-medium transition-colors"
+                  >
+                    Quên mật khẩu?
+                  </button>
+                </div>
+
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="inline-flex w-full items-center justify-center rounded-2xl bg-brand-500 px-5 py-3 text-sm font-semibold text-white shadow-accent transition hover:bg-brand-600 focus-visible:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="inline-flex w-full items-center justify-center rounded-2xl bg-brand-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-600 focus-visible:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                 </button>
@@ -188,6 +192,18 @@ const LoginPage: React.FC = () => {
               <div className="grid gap-3">
                 <LoginWithGithub />
                 <LoginWithGoogle />
+              </div>
+
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-600">
+                  Chưa có tài khoản?{' '}
+                  <button
+                    onClick={() => navigate('/auth/register')}
+                    className="font-semibold text-brand-500 hover:text-brand-600 transition-colors"
+                  >
+                    Đăng ký ngay
+                  </button>
+                </p>
               </div>
             </div>
           </section>

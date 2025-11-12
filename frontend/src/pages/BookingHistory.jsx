@@ -61,11 +61,20 @@ const BookingHistory = () => {
                 tourInfo = await toursAPI.getById(booking.tourId);
               }
               
-              // Gọi API lấy thông tin departure
-              if (booking.tourId && booking.departureId) {
-                const departuresResponse = await toursAPI.getDepartures(booking.tourId);
-                if (departuresResponse && departuresResponse.content) {
-                  departureInfo = departuresResponse.content.find((dep) => dep.id === booking.departureId);
+              // Lấy thông tin departure từ tourInfo.departures 
+              if (tourInfo && tourInfo.departures && booking.departureId) {
+                departureInfo = tourInfo.departures.find((dep) => dep.id === booking.departureId);
+              }
+              
+              // Fallback: nếu không tìm thấy trong tourInfo, gọi API riêng
+              if (!departureInfo && booking.tourId && booking.departureId) {
+                try {
+                  const departuresResponse = await toursAPI.getDepartures(booking.tourId);
+                  if (departuresResponse && departuresResponse.content) {
+                    departureInfo = departuresResponse.content.find((dep) => dep.id === booking.departureId);
+                  }
+                } catch (depError) {
+                  console.error('Error fetching departures separately:', depError);
                 }
               }
             } catch (error) {
@@ -110,12 +119,22 @@ const BookingHistory = () => {
               tourSlug: tourInfo?.slug || '',
               destination: tourInfo?.mainDestination || tourInfo?.destination || tourInfo?.location || tourInfo?.address || 'Đang cập nhật',
               tourImage: imageUrl,
-              // Thông tin từ departure API
-              departureDate: departureInfo?.departureDate || departureInfo?.startDate || departureInfo?.date || 'Invalid Date',
+              // Thông tin từ departure API - ưu tiên startDate
+              departureDate: departureInfo?.startDate || departureInfo?.departureDate || departureInfo?.date || null,
+              departureInfo: departureInfo,
               bookingDate: booking.createdAt || booking.updatedAt || new Date().toISOString(),
               paymentStatus: booking.paymentStatus || 'PENDING',
               guestDetails: { adults: booking.numSeats || 1, children: 0 }
             };
+            
+            // Debug log cho từng booking
+            console.log(`📋 Booking ${booking.id} processed:`, {
+              tourName: tourInfo?.tourName,
+              departureId: booking.departureId,
+              departureFound: !!departureInfo,
+              departureDate: departureInfo?.startDate,
+              rawDepartureInfo: departureInfo
+            });
           })
         );
         
@@ -199,15 +218,12 @@ const BookingHistory = () => {
       setShowCancelModal(false);
       setBookingToCancel(null);
       
-      // Hiển thị thông báo thành công
-      alert('Hủy tour thành công! Số tiền sẽ được hoàn trả trong 3-5 ngày làm việc.');
-      
-      // Refresh lại danh sách booking
+      // Refresh lại danh sách booking để cập nhật trạng thái
       fetchBookingHistory(currentPage);
       
     } catch (error) {
       console.error('Error cancelling booking:', error);
-      alert('Có lỗi xảy ra khi hủy tour. Vui lòng thử lại.');
+      // Chỉ log lỗi, không hiển thị alert
     } finally {
       setCancellingBookingId(null);
     }
@@ -238,11 +254,26 @@ const BookingHistory = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    if (!dateString || dateString === 'Invalid Date') {
+      return 'Chưa xác định';
+    }
+    
+    try {
+      const date = new Date(dateString);
+      // Kiểm tra xem date có hợp lệ không
+      if (isNaN(date.getTime()) || date.getFullYear() < 1900) {
+        return 'Chưa xác định';
+      }
+      
+      return date.toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', dateString, error);
+      return 'Chưa xác định';
+    }
   };
 
   if (loading) {
@@ -362,10 +393,43 @@ const BookingHistory = () => {
                           Xem chi tiết
                         </a>
                         {(() => {
+                          // Xử lý ngày khởi hành - thử nhiều trường có thể chứa ngày
+                          let departureDate = null;
+                          let departureDateString = booking.departureDate || booking.departureInfo?.startDate || booking.departureInfo?.departureDate || booking.startDate;
+                          
+                          if (departureDateString && departureDateString !== 'Invalid Date') {
+                            try {
+                              departureDate = new Date(departureDateString);
+                              // Kiểm tra xem Date có hợp lệ không
+                              if (isNaN(departureDate.getTime())) {
+                                departureDate = null;
+                              }
+                            } catch (error) {
+                              console.error('Error parsing departure date:', departureDateString, error);
+                              departureDate = null;
+                            }
+                          }
+                          
+                          const currentDate = new Date();
+                          const isBeforeDeparture = departureDate && departureDate > currentDate;
+                          
+                          // Debug log để kiểm tra dữ liệu
+                          console.log('🔍 Booking Cancel Debug:', {
+                            bookingId: booking.id,
+                            status: booking.status,
+                            originalDepartureDate: booking.departureDate,
+                            departureDateString: departureDateString,
+                            parsedDepartureDate: departureDate ? departureDate.toISOString() : 'NULL',
+                            currentDate: currentDate.toISOString(),
+                            isBeforeDeparture: isBeforeDeparture,
+                            departureInfo: booking.departureInfo,
+                            timeDiff: departureDate ? `${Math.ceil((departureDate - currentDate) / (1000 * 60 * 60 * 24))} ngày` : 'N/A'
+                          });
+                          
                           // Kiểm tra điều kiện có thể hủy tour
-                          const canCancel = booking.status === 'PENDING';
-                          const isBeforeDeparture = booking.departureDate && new Date(booking.departureDate) > new Date();
-                          const canCancelTour = canCancel && isBeforeDeparture;
+                          const isPending = booking.status === 'PENDING' || booking.status === 'CONFIRMED';
+                          const isNotCancelled = booking.status !== 'CANCELLED';
+                          const canCancelTour = isPending && isBeforeDeparture && isNotCancelled;
                           
                           if (canCancelTour) {
                             return (
@@ -384,28 +448,35 @@ const BookingHistory = () => {
                                 )}
                               </button>
                             );
-                          } else if (booking.status === 'CONFIRMED') {
-                            return (
-                              <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-100 rounded-md">
-                                Đã xác nhận - Không thể hủy
-                              </span>
-                            );
-                          } else if (booking.status === 'COMPLETED') {
-                            return (
-                              <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-md">
-                                Tour đã hoàn thành
-                              </span>
-                            );
                           } else if (booking.status === 'CANCELLED') {
                             return (
-                              <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-md">
-                                Tour đã bị hủy
+                              <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-100 rounded-md">
+                                Đã hủy
                               </span>
                             );
-                          } else if (booking.departureDate && new Date(booking.departureDate) <= new Date()) {
+                          } else if (!isBeforeDeparture && departureDate) {
+                            const daysPast = Math.floor((currentDate - departureDate) / (1000 * 60 * 60 * 24));
                             return (
-                              <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-100 rounded-md">
-                                Tour đã khởi hành
+                              <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-100 rounded-md" title={`Đã khởi hành ${daysPast} ngày trước`}>
+                                Đã khởi hành - Không thể hủy
+                              </span>
+                            );
+                          } else if (!departureDate) {
+                            return (
+                              <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-yellow-600 bg-yellow-50 rounded-md" title="Không tìm thấy thông tin ngày khởi hành">
+                                Chưa có ngày khởi hành
+                              </span>
+                            );
+                          } else if (!isPending) {
+                            return (
+                              <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-100 rounded-md" title={`Trạng thái: ${booking.status}`}>
+                                Không thể hủy ({getStatusText(booking.status)})
+                              </span>
+                            );
+                          } else {
+                            return (
+                              <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-orange-600 bg-orange-50 rounded-md" title="Điều kiện hủy tour không thỏa mãn">
+                                Không thể hủy
                               </span>
                             );
                           }
@@ -423,16 +494,7 @@ const BookingHistory = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-8 flex items-center justify-between">
-          <div className="flex items-center text-sm text-gray-700">
-            <span>
-              Hiển thị <span className="font-medium">{currentPage * pageSize + 1}</span> đến{' '}
-              <span className="font-medium">
-                {Math.min((currentPage + 1) * pageSize, totalElements)}
-              </span>{' '}
-              trong tổng số <span className="font-medium">{totalElements}</span> kết quả
-            </span>
-          </div>
+        <div className="mt-8 flex items-center justify-center">
           <div className="flex items-center space-x-2">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
@@ -486,9 +548,28 @@ const BookingHistory = () => {
               <p className="text-gray-600 mb-4">
                 Bạn có chắc chắn muốn hủy tour <strong>{bookingToCancel.tourName}</strong> không?
               </p>
-              <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                <p className="text-sm text-blue-800">
-                  <strong>Lưu ý:</strong> Số tiền sẽ được hoàn trả và số lượng chỗ sẽ được khôi phục trong vòng 3-5 ngày làm việc.
+              
+              {/* Thông tin booking */}
+              <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-4">
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">Thông tin booking:</h4>
+                <div className="text-sm text-gray-600 space-y-1">
+                  <p><strong>Mã booking:</strong> {bookingToCancel.id}</p>
+                  <p><strong>Trạng thái:</strong> {bookingToCancel.status}</p>
+                  {bookingToCancel.totalAmount && (
+                    <p><strong>Số tiền:</strong> {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(bookingToCancel.totalAmount)}</p>
+                  )}
+                  {bookingToCancel.departureDate && (
+                    <p><strong>Ngày khởi hành:</strong> {new Date(bookingToCancel.departureDate).toLocaleDateString('vi-VN')}</p>
+                  )}
+                </div>
+              </div>
+              
+              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                <p className="text-sm text-yellow-800">
+                  <strong>Chính sách hủy tour:</strong><br/>
+                  • Số tiền đã thanh toán sẽ được hoàn trả trong vòng 3-5 ngày làm việc<br/>
+                  • Số lượng chỗ sẽ được khôi phục tự động<br/>
+                  • Bạn sẽ nhận được email xác nhận hủy tour
                 </p>
               </div>
             </div>

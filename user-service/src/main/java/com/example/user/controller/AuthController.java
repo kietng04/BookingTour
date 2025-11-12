@@ -5,6 +5,7 @@ import com.example.user.dto.LoginResponse;
 import com.example.user.dto.RegisterRequest;
 import com.example.user.dto.RegisterResponse;
 import com.example.user.service.AuthService;
+import com.example.user.service.EmailVerificationService;
 import com.example.user.service.GithubOAuthService;
 import com.example.user.service.GoogleOAuthService;
 import com.example.user.service.OAuthLoginResult;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 public class AuthController {
 
     private final AuthService authService;
+    private final EmailVerificationService emailVerificationService;
     private final GithubOAuthService githubOAuthService;
     private final GoogleOAuthService googleOAuthService;
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -41,9 +43,11 @@ public class AuthController {
     private String googleFrontendErrorUri;
 
     public AuthController(AuthService authService,
+                          EmailVerificationService emailVerificationService,
                           GithubOAuthService githubOAuthService,
                           GoogleOAuthService googleOAuthService) {
         this.authService = authService;
+        this.emailVerificationService = emailVerificationService;
         this.githubOAuthService = githubOAuthService;
         this.googleOAuthService = googleOAuthService;
     }
@@ -190,6 +194,166 @@ public class AuthController {
         response.sendRedirect(errorRedirect);
     }
 
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestBody EmailVerificationRequest request) {
+        try {
+            logger.info("Received verify-email request - email: '{}', code: '{}', code length: {}", 
+                request.getEmail(), request.getCode(), request.getCode() != null ? request.getCode().length() : 0);
+            boolean verified = emailVerificationService.verifyCode(request.getEmail(), request.getCode());
+            if (verified) {
+                // Generate token and return login response after successful verification
+                LoginResponse loginResponse = authService.createLoginResponseAfterVerification(request.getEmail());
+                return ResponseEntity.ok(loginResponse);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new EmailVerificationResponse(false, "Invalid or expired verification code"));
+            }
+        } catch (Exception e) {
+            logger.error("Email verification error: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new EmailVerificationResponse(false, "Verification failed: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(@RequestBody ResendVerificationRequest request) {
+        try {
+            boolean sent = emailVerificationService.resendVerificationCode(request.getEmail());
+            if (sent) {
+                return ResponseEntity.ok(new EmailVerificationResponse(true, "Verification code resent successfully"));
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new EmailVerificationResponse(false, "Failed to resend verification code"));
+            }
+        } catch (Exception e) {
+            logger.error("Resend verification error: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new EmailVerificationResponse(false, "Failed to resend: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/check-email-verified")
+    public ResponseEntity<?> checkEmailVerified(@RequestParam String email) {
+        try {
+            boolean verified = emailVerificationService.isEmailVerified(email);
+            return ResponseEntity.ok(new EmailVerificationResponse(verified, 
+                verified ? "Email is verified" : "Email is not verified"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new EmailVerificationResponse(false, "Check failed: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/send-booking-confirmation")
+    public ResponseEntity<?> sendBookingConfirmation(@RequestBody BookingConfirmationRequest request) {
+        try {
+            authService.sendBookingConfirmationEmail(
+                request.getToEmail(),
+                request.getCustomerName(),
+                request.getBookingId(),
+                request.getTourName(),
+                request.getDepartureDate(),
+                request.getNumberOfPeople(),
+                request.getContactEmail(),
+                request.getContactPhone(),
+                request.getTotalAmount(),
+                request.getPaymentMethod(),
+                request.getPaymentTime()
+            );
+            
+            return ResponseEntity.ok(new EmailVerificationResponse(true, "Booking confirmation email sent successfully"));
+        } catch (Exception e) {
+            logger.error("Error sending booking confirmation email", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new EmailVerificationResponse(false, "Failed to send booking confirmation email"));
+        }
+    }
+
+    @PostMapping("/send-booking-invoice")
+    public ResponseEntity<?> sendBookingInvoice(@RequestBody BookingInvoiceRequest request) {
+        try {
+            authService.sendBookingInvoiceEmail(
+                request.getToEmail(),
+                request.getFullName(),
+                request.getBookingId(),
+                request.getTourName(),
+                request.getNumSeats(),
+                request.getTotalAmount(),
+                request.getDepartureDate(),
+                request.getPaymentMethod()
+            );
+            
+            return ResponseEntity.ok(new EmailVerificationResponse(true, "Booking invoice email sent successfully"));
+        } catch (Exception e) {
+            logger.error("Error sending booking invoice email", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new EmailVerificationResponse(false, "Failed to send booking invoice email: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/send-password-reset")
+    public ResponseEntity<?> sendPasswordReset(@RequestBody ResendVerificationRequest request) {
+        try {
+            emailVerificationService.sendPasswordResetCode(request.getEmail());
+            return ResponseEntity.ok(new EmailVerificationResponse(true, "Password reset code sent successfully"));
+        } catch (Exception e) {
+            logger.error("Error sending password reset code", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new EmailVerificationResponse(false, "Failed to send password reset code"));
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody PasswordResetRequest request) {
+        try {
+            emailVerificationService.resetPasswordWithCode(
+                request.getEmail(),
+                request.getCode(),
+                request.getNewPassword()
+            );
+            return ResponseEntity.ok(new EmailVerificationResponse(true, "Password reset successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new EmailVerificationResponse(false, e.getMessage()));
+        } catch (Exception e) {
+            logger.error("Error resetting password", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new EmailVerificationResponse(false, "Failed to reset password"));
+        }
+    }
+
+    static class EmailVerificationRequest {
+        private String email;
+        private String code;
+
+        public String getEmail() { return email != null ? email.trim() : null; }
+        public void setEmail(String email) { this.email = email; }
+        public String getCode() { return code != null ? code.trim() : null; }
+        public void setCode(String code) { this.code = code; }
+    }
+
+    static class ResendVerificationRequest {
+        private String email;
+
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+    }
+
+    static class EmailVerificationResponse {
+        private boolean success;
+        private String message;
+
+        public EmailVerificationResponse(boolean success, String message) {
+            this.success = success;
+            this.message = message;
+        }
+
+        public boolean isSuccess() { return success; }
+        public void setSuccess(boolean success) { this.success = success; }
+        public String getMessage() { return message; }
+        public void setMessage(String message) { this.message = message; }
+    }
+
     static class ErrorResponse {
         private String error;
 
@@ -225,6 +389,87 @@ public class AuthController {
         public void setState(String state) {
             this.state = state;
         }
+    }
+
+    static class BookingConfirmationRequest {
+        private String toEmail;
+        private String customerName;
+        private String bookingId;
+        private String tourName;
+        private String departureDate;
+        private String numberOfPeople;
+        private String contactEmail;
+        private String contactPhone;
+        private String totalAmount;
+        private String paymentMethod;
+        private String paymentTime;
+
+        // Getters and setters
+        public String getToEmail() { return toEmail; }
+        public void setToEmail(String toEmail) { this.toEmail = toEmail; }
+        public String getCustomerName() { return customerName; }
+        public void setCustomerName(String customerName) { this.customerName = customerName; }
+        public String getBookingId() { return bookingId; }
+        public void setBookingId(String bookingId) { this.bookingId = bookingId; }
+        public String getTourName() { return tourName; }
+        public void setTourName(String tourName) { this.tourName = tourName; }
+        public String getDepartureDate() { return departureDate; }
+        public void setDepartureDate(String departureDate) { this.departureDate = departureDate; }
+        public String getNumberOfPeople() { return numberOfPeople; }
+        public void setNumberOfPeople(String numberOfPeople) { this.numberOfPeople = numberOfPeople; }
+        public String getContactEmail() { return contactEmail; }
+        public void setContactEmail(String contactEmail) { this.contactEmail = contactEmail; }
+        public String getContactPhone() { return contactPhone; }
+        public void setContactPhone(String contactPhone) { this.contactPhone = contactPhone; }
+        public String getTotalAmount() { return totalAmount; }
+        public void setTotalAmount(String totalAmount) { this.totalAmount = totalAmount; }
+        public String getPaymentMethod() { return paymentMethod; }
+        public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+        public String getPaymentTime() { return paymentTime; }
+        public void setPaymentTime(String paymentTime) { this.paymentTime = paymentTime; }
+    }
+
+    static class BookingInvoiceRequest {
+        private String toEmail;
+        private String fullName;
+        private Long bookingId;
+        private String tourName;
+        private Integer numSeats;
+        private java.math.BigDecimal totalAmount;
+        private String departureDate;
+        private String paymentMethod;
+
+        // Getters and setters
+        public String getToEmail() { return toEmail; }
+        public void setToEmail(String toEmail) { this.toEmail = toEmail; }
+        public String getFullName() { return fullName; }
+        public void setFullName(String fullName) { this.fullName = fullName; }
+        public Long getBookingId() { return bookingId; }
+        public void setBookingId(Long bookingId) { this.bookingId = bookingId; }
+        public String getTourName() { return tourName; }
+        public void setTourName(String tourName) { this.tourName = tourName; }
+        public Integer getNumSeats() { return numSeats; }
+        public void setNumSeats(Integer numSeats) { this.numSeats = numSeats; }
+        public java.math.BigDecimal getTotalAmount() { return totalAmount; }
+        public void setTotalAmount(java.math.BigDecimal totalAmount) { this.totalAmount = totalAmount; }
+        public String getDepartureDate() { return departureDate; }
+        public void setDepartureDate(String departureDate) { this.departureDate = departureDate; }
+        public String getPaymentMethod() { return paymentMethod; }
+        public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+    }
+
+    static class PasswordResetRequest {
+        private String email;
+        private String code;
+        private String newPassword;
+
+        // Getters and setters
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public String getCode() { return code; }
+        public void setCode(String code) { this.code = code; }
+        public String getNewPassword() { return newPassword; }
+        public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
     }
 }
 

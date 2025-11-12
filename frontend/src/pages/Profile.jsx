@@ -20,7 +20,6 @@ const Profile = () => {
   });
   
   // Modal states
-  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [showChangePhoneModal, setShowChangePhoneModal] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
@@ -92,36 +91,55 @@ const Profile = () => {
   };
 
   const handleChangePassword = async () => {
+    // Validate mật khẩu
+    if (!formData.currentPassword) {
+      alert('Vui lòng nhập mật khẩu hiện tại!');
+      return;
+    }
+    
+    if (!formData.newPassword) {
+      alert('Vui lòng nhập mật khẩu mới!');
+      return;
+    }
+    
     if (formData.newPassword !== formData.confirmPassword) {
       alert('Mật khẩu xác nhận không khớp!');
       return;
     }
     
+    if (formData.newPassword.length < 6) {
+      alert('Mật khẩu mới phải có ít nhất 6 ký tự!');
+      return;
+    }
+    
     setLoading(true);
     try {
-      // Gửi mã xác nhận qua email
-      // await userAPI.sendPasswordChangeVerification(formData.currentPassword, formData.newPassword);
-      alert('Mã xác nhận đã được gửi qua email của bạn!');
-      setShowChangePasswordModal(true);
-    } catch (error) {
-      alert('Có lỗi xảy ra khi gửi mã xác nhận!');
-    } finally {
-      setLoading(false);
-    }
-  };
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+      const token = localStorage.getItem('authToken');
+      
+      const response = await fetch(`${apiUrl}/api/users/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword
+        })
+      });
 
-  const handleVerifyPasswordChange = async () => {
-    setIsVerifying(true);
-    try {
-      // await userAPI.verifyPasswordChange(verificationCode);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Mật khẩu hiện tại không đúng!');
+      }
+
       alert('Đổi mật khẩu thành công!');
-      setShowChangePasswordModal(false);
-      setVerificationCode('');
       setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
     } catch (error) {
-      alert('Mã xác nhận không đúng!');
+      alert(error.message || 'Có lỗi xảy ra khi đổi mật khẩu!');
     } finally {
-      setIsVerifying(false);
+      setLoading(false);
     }
   };
 
@@ -175,16 +193,6 @@ const Profile = () => {
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Hồ sơ của tôi</h1>
-        <p className="text-gray-600">Quản lý thông tin cá nhân và bảo mật tài khoản</p>
-        {isOAuthUser && (
-          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-blue-800">
-              <Shield className="w-4 h-4 inline mr-1" />
-              Tài khoản được bảo mật bởi {user.provider === 'google' ? 'Google' : 'GitHub'}. 
-              Một số thông tin không thể chỉnh sửa.
-            </p>
-          </div>
-        )}
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
@@ -212,24 +220,6 @@ const Profile = () => {
                 )}
               </div>
             </div>
-            {(!isOAuthUser || (isOAuthUser && hasMissingInfo)) && (
-              <button
-                onClick={() => setIsEditing(!isEditing)}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
-              >
-                {isEditing ? (
-                  <>
-                    <X className="w-4 h-4" />
-                    Hủy
-                  </>
-                ) : (
-                  <>
-                    <Edit2 className="w-4 h-4" />
-                    {isOAuthUser ? 'Hoàn thiện thông tin' : 'Chỉnh sửa'}
-                  </>
-                )}
-              </button>
-            )}
           </div>
         </div>
 
@@ -404,7 +394,7 @@ const Profile = () => {
                 className="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Shield className="w-4 h-4" />
-                Thay đổi mật khẅu
+                Thay đổi mật khẩu
               </button>
             )}
           </div>
@@ -426,61 +416,7 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Change Password Modal */}
-      {showChangePasswordModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Xác nhận thay đổi mật khẩu</h3>
-              <button 
-                onClick={() => setShowChangePasswordModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            
-            <div className="mb-6">
-              <p className="text-gray-600 mb-4">
-                Chúng tôi đã gửi mã xác nhận đến email <strong>{user.email}</strong>
-              </p>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mã xác nhận
-              </label>
-              <input
-                type="text"
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-                placeholder="Nhập mã xác nhận 6 số"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              />
-            </div>
-            
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setShowChangePasswordModal(false)}
-                className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
-              >
-                Hủy bỏ
-              </button>
-              <button
-                onClick={handleVerifyPasswordChange}
-                disabled={isVerifying || !verificationCode}
-                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isVerifying ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Đang xác nhận...
-                  </>
-                ) : (
-                  'Xác nhận'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Change Phone Modal */}
       {showChangePhoneModal && (

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hóa đơn đặt tour - BookingTour</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .header-subtitle {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+        .success-badge {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 12px 30px;
+            border-radius: 30px;
+            display: inline-block;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 20px;
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+        .invoice-box {
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            border-left: 5px solid #10b981;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+        .invoice-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #059669;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .invoice-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #d1fae5;
+        }
+        .invoice-row:last-child {
+            border-bottom: none;
+        }
+        .invoice-label {
+            font-weight: 600;
+            color: #065f46;
+        }
+        .invoice-value {
+            text-align: right;
+            color: #1f2937;
+        }
+        .total-row {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            margin: 20px -25px -25px;
+            padding: 20px 25px;
+            border-radius: 0 0 8px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .total-label {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .total-amount {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .status-badge {
+            display: inline-block;
+            background-color: #10b981;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+        .info-section {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .info-section h3 {
+            color: #1e40af;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .info-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .info-list li {
+            margin: 8px 0;
+            color: #1e3a8a;
+        }
+        .cta-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 10px;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: white;
+            color: #2563eb;
+            padding: 14px 35px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 15px;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        .footer {
+            text-align: center;
+            padding: 30px;
+            background-color: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .footer-strong {
+            color: #1f2937;
+            font-weight: 600;
+            display: block;
+            margin: 10px 0;
+        }
+        .divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #10b981, transparent);
+            margin: 30px 0;
+        }
+        .highlight {
+            color: #10b981;
+            font-weight: bold;
+        }
+        @media (max-width: 600px) {
+            .content {
+                padding: 30px 20px;
+            }
+            .invoice-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .invoice-value {
+                text-align: left;
+            }
+            .total-row {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🌟 BookingTour</div>
+            <div class="header-subtitle">Hệ thống đặt tour trực tuyến</div>
+            <div class="success-badge">✅ THANH TOÁN THÀNH CÔNG</div>
+        </div>
+
+        <div class="content">
+            <div class="greeting">
+                Xin chào <span class="highlight" th:text="${fullName}">Khách hàng</span>! 👋
+            </div>
+
+            <p style="font-size: 16px; line-height: 1.8;">
+                Cảm ơn bạn đã tin tưởng và đặt tour tại <strong>BookingTour</strong>! 
+                Chúng tôi rất vui được đồng hành cùng bạn trong hành trình khám phá những điểm đến tuyệt vời.
+            </p>
+
+            <div class="divider"></div>
+
+            <div class="invoice-box">
+                <div class="invoice-title">📋 HÓA ĐƠN ĐẶT TOUR</div>
+                
+                <div class="invoice-row">
+                    <span class="invoice-label">🔢 Mã đặt tour:</span>
+                    <span class="invoice-value"><strong>#<span th:text="${bookingId}">12345</span></strong></span>
+                </div>
+                
+                <div class="invoice-row">
+                    <span class="invoice-label">📅 Ngày đặt:</span>
+                    <span class="invoice-value" th:text="${bookingDate}">12/11/2025 14:30</span>
+                </div>
+                
+                <div class="invoice-row">
+                    <span class="invoice-label">🎯 Tour:</span>
+                    <span class="invoice-value"><strong th:text="${tourName}">Tour Đà Lạt 3N2Đ</strong></span>
+                </div>
+                
+                <div class="invoice-row">
+                    <span class="invoice-label">🚀 Ngày khởi hành:</span>
+                    <span class="invoice-value" th:text="${departureDate}">20/11/2025</span>
+                </div>
+                
+                <div class="invoice-row">
+                    <span class="invoice-label">👥 Số khách:</span>
+                    <span class="invoice-value"><span th:text="${numSeats}">2</span> người</span>
+                </div>
+                
+                <div class="invoice-row">
+                    <span class="invoice-label">💳 Phương thức thanh toán:</span>
+                    <span class="invoice-value" th:text="${paymentMethod}">MoMo</span>
+                </div>
+                
+                <div class="invoice-row">
+                    <span class="invoice-label">📊 Trạng thái:</span>
+                    <span class="invoice-value">
+                        <span class="status-badge">ĐÃ THANH TOÁN</span>
+                    </span>
+                </div>
+                
+                <div class="total-row">
+                    <span class="total-label">💰 TỔNG TIỀN:</span>
+                    <span class="total-amount"><span th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')}">5,000,000</span> VND</span>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>📌 Thông tin quan trọng</h3>
+                <ul class="info-list">
+                    <li>Vui lòng <strong>kiểm tra email</strong> này và <strong>lưu lại mã đặt tour</strong> để tra cứu</li>
+                    <li>Đội ngũ của chúng tôi sẽ <strong>liên hệ với bạn trong vòng 24h</strong> để xác nhận chi tiết</li>
+                    <li>Bạn có thể theo dõi trạng thái đặt tour trong mục <strong>"Lịch sử đặt tour"</strong></li>
+                    <li>Mọi thắc mắc xin liên hệ Hotline: <strong>1900-xxxx</strong></li>
+                </ul>
+            </div>
+
+            <div class="cta-section" style="color: white;">
+                <h3 style="margin-top: 0; color: white;">🎉 Sẵn sàng cho chuyến đi!</h3>
+                <p style="color: rgba(255,255,255,0.95); margin: 15px 0;">
+                    Xem chi tiết đặt tour và chuẩn bị hành trang cho chuyến phiêu lưu của bạn
+                </p>
+                <a href="http://localhost:3000/booking-history" class="cta-button">Xem chi tiết đặt tour →</a>
+            </div>
+
+            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 18px; margin: 25px 0; border-radius: 0 8px 8px 0;">
+                <strong style="color: #92400e;">💡 Lưu ý:</strong>
+                <p style="margin: 10px 0 0 0; color: #78350f;">
+                    Vui lòng mang theo CMND/CCCD khi tham gia tour. Đến điểm tập trung <strong>trước 30 phút</strong> so với giờ khởi hành.
+                </p>
+            </div>
+
+            <p style="font-size: 16px;">
+                Chúc bạn có một chuyến du lịch <span class="highlight">an toàn</span>, <span class="highlight">vui vẻ</span> và <span class="highlight">đầy ý nghĩa</span>! 🌈✨
+            </p>
+        </div>
+
+        <div class="footer">
+            <span class="footer-strong">Cảm ơn bạn đã sử dụng dịch vụ BookingTour! 🙏</span>
+            <div style="margin: 20px 0;">
+                <p><strong>BookingTour Team</strong></p>
+                <p style="margin: 10px 0;">
+                    📧 support@bookingtour.com | 📞 Hotline: 1900-xxxx<br>
+                    🌐 www.bookingtour.com
+                </p>
+            </div>
+            
+            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                <p style="font-size: 12px; color: #9ca3af; margin: 0;">
+                    Email này được gửi tự động từ hệ thống BookingTour.<br>
+                    Vui lòng không trả lời trực tiếp email này. Nếu cần hỗ trợ, hãy liên hệ hotline của chúng tôi.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
