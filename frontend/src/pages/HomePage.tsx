@@ -213,28 +213,28 @@ const HomePage: React.FC = () => {
             className="space-y-6"
           >
             <span className="inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-600">
-              How it works
+              Cách thức hoạt động
             </span>
-            <h2 className="text-3xl font-semibold text-gray-900">Plan with confidence</h2>
+            <h2 className="text-3xl font-semibold text-gray-900">Lên kế hoạch với sự tự tin</h2>
             <p className="text-base text-gray-600">
-              BookingTour blends technology with human expertise. Our travel designers craft experiences that balance cultural depth, comfort, and flexibility.
+              BookingTour kết hợp công nghệ với chuyên môn con người. Các nhà thiết kế du lịch của chúng tôi tạo ra những trải nghiệm cân bằng giữa chiều sâu văn hóa, sự thoải mái và tính linh hoạt.
             </p>
             <div className="space-y-6">
               {[
                 {
                   icon: Map,
-                  title: 'Tailored itineraries',
-                  description: 'We personalize each tour based on your travel style, pacing preferences, and interests.',
+                  title: 'Hành trình được cá nhân hóa',
+                  description: 'Chúng tôi cá nhân hóa từng tour dựa trên phong cách du lịch, sở thích về nhịp độ và sở thích của bạn.',
                 },
                 {
                   icon: Compass,
-                  title: 'Verified guides & hosts',
-                  description: 'Certified professionals who live locally and know the hidden gems beyond guidebooks.',
+                  title: 'Hướng dẫn viên & chủ nhà được xác minh',
+                  description: 'Các chuyên gia được chứng nhận sống tại địa phương và biết những viên ngọc ẩn ngoài sách hướng dẫn.',
                 },
                 {
                   icon: Shield,
-                  title: 'Flexible protection',
-                  description: 'Free date changes up to 14 days before departure on most experiences.',
+                  title: 'Bảo vệ linh hoạt',
+                  description: 'Thay đổi ngày miễn phí lên đến 14 ngày trước khởi hành cho hầu hết các trải nghiệm.',
                 },
               ].map((item) => (
                 <div key={item.title} className="flex gap-4">
@@ -264,15 +264,15 @@ const HomePage: React.FC = () => {
             />
             <div className="absolute inset-0 bg-black/40" />
             <div className="relative z-10 p-10">
-              <h3 className="text-2xl font-semibold">Speak to a travel designer</h3>
+              <h3 className="text-2xl font-semibold">Nói chuyện với nhà thiết kế du lịch</h3>
               <p className="mt-3 max-w-md text-sm text-white/80">
-                Share your travel plans with our experts for tailored itineraries, exclusive access, and insider recommendations.
+                Chia sẻ kế hoạch du lịch của bạn với các chuyên gia để có hành trình được tùy chỉnh, quyền truy cập độc quyền và các khuyến nghị từ người trong cuộc.
               </p>
               <Link
                 to="/support"
                 className="mt-6 inline-flex items-center justify-center rounded-full bg-white/90 px-5 py-3 text-sm font-semibold text-gray-900 shadow-lg transition hover:bg-white focus-visible:bg-white"
               >
-                Plan a custom trip
+                Lên kế hoạch chuyến đi tùy chỉnh
               </Link>
             </div>
           </motion.div>

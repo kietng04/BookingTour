@@ -172,30 +172,58 @@ public class GoogleOAuthService {
                 ? email
                 : providerId + "@users.noreply.google.com";
 
+        // First try to find by Google provider ID
         Optional<User> existingUser = userRepository.findByProviderId(providerId);
 
+        // If not found by provider ID, try to find by email
         if (existingUser.isEmpty() && StringUtils.hasText(email)) {
             existingUser = userRepository.findByEmail(email);
+            
+            // If found user by email but it's NOT an OAuth user, link this Google account
+            if (existingUser.isPresent()) {
+                User user = existingUser.get();
+                
+                // Link Google account to existing regular account
+                logger.info("Linking Google account to existing user: email={}", email);
+                user.setProvider("GOOGLE");
+                user.setProviderId(providerId);
+                user.setIsOAuthUser(true);
+                
+                // Update avatar and full name if not set
+                if (!StringUtils.hasText(user.getAvatar())) {
+                    user.setAvatar(userResponse.picture());
+                }
+                if (!StringUtils.hasText(user.getFullName())) {
+                    String fullName = StringUtils.hasText(userResponse.name())
+                            ? userResponse.name()
+                            : (StringUtils.hasText(userResponse.givenName()) ? userResponse.givenName() : providerId);
+                    user.setFullName(fullName);
+                }
+                
+                return userRepository.save(user);
+            }
         }
 
+        // Create new user if not found
         User user = existingUser.orElseGet(User::new);
 
         if (user.getId() == null) {
+            logger.info("Creating new user from Google: email={}", email);
             String baseUsername = deriveBaseUsername(userResponse);
             user.setUsername(generateUniqueUsername(baseUsername));
             user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+            
+            String fullName = StringUtils.hasText(userResponse.name())
+                    ? userResponse.name()
+                    : (StringUtils.hasText(userResponse.givenName()) ? userResponse.givenName() : providerId);
+
+            user.setEmail(resolvedEmail);
+            user.setFullName(fullName);
+            user.setAvatar(userResponse.picture());
+            user.setProvider("GOOGLE");
+            user.setProviderId(providerId);
+            user.setIsOAuthUser(true);
         }
-
-        String fullName = StringUtils.hasText(userResponse.name())
-                ? userResponse.name()
-                : (StringUtils.hasText(userResponse.givenName()) ? userResponse.givenName() : providerId);
-
-        user.setEmail(resolvedEmail);
-        user.setFullName(fullName);
-        user.setAvatar(userResponse.picture());
-        user.setProvider("GOOGLE");
-        user.setProviderId(providerId);
-        user.setIsOAuthUser(true);
 
         return userRepository.save(user);
     }

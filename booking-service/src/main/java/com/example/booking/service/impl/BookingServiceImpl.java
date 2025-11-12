@@ -61,7 +61,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.CONFIRMED);
         Booking confirmedBooking = bookingRepository.save(booking);
 
-        log.info("Booking {} confirmed successfully", bookingId);
+        log.info("Booking {} confirmed successfully - email was already sent during booking creation", bookingId);
         return confirmedBooking;
     }
 

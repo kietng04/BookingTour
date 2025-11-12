@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import OAuth2Callback from './pages/OAuth2Callback';
 import LoginPage from './pages/LoginPage';
+import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import HomePage from './pages/HomePage';
 import ToursPageExplore from './pages/ToursPageExplore';
 import TourDetailPage from './pages/TourDetailPage';
@@ -33,6 +35,8 @@ const App: React.FC = () => {
             <Route path="/destinations" element={<PlaceholderPage title="Destinations coming soon" />} />
             <Route path="/auth/callback" element={<OAuth2Callback />} />
             <Route path="/auth/login" element={<LoginPage />} />
+            <Route path="/auth/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>

@@ -17,6 +17,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        jdbc:
+          time_zone: Asia/Ho_Chi_Minh
   security:
     oauth2:
       client:
@@ -42,6 +44,20 @@ spring:
             token-uri: https://oauth2.googleapis.com/token
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
             user-name-attribute: sub
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: doraechan123@gmail.com
+    password: "nccp ssjc kvss bfhp"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 eureka:
   client:
@@ -62,6 +78,19 @@ management:
 jwt:
   secret: mySecretKeyForJWTTokenGenerationThatNeedsToBeAtLeast256BitsLong
   expiration: 86400000
+
+# Email settings
+email:
+  from: BookingTour <doraechan123@gmail.com>
+  templates:
+    verification: verification-email
+  verification:
+    code-length: 6
+    expiration-minutes: 10
+    max-attempts: 5
+    development-mode: false
+    default-code: "123456"
+    delete-unverified-users: true  # Tự động xóa user chưa verify khi mã hết hạn hoặc quá số lần thử
 
 oauth:
   github:

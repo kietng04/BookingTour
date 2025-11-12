@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, X, Globe2, PhoneCall, User, LogOut, Calendar } from 'lucide-react';
+import { Menu, X, Globe2, PhoneCall, User, LogOut, Calendar, ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../../context/AuthContext';
+
+import { regionsAPI } from '../../services/api';
 
 const navItems = [
   { label: 'Tour', to: '/tours' },
@@ -15,7 +17,12 @@ const primaryNavClass =
 const SiteHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [isTravelMenuOpen, setIsTravelMenuOpen] = useState(false);
+  const [regions, setRegions] = useState([]);
+  const [provincesByRegion, setProvincesByRegion] = useState({});
+  const [loadingRegions, setLoadingRegions] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
+  const travelRef = useRef<HTMLDivElement | null>(null);
   const { isAuthenticated, user, logout } = useAuth();
 
   const profileInitials = useMemo(() => {
@@ -31,8 +38,44 @@ const SiteHeader: React.FC = () => {
     return user.fullName || user.username || '';
   }, [user]);
 
+  // Fetch regions and provinces data
   useEffect(() => {
-    if (!isProfileMenuOpen) {
+    const fetchRegionsAndProvinces = async () => {
+      setLoadingRegions(true);
+      try {
+        // Fetch regions
+        const regionsData = await regionsAPI.getAll();
+        const regionsList = Array.isArray(regionsData) ? regionsData : [];
+        setRegions(regionsList);
+
+        // Fetch provinces for each region
+        const provincesMap = {};
+        await Promise.all(
+          regionsList.map(async (region) => {
+            try {
+              const provincesData = await regionsAPI.getProvinces(region.id);
+              provincesMap[region.id] = Array.isArray(provincesData) ? provincesData : [];
+            } catch (error) {
+              console.error(`Failed to fetch provinces for region ${region.id}:`, error);
+              provincesMap[region.id] = [];
+            }
+          })
+        );
+        setProvincesByRegion(provincesMap);
+      } catch (error) {
+        console.error('Failed to fetch regions:', error);
+        setRegions([]);
+        setProvincesByRegion({});
+      } finally {
+        setLoadingRegions(false);
+      }
+    };
+
+    fetchRegionsAndProvinces();
+  }, []);
+
+  useEffect(() => {
+    if (!isProfileMenuOpen && !isTravelMenuOpen) {
       return;
     }
 
@@ -40,11 +83,14 @@ const SiteHeader: React.FC = () => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setProfileMenuOpen(false);
       }
+      if (travelRef.current && !travelRef.current.contains(event.target as Node)) {
+        setIsTravelMenuOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isProfileMenuOpen]);
+  }, [isProfileMenuOpen, isTravelMenuOpen]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur">
@@ -64,6 +110,76 @@ const SiteHeader: React.FC = () => {
           </Link>
         </div>
         <nav className="hidden items-center gap-8 lg:flex" aria-label="Điều hướng chính">
+          {/* Du lịch Dropdown */}
+          <div className="relative" ref={travelRef}>
+            <button
+              type="button"
+              onClick={() => setIsTravelMenuOpen((prev) => !prev)}
+              className={clsx(
+                primaryNavClass,
+                'group gap-1',
+                isTravelMenuOpen && 'text-gray-900'
+              )}
+              aria-haspopup="true"
+              aria-expanded={isTravelMenuOpen}
+            >
+              Du lịch
+              <ChevronDown className={clsx(
+                'h-4 w-4 transition-transform duration-200',
+                isTravelMenuOpen && 'rotate-180'
+              )} />
+            </button>
+            
+            {isTravelMenuOpen && (
+              <div className="absolute left-0 top-full mt-2 w-[900px] origin-top-left transform">
+                <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl">
+                  <div className="p-6">
+                    {loadingRegions ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto mb-4"></div>
+                        <p className="text-sm text-gray-600">Đang tải dữ liệu...</p>
+                      </div>
+                    ) : regions.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-sm text-gray-600">Không có dữ liệu vùng miền</p>
+                      </div>
+                    ) : (
+                      <div className={`grid gap-6 ${regions.length === 3 ? 'grid-cols-3' : 'grid-cols-4'}`}>
+                        {regions.map((region) => {
+                          const provinces = provincesByRegion[region.id] || [];
+                          const regionSlug = region.name.toLowerCase().includes('bắc') ? 'north' : 
+                                           region.name.toLowerCase().includes('trung') ? 'central' : 'south';
+                          
+                          return (
+                            <div key={region.id}>
+                              <h3 className="mb-3 text-sm font-semibold text-gray-900 uppercase tracking-wide">
+                                {region.name}
+                              </h3>
+                              <ul className="space-y-2">
+                                {provinces.slice(0, 10).map((province) => (
+                                  <li key={province.id}>
+                                    <Link
+                                      to={`/tours?region=${regionSlug}&destination=${encodeURIComponent(province.name)}`}
+                                      className="block text-sm text-gray-600 hover:text-brand-600 transition-colors"
+                                      onClick={() => setIsTravelMenuOpen(false)}
+                                    >
+                                      {province.name}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Các menu khác */}
           {navItems.map((item) => (
             <NavLink
               key={item.label}
@@ -166,6 +282,58 @@ const SiteHeader: React.FC = () => {
       >
         <div className="space-y-6 border-t border-gray-100 bg-white px-6 py-6 shadow-card transition-all duration-300 ease-in-out">
           <nav className="grid gap-4" aria-label="Điều hướng di động">
+            {/* Du lịch mobile menu */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setIsTravelMenuOpen((prev) => !prev)}
+                className="flex w-full items-center justify-between text-base font-medium text-gray-700"
+              >
+                Du lịch
+                <ChevronDown className={clsx(
+                  'h-4 w-4 transition-transform duration-200',
+                  isTravelMenuOpen && 'rotate-180'
+                )} />
+              </button>
+              
+              {isTravelMenuOpen && (
+                <div className="mt-3 space-y-4 pl-4">
+                  {loadingRegions ? (
+                    <p className="text-sm text-gray-500">Đang tải...</p>
+                  ) : (
+                    regions.slice(0, 2).map((region) => {
+                      const provinces = provincesByRegion[region.id] || [];
+                      const regionSlug = region.name.toLowerCase().includes('bắc') ? 'north' : 
+                                       region.name.toLowerCase().includes('trung') ? 'central' : 'south';
+                      
+                      return (
+                        <div key={region.id}>
+                          <h4 className="text-sm font-semibold text-gray-900 mb-2">{region.name}</h4>
+                          <ul className="space-y-1">
+                            {provinces.slice(0, 5).map((province) => (
+                              <li key={province.id}>
+                                <Link
+                                  to={`/tours?region=${regionSlug}&destination=${encodeURIComponent(province.name)}`}
+                                  className="block text-sm text-gray-600"
+                                  onClick={() => {
+                                    setIsMenuOpen(false);
+                                    setIsTravelMenuOpen(false);
+                                  }}
+                                >
+                                  {province.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Các menu khác */}
             {navItems.map((item) => (
               <NavLink
                 key={item.label}

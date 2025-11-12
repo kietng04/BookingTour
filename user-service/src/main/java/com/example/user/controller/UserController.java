@@ -6,6 +6,7 @@ import com.example.user.repository.UserRepository;
 import com.example.user.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,9 @@ public class UserController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
@@ -113,9 +117,70 @@ public class UserController {
         }
     }
 
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String token,
+                                            @RequestBody ChangePasswordRequest request) {
+        try {
+            // Extract token from Bearer
+            String jwtToken = token.substring(7);
+            String email = jwtUtil.extractEmail(jwtToken);
+            
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Check if user is OAuth user
+            if (Boolean.TRUE.equals(user.getIsOAuthUser())) {
+                return ResponseEntity.badRequest()
+                        .body("{\"error\": \"Tài khoản OAuth không thể đổi mật khẩu\"}");
+            }
+
+            // Verify current password
+            if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+                return ResponseEntity.badRequest()
+                        .body("{\"error\": \"Mật khẩu hiện tại không đúng\"}");
+            }
+
+            // Validate new password
+            if (request.getNewPassword() == null || request.getNewPassword().length() < 6) {
+                return ResponseEntity.badRequest()
+                        .body("{\"error\": \"Mật khẩu mới phải có ít nhất 6 ký tự\"}");
+            }
+
+            // Update password
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            userRepository.save(user);
+
+            return ResponseEntity.ok().body("{\"message\": \"Đổi mật khẩu thành công\"}");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"error\": \"" + e.getMessage() + "\"}");
+        }
+    }
+
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("User Service is healthy!");
+    }
+
+    // DTO for change password request
+    public static class ChangePasswordRequest {
+        private String currentPassword;
+        private String newPassword;
+
+        public String getCurrentPassword() {
+            return currentPassword;
+        }
+
+        public void setCurrentPassword(String currentPassword) {
+            this.currentPassword = currentPassword;
+        }
+
+        public String getNewPassword() {
+            return newPassword;
+        }
+
+        public void setNewPassword(String newPassword) {
+            this.newPassword = newPassword;
+        }
     }
 }
 

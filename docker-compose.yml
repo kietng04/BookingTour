@@ -8,6 +8,8 @@ services:
       POSTGRES_DB: userdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      TZ: Asia/Ho_Chi_Minh
+      PGTZ: Asia/Ho_Chi_Minh
     ports:
       - "5432:5432"
     volumes:
@@ -119,6 +121,7 @@ services:
       - GOOGLE_REDIRECT_URI=http://localhost:3000/auth/callback
       - LOGGING_LEVEL_ROOT=DEBUG
       - LOGGING_LEVEL_COM_EXAMPLE=DEBUG
+      - TZ=Asia/Ho_Chi_Minh
     depends_on:
       eureka-server:
         condition: service_healthy

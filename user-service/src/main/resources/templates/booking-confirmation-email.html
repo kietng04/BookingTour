@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận đặt tour - BookingTour</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #10b981;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+        .success-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            display: inline-block;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .booking-details {
+            background-color: #f0fdf4;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #374151;
+        }
+        .detail-value {
+            color: #10b981;
+            font-weight: 600;
+        }
+        .total-amount {
+            background: linear-gradient(135deg, #fef3c7, #f59e0b);
+            color: #92400e;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .payment-info {
+            background-color: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .next-steps {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            color: #666;
+            font-size: 14px;
+        }
+        .contact-info {
+            margin-top: 20px;
+        }
+        .highlight {
+            color: #10b981;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🌟 BookingTour</div>
+            <div class="success-badge">✅ Đặt tour thành công!</div>
+        </div>
+
+        <h2 style="color: #1f2937; margin-bottom: 20px;">Cảm ơn bạn đã đặt tour!</h2>
+        
+        <p>Xin chào <span class="highlight" th:text="${customerName}">Khách hàng</span>,</p>
+        
+        <p>Chúng tôi xác nhận rằng đơn đặt tour của bạn đã được xử lý thành công. Dưới đây là thông tin chi tiết:</p>
+
+        <div class="booking-details">
+            <h3 style="margin-top: 0; color: #1f2937;">📋 Thông tin đặt tour</h3>
+            
+            <div class="detail-row">
+                <span class="detail-label">🎫 Mã đặt tour:</span>
+                <span class="detail-value" th:text="${bookingId}">BT2025001</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">🏖️ Tên tour:</span>
+                <span class="detail-value" th:text="${tourName}">Tour Hà Nội - Sapa 3N2Đ</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">📅 Ngày khởi hành:</span>
+                <span class="detail-value" th:text="${departureDate}">15/11/2025</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">👥 Số người:</span>
+                <span class="detail-value" th:text="${numberOfPeople}">2 người</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">📧 Email liên hệ:</span>
+                <span class="detail-value" th:text="${contactEmail}">example@email.com</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">📞 Số điện thoại:</span>
+                <span class="detail-value" th:text="${contactPhone}">0123456789</span>
+            </div>
+        </div>
+
+        <div class="total-amount">
+            💰 Tổng thanh toán: <span th:text="${totalAmount}">5,000,000</span> VND
+        </div>
+
+        <div class="payment-info">
+            <h3 style="margin-top: 0; color: #1f2937;">💳 Thông tin thanh toán</h3>
+            <p><strong>Phương thức:</strong> <span th:text="${paymentMethod}">MoMo</span></p>
+            <p><strong>Trạng thái:</strong> <span style="color: #10b981; font-weight: bold;">✅ Đã thanh toán</span></p>
+            <p><strong>Thời gian:</strong> <span th:text="${paymentTime}">11/11/2025 17:30</span></p>
+        </div>
+
+        <div class="next-steps">
+            <h3 style="margin-top: 0; color: #1f2937;">📋 Bước tiếp theo</h3>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>📱 Kiểm tra lịch sử đặt tour trên website để theo dõi trạng thái</li>
+                <li>📞 Chúng tôi sẽ liên hệ với bạn trước ngày khởi hành 2-3 ngày</li>
+                <li>🎒 Chuẩn bị giấy tờ tùy thân và hành lý theo hướng dẫn</li>
+                <li>🚌 Thông tin điểm tập trung sẽ được gửi qua SMS/Email</li>
+            </ul>
+        </div>
+
+        <p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi.</p>
+
+        <div class="footer">
+            <p><strong>Chúc bạn có chuyến du lịch tuyệt vời!</strong></p>
+            <p><strong>BookingTour Team</strong></p>
+            
+            <div class="contact-info">
+                <p>📧 Email: support@bookingtour.com</p>
+                <p>📞 Hotline: 1900-xxxx</p>
+                <p>🌐 Website: www.bookingtour.com</p>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 12px; color: #999;">
+                Email này được gửi tự động, vui lòng không trả lời trực tiếp.<br>
+                Mã đặt tour: <span th:text="${bookingId}">BT2025001</span>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

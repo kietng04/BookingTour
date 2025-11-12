@@ -37,6 +37,9 @@ public class User {
     @Column(name = "is_oauth_user")
     private Boolean isOAuthUser = false;
 
+    @Column(name = "is_active")
+    private Boolean active = true;
+
     public User() {}
 
     public User(String username, String email, String fullName) {
@@ -123,6 +126,14 @@ public class User {
 
     public void setIsOAuthUser(Boolean isOAuthUser) {
         this.isOAuthUser = isOAuthUser;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 }
 

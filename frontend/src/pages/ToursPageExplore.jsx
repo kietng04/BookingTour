@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
+import { useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, Undo2, ArrowUpDown, CalendarDays, MapPin } from 'lucide-react';
 import TourGrid from '../components/tours/TourGrid';
 import { toursAPI, regionsAPI } from '../services/api';
@@ -11,6 +12,7 @@ const DEFAULT_FILTERS = {
   endDate: '',
   region: '',
   province: '',
+  destinationName: '', // Temporary field for URL parameter matching
 };
 
 const PAGE_SIZE = 9;
@@ -234,6 +236,7 @@ FilterPanel.defaultProps = {
 };
 
 const ToursPageExplore = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [allTours, setAllTours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -247,6 +250,49 @@ const ToursPageExplore = () => {
   const [isRegionsLoading, setRegionsLoading] = useState(false);
   const [isProvincesLoading, setProvincesLoading] = useState(false);
   const [regionError, setRegionError] = useState(null);
+
+  // Mapping từ region slug sang region ID (chỉ 3 miền: Bắc, Trung, Nam)
+  const regionMapping = {
+    'north': '1',    // Miền Bắc
+    'central': '2',  // Miền Trung  
+    'south': '3'     // Miền Nam
+  };
+
+  // Khởi tạo filters từ URL parameters khi component mount hoặc URL thay đổi
+  useEffect(() => {
+    const regionParam = searchParams.get('region');
+    const destinationParam = searchParams.get('destination');
+    
+    console.log('URL params changed:', { regionParam, destinationParam });
+    
+    if (regionParam && regionMapping[regionParam]) {
+      // Với destination, tìm province ID thay vì set vào search
+      if (destinationParam) {
+        // Decode URL parameter
+        const decodedDestination = decodeURIComponent(destinationParam);
+        console.log('Setting filters with destination:', decodedDestination);
+        setFilters(prev => ({
+          ...prev,
+          region: regionMapping[regionParam],
+          destinationName: decodedDestination // Temporary field để match province
+        }));
+      } else {
+        setFilters(prev => ({
+          ...prev,
+          region: regionMapping[regionParam],
+          destinationName: undefined
+        }));
+      }
+    } else {
+      // Reset filters if no region param
+      setFilters(prev => ({
+        ...prev,
+        region: '',
+        province: '',
+        destinationName: undefined
+      }));
+    }
+  }, [searchParams]); // Chạy lại khi URL parameters thay đổi
 
   useEffect(() => {
     let active = true;
@@ -269,6 +315,8 @@ const ToursPageExplore = () => {
       }
       if (keyword.trim()) {
         params.keyword = keyword.trim();
+        // Tìm kiếm theo điểm đến cụ thể
+        params.destination = keyword.trim();
       }
       if (filters.startDate) {
         params.startDate = filters.startDate;
@@ -365,26 +413,62 @@ const ToursPageExplore = () => {
         const response = await regionsAPI.getProvinces(filters.region);
         const rawProvinces = Array.isArray(response) ? response : [];
         if (active) {
-          setProvinces(
-            rawProvinces
-              .filter((province) => province?.id !== undefined)
-              .map((province) => ({
-                id: String(province.id),
-                name: province?.name ?? 'Không tên',
-                regionId: (() => {
-                  if (province.regionId !== undefined && province.regionId !== null) {
-                    return String(province.regionId);
-                  }
-                  if (province.region?.id !== undefined && province.region?.id !== null) {
-                    return String(province.region.id);
-                  }
-                  if (province.region?.regionId !== undefined && province.region?.regionId !== null) {
-                    return String(province.region.regionId);
-                  }
-                  return String(filters.region);
-                })(),
-              }))
-          );
+          const processedProvinces = rawProvinces
+            .filter((province) => province?.id !== undefined)
+            .map((province) => ({
+              id: String(province.id),
+              name: province?.name ?? 'Không tên',
+              regionId: (() => {
+                if (province.regionId !== undefined && province.regionId !== null) {
+                  return String(province.regionId);
+                }
+                if (province.region?.id !== undefined && province.region?.id !== null) {
+                  return String(province.region.id);
+                }
+                if (province.region?.regionId !== undefined && province.region?.regionId !== null) {
+                  return String(province.region.regionId);
+                }
+                return String(filters.region);
+              })(),
+            }));
+          
+          setProvinces(processedProvinces);
+
+          // Auto-select province if destinationName matches
+          if (filters.destinationName) {
+            console.log('Looking for destination:', filters.destinationName);
+            console.log('Available provinces:', processedProvinces.map(p => p.name));
+            
+            const matchingProvince = processedProvinces.find(
+              province => province.name.toLowerCase().trim() === filters.destinationName.toLowerCase().trim()
+            );
+            
+            console.log('Matching province found:', matchingProvince);
+            
+            if (matchingProvince) {
+              console.log('Setting province to:', matchingProvince.id);
+              setFilters(prev => ({
+                ...prev,
+                province: matchingProvince.id,
+                destinationName: undefined // Clear temporary field
+              }));
+            } else {
+              // If exact match not found, try partial match
+              const partialMatch = processedProvinces.find(
+                province => province.name.toLowerCase().includes(filters.destinationName.toLowerCase()) ||
+                           filters.destinationName.toLowerCase().includes(province.name.toLowerCase())
+              );
+              
+              if (partialMatch) {
+                console.log('Partial match found:', partialMatch);
+                setFilters(prev => ({
+                  ...prev,
+                  province: partialMatch.id,
+                  destinationName: undefined
+                }));
+              }
+            }
+          }
         }
       } catch (err) {
         console.error('Không thể tải danh sách tỉnh thành', err);
@@ -403,7 +487,7 @@ const ToursPageExplore = () => {
     return () => {
       active = false;
     };
-  }, [filters.region]);
+  }, [filters.region, filters.destinationName]);
 
   useEffect(() => {
     const trimmedKeyword = searchInput.trim();
@@ -536,17 +620,9 @@ const ToursPageExplore = () => {
           )}
 
           <nav
-            className="flex flex-col items-center gap-4 rounded-3xl border border-gray-100 bg-white p-4 shadow-card sm:flex-row sm:justify-between"
+            className="flex items-center justify-center gap-4 rounded-3xl border border-gray-100 bg-white p-4 shadow-card"
             aria-label="Phân trang tour"
           >
-            <div className="text-xs font-medium text-gray-500">
-              Đang hiển thị{' '}
-              <span className="text-gray-900">
-                {paginatedTours.length ? (safePage - 1) * PAGE_SIZE + 1 : 0}–
-                {(safePage - 1) * PAGE_SIZE + paginatedTours.length}
-              </span>{' '}
-              trong tổng số <span className="text-gray-900">{filteredTours.length}</span> tour
-            </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
