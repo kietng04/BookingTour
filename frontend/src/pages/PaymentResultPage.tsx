@@ -103,6 +103,11 @@ const PaymentResultPage: React.FC = () => {
         if (derivedStatus === 'success') {
           setCanReopenPayment(false);
           setReopenMessage('Thanh toán đã hoàn tất. Liên kết MoMo không còn khả dụng.');
+          
+          // Tự động điều hướng đến trang lịch sử đặt tour sau 3 giây
+          setTimeout(() => {
+            navigate('/booking-history', { replace: true });
+          }, 3000);
         } else if (referenceTimestamp != null && !Number.isNaN(referenceTimestamp)) {
           const expiresAt = referenceTimestamp + PAYMENT_REOPEN_WINDOW_MS;
           if (Date.now() <= expiresAt) {
@@ -142,7 +147,7 @@ const PaymentResultPage: React.FC = () => {
       case 'success':
         return {
           title: 'Thanh toán thành công',
-          description: 'Chúng tôi đã nhận được thanh toán MoMo của bạn. Đặt chỗ đang được xác nhận.',
+          description: 'Chúng tôi đã nhận được thanh toán MoMo của bạn. Đặt chỗ đang được xác nhận. Bạn sẽ được tự động chuyển đến trang lịch sử đặt tour trong 3 giây...',
           className: 'bg-green-50 text-green-700 border-green-100',
           Icon: CheckCircle2,
         };
@@ -300,10 +305,23 @@ const PaymentResultPage: React.FC = () => {
             )}
 
             <div className="flex flex-wrap gap-3">
+              {status === 'success' && (
+                <button
+                  type="button"
+                  onClick={() => navigate('/booking-history', { replace: true })}
+                  className="inline-flex items-center rounded-full bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-600 focus-visible:bg-brand-600"
+                >
+                  Xem lịch sử đặt tour
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="inline-flex items-center rounded-full bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-600 focus-visible:bg-brand-600"
+                className={`inline-flex items-center rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg transition ${
+                  status === 'success' 
+                    ? 'border border-gray-200 text-gray-700 hover:border-brand-300 hover:text-gray-900 focus-visible:border-brand-300'
+                    : 'bg-brand-500 text-white hover:bg-brand-600 focus-visible:bg-brand-600'
+                }`}
               >
                 Về trang chủ
               </button>

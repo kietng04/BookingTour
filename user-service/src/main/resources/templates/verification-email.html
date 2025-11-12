@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác thực tài khoản - BookingTour</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        .verification-code {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            letter-spacing: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .instructions {
+            background-color: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .warning {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 14px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            color: #666;
+            font-size: 14px;
+        }
+        .contact-info {
+            margin-top: 20px;
+        }
+        .highlight {
+            color: #3b82f6;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🌟 BookingTour</div>
+            <div class="subtitle">Nền tảng đặt tour du lịch hàng đầu</div>
+        </div>
+
+        <h2 style="color: #1f2937; margin-bottom: 20px;">Chào mừng bạn đến với BookingTour!</h2>
+        
+        <p>Xin chào <span class="highlight" th:text="${name}">Khách hàng</span>,</p>
+        
+        <p>Cảm ơn bạn đã đăng ký tài khoản tại BookingTour. Để hoàn tất quá trình đăng ký và bảo mật tài khoản của bạn, vui lòng sử dụng mã xác thực dưới đây:</p>
+
+        <div class="verification-code" th:text="${verificationCode}">123456</div>
+
+        <div class="instructions">
+            <h3 style="margin-top: 0; color: #1f2937;">Hướng dẫn xác thực:</h3>
+            <ol>
+                <li>Quay lại trang đăng ký của BookingTour</li>
+                <li>Nhập mã xác thực <strong th:text="${verificationCode}">123456</strong> vào ô "Mã xác thực"</li>
+                <li>Nhấn nút "Xác thực tài khoản"</li>
+                <li>Hoàn tất quá trình đăng ký</li>
+            </ol>
+        </div>
+
+        <div class="warning">
+            ⚠️ <strong>Lưu ý quan trọng:</strong>
+            <ul style="margin: 10px 0;">
+                <li>Mã xác thực có hiệu lực trong <strong th:text="${expirationMinutes}">15</strong> phút</li>
+                <li>Không chia sẻ mã này với bất kỳ ai</li>
+                <li>Nếu bạn không yêu cầu đăng ký này, vui lòng bỏ qua email</li>
+            </ul>
+        </div>
+
+        <p>Sau khi xác thực thành công, bạn sẽ có thể:</p>
+        <ul>
+            <li>🎯 Tìm kiếm và đặt tour du lịch</li>
+            <li>💳 Thanh toán an toàn với nhiều phương thức</li>
+            <li>📱 Quản lý lịch sử đặt tour</li>
+            <li>🎁 Nhận thông báo về ưu đãi đặc biệt</li>
+            <li>⭐ Đánh giá và chia sẻ trải nghiệm</li>
+        </ul>
+
+        <p>Nếu bạn gặp bất kỳ khó khăn nào trong quá trình đăng ký, đừng ngại liên hệ với chúng tôi.</p>
+
+        <div class="footer">
+            <p><strong>BookingTour Team</strong></p>
+            <div class="contact-info">
+                <p>📧 Email: support@bookingtour.com</p>
+                <p>📞 Hotline: 1900-xxxx</p>
+                <p>🌐 Website: www.bookingtour.com</p>
+            </div>
+            <p style="margin-top: 20px; font-size: 12px; color: #999;">
+                Email này được gửi tự động, vui lòng không trả lời trực tiếp.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

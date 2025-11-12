@@ -44,19 +44,6 @@ const HeroSection: React.FC = () => {
             </div>
           </dl>
         </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
-          className="mt-10 max-w-xl rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-lg shadow-xl"
-        >
-          <h2 className="text-xl font-semibold text-white">Đặc quyền thành viên BookingTour+</h2>
-          <ul className="mt-4 space-y-3 text-sm text-white/80">
-            <li>• Ưu đãi chỉ dành cho thành viên đối với hơn 120 hành trình tuyển chọn.</li>
-            <li>• Hỗ trợ điều phối viên riêng từ lúc lên kế hoạch đến sau chuyến đi.</li>
-            <li>• Quyền đổi lịch linh hoạt và bảo hiểm du lịch toàn diện.</li>
-          </ul>
-        </motion.div>
       </div>
     </section>
   );

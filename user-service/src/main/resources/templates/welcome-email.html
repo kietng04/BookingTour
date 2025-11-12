@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chào mừng đến với BookingTour!</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #10b981;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+        .welcome-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            display: inline-block;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .features {
+            background-color: #f0fdf4;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .feature-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            width: 30px;
+        }
+        .cta-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 10px;
+            color: white;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: white;
+            color: #3b82f6;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: transform 0.2s;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            color: #666;
+            font-size: 14px;
+        }
+        .social-links {
+            margin: 20px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #666;
+            text-decoration: none;
+        }
+        .highlight {
+            color: #10b981;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🌟 BookingTour</div>
+            <div class="welcome-badge">✅ Tài khoản đã được kích hoạt!</div>
+        </div>
+
+        <h2 style="color: #1f2937; text-align: center;">Chào mừng <span th:text="${name}">Khách hàng</span> đến với BookingTour!</h2>
+        
+        <p style="text-align: center; font-size: 18px; color: #059669;">
+            🎉 Tài khoản của bạn đã được xác thực thành công!
+        </p>
+        
+        <p>Chào mừng bạn đến với cộng đồng du lịch BookingTour! Tài khoản với email <span class="highlight" th:text="${email}">user@example.com</span> của bạn đã sẵn sàng để khám phá hàng ngàn tour du lịch hấp dẫn.</p>
+
+        <div class="features">
+            <h3 style="color: #1f2937; text-align: center; margin-bottom: 20px;">Những gì bạn có thể làm ngay bây giờ:</h3>
+            
+            <div class="feature-item">
+                <span class="feature-icon">🔍</span>
+                <div>
+                    <strong>Tìm kiếm tour yêu thích</strong><br>
+                    <small>Khám phá hàng ngàn tour trong nước và quốc tế</small>
+                </div>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-icon">💳</span>
+                <div>
+                    <strong>Đặt tour dễ dàng</strong><br>
+                    <small>Thanh toán an toàn với MoMo, VNPay và thẻ tín dụng</small>
+                </div>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-icon">📱</span>
+                <div>
+                    <strong>Quản lý đặt tour</strong><br>
+                    <small>Theo dõi lịch sử và trạng thái đặt tour của bạn</small>
+                </div>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-icon">🎁</span>
+                <div>
+                    <strong>Ưu đãi độc quyền</strong><br>
+                    <small>Nhận thông báo về các chương trình khuyến mãi đặc biệt</small>
+                </div>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-icon">⭐</span>
+                <div>
+                    <strong>Đánh giá & chia sẻ</strong><br>
+                    <small>Chia sẻ trải nghiệm và giúp cộng đồng chọn tour tốt nhất</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <h3 style="margin-top: 0;">🚀 Sẵn sàng cho chuyến phiêu lưu đầu tiên?</h3>
+            <p>Khám phá những điểm đến tuyệt vời và đặt tour ngay hôm nay!</p>
+            <a href="http://localhost:3000" class="cta-button">Bắt đầu khám phá →</a>
+        </div>
+
+        <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;">
+            <strong>💡 Mẹo nhỏ:</strong> Hãy hoàn thiện thông tin cá nhân trong phần "Hồ sơ" để có trải nghiệm đặt tour tốt nhất!
+        </div>
+
+        <p>Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, đội ngũ BookingTour luôn sẵn sàng giúp đỡ bạn.</p>
+
+        <div class="footer">
+            <p><strong>Chúc bạn có những chuyến du lịch tuyệt vời!</strong></p>
+            <p><strong>BookingTour Team</strong></p>
+            
+            <div class="social-links">
+                <a href="#">📘 Facebook</a>
+                <a href="#">📷 Instagram</a>
+                <a href="#">🐦 Twitter</a>
+                <a href="#">📺 YouTube</a>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <p>📧 Email: support@bookingtour.com</p>
+                <p>📞 Hotline: 1900-xxxx</p>
+                <p>🌐 Website: www.bookingtour.com</p>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 12px; color: #999;">
+                Email này được gửi tự động, vui lòng không trả lời trực tiếp.<br>
+                Nếu bạn không muốn nhận email từ chúng tôi, <a href="#" style="color: #999;">bỏ đăng ký tại đây</a>.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
