@@ -3,7 +3,6 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import Card from '../common/Card.jsx';
 
 const TopToursChart = ({ data }) => {
-  // Format currency for display
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -12,7 +11,6 @@ const TopToursChart = ({ data }) => {
     }).format(value);
   };
 
-  // Custom tooltip
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const tour = payload[0].payload;

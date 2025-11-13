@@ -35,7 +35,6 @@ const Dashboard = () => {
     endDate: ''
   });
 
-  // Initialize default date range (last 30 days)
   useEffect(() => {
     const today = new Date();
     const last30Days = new Date(today);
@@ -47,19 +46,16 @@ const Dashboard = () => {
     setDateRange({ startDate, endDate });
   }, []);
 
-  // Fetch all dashboard data when date range changes
   useEffect(() => {
     if (!dateRange.startDate || !dateRange.endDate) return;
 
     loadDashboardData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateRange]);
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
 
-      // Fetch all data in parallel
       const [
         statsData,
         trendsData,
@@ -76,7 +72,6 @@ const Dashboard = () => {
         bookingsAPI.getAll({ page: 0, size: 10 })
       ]);
 
-      // Update stats cards
       if (statsData) {
         const updatedStats = [
           {
@@ -111,7 +106,6 @@ const Dashboard = () => {
         setStats(updatedStats);
       }
 
-      // Update revenue trends chart
       if (trendsData && Array.isArray(trendsData)) {
         const formattedTrends = trendsData.map(item => ({
           month: formatDateShort(item.period),
@@ -120,7 +114,6 @@ const Dashboard = () => {
         setRevenueTrends(formattedTrends);
       }
 
-      // Update top tours chart
       if (toursData && Array.isArray(toursData)) {
         const formattedTours = toursData.map(tour => ({
           tourId: tour.tourId,
@@ -132,17 +125,14 @@ const Dashboard = () => {
         setTopTours(formattedTours);
       }
 
-      // Update booking status chart
       if (statusData && Array.isArray(statusData)) {
         setBookingStatusStats(statusData);
       }
 
-      // Update departure occupancy
       if (occupancyData && Array.isArray(occupancyData)) {
         setDepartureOccupancy(occupancyData);
       }
 
-      // Update recent bookings
       if (recentData && recentData.content) {
         const formattedBookings = recentData.content.map((b) => ({
           id: String(b.id),
@@ -190,10 +180,8 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-8">
-      {/* Date Range Filter */}
       <DateRangeFilter onDateRangeChange={handleDateRangeChange} />
 
-      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <StatCard
@@ -207,19 +195,16 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Revenue Trends and Recent Bookings */}
       <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
         <RevenueChart data={revenueTrends} />
         <RecentBookings bookings={recentBookings} />
       </div>
 
-      {/* Top Tours and Booking Status */}
       <div className="grid gap-6 xl:grid-cols-2">
         <TopToursChart data={topTours} />
         <BookingStatusChart data={bookingStatusStats} />
       </div>
 
-      {/* Departure Occupancy */}
       <DepartureOccupancyChart data={departureOccupancy} />
 
       {loading && (

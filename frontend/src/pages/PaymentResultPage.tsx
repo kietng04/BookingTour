@@ -40,7 +40,6 @@ const PaymentResultPage: React.FC = () => {
           }
         }
       } catch {
-        // ignore invalid session
       }
     }
 
@@ -59,7 +58,6 @@ const PaymentResultPage: React.FC = () => {
             return Number(parsed.bookingId);
           }
         } catch {
-          // ignore
         }
       }
       return null;
@@ -104,7 +102,6 @@ const PaymentResultPage: React.FC = () => {
           setCanReopenPayment(false);
           setReopenMessage('Thanh toán đã hoàn tất. Liên kết MoMo không còn khả dụng.');
           
-          // Tự động điều hướng đến trang lịch sử đặt tour sau 3 giây
           setTimeout(() => {
             navigate('/booking-history', { replace: true });
           }, 3000);

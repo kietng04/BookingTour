@@ -179,7 +179,6 @@ const BookingPage = () => {
 
     if (maxSelectableGuests <= 0) {
       setGuestCounts(() => {
-        // Nếu không còn chỗ, reset về 1 adult
         return { adults: 1, children: 0 };
       });
       return;

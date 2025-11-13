@@ -31,7 +31,6 @@ public class DashboardController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
-        // Default to last 30 days if not provided
         if (endDate == null) {
             endDate = LocalDate.now();
         }
@@ -55,7 +54,6 @@ public class DashboardController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
-        // Default to last 30 days if not provided
         if (endDate == null) {
             endDate = LocalDate.now();
         }

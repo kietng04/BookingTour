@@ -3,22 +3,20 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import Card from '../common/Card.jsx';
 
 const BookingStatusChart = ({ data }) => {
-  // Color scheme for different statuses
   const STATUS_COLORS = {
     CONFIRMED: '#10b981', // green
     PENDING: '#f59e0b',   // amber
     CANCELLED: '#ef4444', // red
-    FAILED: '#6b7280',    // gray
+    FAILED: '#6b7280',
   };
 
-  // Custom label to show percentage
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-    if (percent < 0.05) return null; // Don't show label if less than 5%
+    if (percent < 0.05) return null;
 
     return (
       <text
@@ -34,7 +32,6 @@ const BookingStatusChart = ({ data }) => {
     );
   };
 
-  // Custom tooltip
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const statusData = payload[0].payload;
@@ -100,7 +97,6 @@ const BookingStatusChart = ({ data }) => {
             </PieChart>
           </ResponsiveContainer>
 
-          {/* Legend */}
           <div className="w-full px-6 pb-6">
             <div className="grid grid-cols-2 gap-3">
               {data.map((item) => (

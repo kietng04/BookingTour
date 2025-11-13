@@ -1,8 +1,5 @@
-// Dùng đường dẫn tương đối để trình duyệt gửi same-origin tới Vite dev server
-// và proxy qua gateway → tránh CORS khi chạy MCP Playwright
 const API_BASE_URL = '/api';
 
-// Get admin token from storage
 const getAdminToken = () => {
   return localStorage.getItem('bt-admin-token');
 };
@@ -28,7 +25,6 @@ async function fetchAdminAPI(endpoint, options = {}) {
     const response = await fetch(url, config);
 
     if (response.status === 401) {
-      // Unauthorized - clear token and redirect to login
       console.warn('Unauthorized access, redirecting to login...');
       localStorage.removeItem('bt-admin-token');
       window.location.href = '/auth/login';
@@ -36,14 +32,12 @@ async function fetchAdminAPI(endpoint, options = {}) {
     }
 
     if (response.status === 403) {
-      // Forbidden - insufficient permissions
       throw new Error('Insufficient permissions for this action');
     }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ message: 'Request failed' }));
       const error = new Error(errorData.message || `HTTP ${response.status}`);
-      // Attach response information for better error handling
       error.response = {
         status: response.status,
         statusText: response.statusText,
@@ -52,13 +46,11 @@ async function fetchAdminAPI(endpoint, options = {}) {
       throw error;
     }
 
-    // Handle empty response body (e.g., 204 No Content or DELETE with 200 OK but no body)
     const contentLength = response.headers.get('content-length');
     if (contentLength === '0' || response.status === 204) {
       return null;
     }
 
-    // Try to parse JSON, return null if empty
     const text = await response.text();
     return text ? JSON.parse(text) : null;
   } catch (error) {
@@ -67,7 +59,6 @@ async function fetchAdminAPI(endpoint, options = {}) {
   }
 }
 
-// Legacy function for backward compatibility
 async function fetchAPI(endpoint, options = {}) {
   return fetchAdminAPI(endpoint, options);
 }
@@ -190,7 +181,6 @@ export const usersAPI = {
   getById: (userId) => fetchAPI(`/users/${userId}`),
 };
 
-// Tour schedules CRUD
 export const schedulesAPI = {
   getAll: (tourId) => fetchAPI(`/tours/${tourId}/schedules`),
   create: (tourId, data) => fetchAPI(`/tours/${tourId}/schedules`, {
@@ -206,7 +196,6 @@ export const schedulesAPI = {
   }),
 };
 
-// Tour images CRUD
 export const imagesAPI = {
   getAll: (tourId) => fetchAPI(`/tours/${tourId}/images`),
   create: (tourId, data) => fetchAPI(`/tours/${tourId}/images`, {
@@ -222,7 +211,6 @@ export const imagesAPI = {
   }),
 };
 
-// Tour discounts CRUD
 export const discountsAPI = {
   getAll: (tourId) => fetchAPI(`/tours/${tourId}/discounts`),
   create: (tourId, data) => fetchAPI(`/tours/${tourId}/discounts`, {
@@ -238,7 +226,6 @@ export const discountsAPI = {
   }),
 };
 
-// Dashboard API
 export const dashboardAPI = {
   getStats: (params = {}) => {
     const query = new URLSearchParams(params).toString();
@@ -269,5 +256,5 @@ export default {
   images: imagesAPI,
   discounts: discountsAPI,
   dashboard: dashboardAPI,
-  fetchAdminAPI, // Export the new auth-aware function
+  fetchAdminAPI,
 };

@@ -35,13 +35,11 @@ const DepartureForm = ({
   const startDate = watch('startDate');
   const totalSlots = watch('totalSlots');
 
-  // Fetch tours for selection
   useEffect(() => {
     const fetchTours = async () => {
       try {
         const data = await toursAPI.getAll({ status: 'ACTIVE' });
         const toursArray = data.content || data || [];
-        // Normalize tour data to ensure tourId field exists
         const normalizedTours = toursArray.map(tour => ({
           ...tour,
           tourId: tour.id ?? tour.tourId,
@@ -58,7 +56,6 @@ const DepartureForm = ({
     fetchTours();
   }, []);
 
-  // Calculate reserved slots for edit mode
   const reservedSlots = mode === 'edit' && initialValues
     ? (initialValues.totalSlots - initialValues.remainingSlots)
     : 0;
@@ -104,7 +101,6 @@ const DepartureForm = ({
   return (
     <Card>
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-        {/* Tour Selection */}
         <div>
           <Select
             label="Tour"
@@ -128,7 +124,6 @@ const DepartureForm = ({
           )}
         </div>
 
-        {/* Date Range */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Input
@@ -152,7 +147,6 @@ const DepartureForm = ({
           </div>
         </div>
 
-        {/* Total Slots */}
         <div>
           <Input
             label="Total Slots"
@@ -170,7 +164,6 @@ const DepartureForm = ({
           )}
         </div>
 
-        {/* Remaining Slots Info (Edit Mode) */}
         {mode === 'edit' && initialValues && (
           <div className="bg-slate-50 p-4 rounded-lg">
             <h4 className="font-medium text-slate-900 mb-2">Current Status</h4>
@@ -191,7 +184,6 @@ const DepartureForm = ({
           </div>
         )}
 
-        {/* Action Buttons */}
         <div className="flex gap-3 pt-4 border-t">
           <Button
             type="submit"
@@ -215,3 +207,4 @@ const DepartureForm = ({
 };
 
 export default DepartureForm;
+

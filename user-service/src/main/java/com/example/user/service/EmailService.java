@@ -47,7 +47,6 @@ public class EmailService {
             helper.setTo(toEmail);
             helper.setSubject("🔐 Mã xác thực BookingTour");
 
-            // Tạo HTML content đơn giản
             String htmlContent = String.format(
                 "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>" +
                 "<h2 style='color: #2563eb; text-align: center;'>🔐 Mã xác thực tài khoản</h2>" +
@@ -66,7 +65,6 @@ public class EmailService {
             mailSender.send(message);
             
         } catch (MessagingException e) {
-            // Fallback to plain text email
             sendPlainTextVerificationEmail(toEmail, fullName, verificationCode);
         }
     }
@@ -129,7 +127,6 @@ public class EmailService {
             mailSender.send(message);
             
         } catch (MessagingException e) {
-            // Fallback to plain text
             sendPlainTextWelcomeEmail(toEmail, fullName);
         }
     }
@@ -190,7 +187,6 @@ public class EmailService {
             mailSender.send(message);
             
         } catch (MessagingException e) {
-            // Fallback to plain text
             sendPlainTextBookingInvoice(toEmail, fullName, bookingId, tourName, numSeats, totalAmount);
         }
     }
@@ -256,7 +252,6 @@ public class EmailService {
         helper.setTo(toEmail);
         helper.setSubject("🎉 Xác nhận đặt tour thành công - BookingTour");
         
-        // Create template context
         Context context = new Context();
         context.setVariable("customerName", customerName);
         context.setVariable("bookingId", bookingId);
@@ -269,7 +264,6 @@ public class EmailService {
         context.setVariable("paymentMethod", paymentMethod);
         context.setVariable("paymentTime", paymentTime);
         
-        // Process template
         String htmlContent = templateEngine.process("booking-confirmation-email", context);
         helper.setText(htmlContent, true);
         

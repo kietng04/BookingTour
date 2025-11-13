@@ -48,14 +48,12 @@ public class DashboardServiceImpl implements DashboardService {
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
-        // Revenue stats
         BigDecimal totalRevenue = bookingRepository.sumRevenueByDateRange(startDateTime, endDateTime);
         BigDecimal confirmedRevenue = bookingRepository.sumRevenueByStatusAndDateRange(
                 Booking.BookingStatus.CONFIRMED, startDateTime, endDateTime);
         BigDecimal pendingRevenue = bookingRepository.sumRevenueByStatusAndDateRange(
                 Booking.BookingStatus.PENDING, startDateTime, endDateTime);
 
-        // Calculate revenue change (compare to previous period)
         long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate);
         LocalDate prevStartDate = startDate.minusDays(daysBetween);
         LocalDate prevEndDate = startDate.minusDays(1);
@@ -65,7 +63,6 @@ public class DashboardServiceImpl implements DashboardService {
 
         RevenueStats revenueStats = new RevenueStats(totalRevenue, confirmedRevenue, pendingRevenue, revenueChange);
 
-        // Booking stats
         Long totalBookings = bookingRepository.countByDateRange(startDateTime, endDateTime);
         Long confirmedBookings = bookingRepository.countByStatusAndDateRange(
                 Booking.BookingStatus.CONFIRMED, startDateTime, endDateTime);
@@ -81,7 +78,6 @@ public class DashboardServiceImpl implements DashboardService {
         BookingStats bookingStats = new BookingStats(
                 totalBookings, confirmedBookings, pendingBookings, cancelledBookings, conversionRate);
 
-        // User stats
         Long activeUsers = bookingRepository.countDistinctUsersByDateRange(startDateTime, endDateTime);
         Long totalUsers = getTotalUsersFromUserService();
         Long newUsers = getNewUsersByDateRange(startDate, endDate);
@@ -123,10 +119,8 @@ public class DashboardServiceImpl implements DashboardService {
                     BigDecimal revenue = (BigDecimal) row[1];
                     Long bookingCount = ((Number) row[2]).longValue();
 
-                    // Fetch tour name from tour-service
                     String tourName = getTourNameFromTourService(tourId);
 
-                    // Calculate occupancy rate (would need departure data, simplified for now)
                     Double occupancyRate = calculateTourOccupancyRate(tourId);
 
                     return new TopTourDTO(tourId, tourName, revenue, bookingCount, occupancyRate);
@@ -160,7 +154,6 @@ public class DashboardServiceImpl implements DashboardService {
         log.info("Fetching departure occupancy rates");
 
         try {
-            // Get all tours with their departures
             String url = tourServiceUrl + "/tours";
             ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
                     url,
@@ -179,7 +172,6 @@ public class DashboardServiceImpl implements DashboardService {
                 Long tourId = ((Number) tour.get("id")).longValue();
                 String tourName = (String) tour.get("tourName");
 
-                // Get departures for this tour
                 List<Map<String, Object>> departures = getDeparturesFromTourService(tourId);
 
                 for (Map<String, Object> dep : departures) {
@@ -193,7 +185,6 @@ public class DashboardServiceImpl implements DashboardService {
                             ? (bookedSlots * 100.0) / totalSlots
                             : 0.0;
 
-                    // Determine status
                     String status = remainingSlots == 0 ? "FULL" :
                             occupancyRate > 80 ? "NEARLY_FULL" : "AVAILABLE";
 
@@ -205,7 +196,6 @@ public class DashboardServiceImpl implements DashboardService {
                 }
             }
 
-            // Sort by occupancy rate descending and limit to top 10
             return occupancyList.stream()
                     .sorted(Comparator.comparing(DepartureOccupancyDTO::getOccupancyRate).reversed())
                     .limit(10)
@@ -217,7 +207,6 @@ public class DashboardServiceImpl implements DashboardService {
         }
     }
 
-    // Helper methods
 
     private Double calculatePercentageChange(BigDecimal current, BigDecimal previous) {
         if (previous == null || previous.compareTo(BigDecimal.ZERO) == 0) {
@@ -247,8 +236,6 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private Double calculateTourOccupancyRate(Long tourId) {
-        // Simplified calculation: total confirmed bookings / total available slots
-        // In a real implementation, this would need departure-level data
         return 0.0; // Placeholder
     }
 
@@ -269,14 +256,10 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private Long getTotalUsersFromUserService() {
-        // This would call user-service to get total user count
-        // For now, return 0 as placeholder
         return 0L;
     }
 
     private Long getNewUsersByDateRange(LocalDate startDate, LocalDate endDate) {
-        // This would call user-service to get new users in date range
-        // For now, return 0 as placeholder
         return 0L;
     }
 }

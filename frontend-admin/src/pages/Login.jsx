@@ -7,7 +7,6 @@ import Input from '../components/common/Input.jsx';
 import LoginWithGoogle from '../components/auth/LoginWithGoogle.jsx';
 import LoginWithGithub from '../components/auth/LoginWithGithub.jsx';
 
-// Use relative path to hit Vite proxy and avoid CORS
 const API_BASE_URL = '';
 
 const Login = () => {
@@ -58,7 +57,6 @@ const Login = () => {
 
         const { token, username, email: contactEmail, fullName, avatar, role = 'ADMIN', userId } = payload;
 
-        // Store admin data using AdminAuthContext pattern
         localStorage.setItem('bt-admin-token', token);
         localStorage.setItem('bt-admin-username', username || '');
         localStorage.setItem('bt-admin-email', contactEmail || '');
@@ -68,7 +66,6 @@ const Login = () => {
         localStorage.setItem('bt-admin-userId', userId?.toString() || '');
         localStorage.setItem('bt-admin-lastActivity', Date.now().toString());
 
-        // Set default admin permissions
         const defaultPermissions = [
           'TOUR_READ',
           'TOUR_CREATE',
@@ -89,10 +86,8 @@ const Login = () => {
           sessionStorage.removeItem('bt-admin-session-token');
         }
 
-        // Trigger auth state refresh
         refresh();
 
-        // Dispatch auth changed event
         window.dispatchEvent(new Event('admin-auth-changed'));
 
         navigate('/', { replace: true });

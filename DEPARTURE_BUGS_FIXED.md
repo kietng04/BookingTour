@@ -43,10 +43,8 @@ The useEffect dependency array referenced `showToast` but the variable was actua
 
 ### Fix
 ```javascript
-// Before
 }, [departureId, navigate, showToast]);
 
-// After
 }, [departureId, navigate, toast]);
 ```
 
@@ -70,11 +68,9 @@ TypeError: tours.map is not a function
 
 ### Fix
 ```javascript
-// Before
 const data = await toursAPI.getAll({ status: 'ACTIVE' });
 setTours(data); // Error: data is not an array
 
-// After
 const data = await toursAPI.getAll({ status: 'ACTIVE' });
 const toursArray = data.content || data || [];
 const normalizedTours = toursArray.map(tour => ({
@@ -121,14 +117,12 @@ Query parameters were being set to the string "undefined" instead of being omitt
 
 ### Fix
 ```javascript
-// Before
 const params = {
   from: appliedFilters.fromDate || undefined,
   to: appliedFilters.toDate || undefined,
   status: appliedFilters.status || undefined
 };
 
-// After
 const params = {};
 if (appliedFilters.fromDate) params.from = appliedFilters.fromDate;
 if (appliedFilters.toDate) params.to = appliedFilters.toDate;
@@ -156,7 +150,6 @@ if (!Array.isArray(tours)) {
   return [];
 }
 
-// Added null checks before accessing properties
 if (dep && typeof dep === 'object') {
   allDepartures.push({
     ...dep,
@@ -187,11 +180,9 @@ Same paginated response issue when fetching tours to find departure.
 
 ### Fix
 ```javascript
-// Before
 const tours = await toursAPI.getAll();
 for (const tour of tours) { /* ... */ }
 
-// After
 const toursData = await toursAPI.getAll();
 const tours = toursData.content || toursData || [];
 
@@ -227,10 +218,8 @@ Form validation was requiring tourId even in edit mode where the field is disabl
 
 ### Fix
 ```javascript
-// Before
 {...register('tourId', { required: 'Tour is required' })}
 
-// After
 {...register('tourId', {
   required: mode === 'edit' ? false : 'Tour is required'
 })}
@@ -275,24 +264,20 @@ The variable `tourId` was declared inside the try block but referenced in the ca
 
 ### Fix
 ```javascript
-// Before
 for (const tour of tours) {
   try {
     const tourId = tour.id ?? tour.tourId;  // Declared inside try
     if (!tourId) continue;
-    // ... fetch departures
   } catch (err) {
     console.error(`Failed to fetch departures for tour ${tourId}:`, err);  // tourId out of scope!
   }
 }
 
-// After
 for (const tour of tours) {
   const tourId = tour.id ?? tour.tourId;  // Declared outside try
   if (!tourId) continue;
 
   try {
-    // ... fetch departures
   } catch (err) {
     console.error(`Failed to fetch departures for tour ${tourId}:`, err);  // Now in scope!
   }

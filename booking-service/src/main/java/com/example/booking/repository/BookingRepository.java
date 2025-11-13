@@ -36,7 +36,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT COUNT(b.numSeats) FROM Booking b WHERE b.departureId = :departureId AND b.status IN ('PENDING', 'CONFIRMED')")
     Integer countBookedSeats(@Param("departureId") Long departureId);
 
-    // Dashboard queries
 
     /**
      * Sum total revenue by status and date range

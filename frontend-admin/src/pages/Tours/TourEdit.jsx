@@ -39,7 +39,6 @@ const TourEdit = () => {
   }, [tourId]);
 
   const adaptInitial = (t) => {
-    // Map backend status to frontend status
     const backendToFrontendStatus = {
       'ACTIVE': 'live',
       'UNACTIVE': 'draft',
@@ -62,7 +61,6 @@ const TourEdit = () => {
   };
 
   const adaptPayload = (form) => {
-    // Map frontend status to backend status
     const statusMap = {
       'draft': 'UNACTIVE',
       'live': 'ACTIVE',

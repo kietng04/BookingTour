@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import Card from '../common/Card.jsx';
 
 const DepartureOccupancyChart = ({ data }) => {
-  // Get color based on occupancy rate
   const getOccupancyColor = (rate) => {
     if (rate >= 90) return 'bg-red-500';
     if (rate >= 70) return 'bg-amber-500';
@@ -10,7 +9,6 @@ const DepartureOccupancyChart = ({ data }) => {
     return 'bg-blue-500';
   };
 
-  // Get status badge color
   const getStatusColor = (status) => {
     switch (status) {
       case 'FULL':
@@ -24,7 +22,6 @@ const DepartureOccupancyChart = ({ data }) => {
     }
   };
 
-  // Format date
   const formatDate = (dateString) => {
     try {
       const date = new Date(dateString);
@@ -50,7 +47,6 @@ const DepartureOccupancyChart = ({ data }) => {
                 key={departure.departureId}
                 className="border border-slate-200 rounded-lg p-4 hover:border-primary-300 transition-colors"
               >
-                {/* Tour Name and Date */}
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
                     <h4 className="font-semibold text-slate-900 text-sm">{departure.tourName}</h4>
@@ -67,7 +63,6 @@ const DepartureOccupancyChart = ({ data }) => {
                   </span>
                 </div>
 
-                {/* Progress Bar */}
                 <div className="mb-2">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-medium text-slate-700">
@@ -87,7 +82,6 @@ const DepartureOccupancyChart = ({ data }) => {
                   </div>
                 </div>
 
-                {/* Slots Info */}
                 <div className="flex items-center gap-4 text-xs text-slate-600">
                   <div className="flex items-center gap-1">
                     <div className="w-2 h-2 rounded-full bg-red-500" />

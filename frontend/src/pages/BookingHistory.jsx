@@ -35,7 +35,6 @@ const BookingHistory = () => {
       setLoading(true);
       console.log('Fetching booking history for user:', user.userId, 'page:', page);
       
-      // Gọi API thực tế với pagination
       const response = await bookingsAPI.getUserBookings(user.userId, {
         page: page.toString(),
         size: pageSize.toString()
@@ -43,30 +42,25 @@ const BookingHistory = () => {
       console.log('API response:', response);
       
       if (response) {
-        // Xử lý pagination response
         const bookingList = response.content || [];
         setTotalPages(response.totalPages || 0);
         setTotalElements(response.totalElements || 0);
         setCurrentPage(response.number || 0);
         
-        // Lấy thông tin chi tiết cho từng booking
         const enrichedBookings = await Promise.all(
           bookingList.map(async (booking) => {
             let tourInfo = null;
             let departureInfo = null;
             
             try {
-              // Gọi API lấy thông tin tour
               if (booking.tourId) {
                 tourInfo = await toursAPI.getById(booking.tourId);
               }
               
-              // Lấy thông tin departure từ tourInfo.departures 
               if (tourInfo && tourInfo.departures && booking.departureId) {
                 departureInfo = tourInfo.departures.find((dep) => dep.id === booking.departureId);
               }
               
-              // Fallback: nếu không tìm thấy trong tourInfo, gọi API riêng
               if (!departureInfo && booking.tourId && booking.departureId) {
                 try {
                   const departuresResponse = await toursAPI.getDepartures(booking.tourId);
@@ -81,17 +75,14 @@ const BookingHistory = () => {
               console.error('Error fetching tour/departure info for booking', booking.id, ':', error);
             }
             
-            // Xử lý image từ images array - tìm image có isPrimary = true
             let imageUrl = '/placeholder-tour.jpg';
             
             if (tourInfo?.images && Array.isArray(tourInfo.images) && tourInfo.images.length > 0) {
-              // Tìm image có isPrimary = true
               const primaryImage = tourInfo.images.find((image) => image.isPrimary === true);
               
               if (primaryImage && primaryImage.imageUrl && primaryImage.imageUrl.trim() !== '') {
                 imageUrl = primaryImage.imageUrl.trim();
               } else {
-                // Fallback: lấy image đầu tiên có imageUrl không rỗng
                 for (let i = 0; i < tourInfo.images.length; i++) {
                   const img = tourInfo.images[i];
                   if (img && img.imageUrl && img.imageUrl.trim() !== '') {
@@ -114,12 +105,10 @@ const BookingHistory = () => {
               paymentOverride: booking.paymentOverride,
               createdAt: booking.createdAt,
               updatedAt: booking.updatedAt,
-              // Thông tin từ tour API - sử dụng cùng logic như TourDetail
               tourName: tourInfo?.tourName || tourInfo?.name || tourInfo?.title || `Tour #${booking.tourId}`,
               tourSlug: tourInfo?.slug || '',
               destination: tourInfo?.mainDestination || tourInfo?.destination || tourInfo?.location || tourInfo?.address || 'Đang cập nhật',
               tourImage: imageUrl,
-              // Thông tin từ departure API - ưu tiên startDate
               departureDate: departureInfo?.startDate || departureInfo?.departureDate || departureInfo?.date || null,
               departureInfo: departureInfo,
               bookingDate: booking.createdAt || booking.updatedAt || new Date().toISOString(),
@@ -127,7 +116,6 @@ const BookingHistory = () => {
               guestDetails: { adults: booking.numSeats || 1, children: 0 }
             };
             
-            // Debug log cho từng booking
             console.log(`📋 Booking ${booking.id} processed:`, {
               tourName: tourInfo?.tourName,
               departureId: booking.departureId,
@@ -140,7 +128,6 @@ const BookingHistory = () => {
         
         setBookings(enrichedBookings);
       } else {
-        // Không có dữ liệu - để trống, không dùng mock
         setBookings([]);
         setTotalPages(0);
         setTotalElements(0);
@@ -148,7 +135,6 @@ const BookingHistory = () => {
       }
     } catch (error) {
       console.error('Failed to fetch booking history:', error);
-      // Lỗi API - để trống, không dùng mock data
       setBookings([]);
       setTotalPages(0);
       setTotalElements(0);
@@ -211,19 +197,15 @@ const BookingHistory = () => {
     try {
       setCancellingBookingId(bookingToCancel.id);
       
-      // Gọi API hủy tour
       await bookingsAPI.cancel(bookingToCancel.id);
       
-      // Đóng modal
       setShowCancelModal(false);
       setBookingToCancel(null);
       
-      // Refresh lại danh sách booking để cập nhật trạng thái
       fetchBookingHistory(currentPage);
       
     } catch (error) {
       console.error('Error cancelling booking:', error);
-      // Chỉ log lỗi, không hiển thị alert
     } finally {
       setCancellingBookingId(null);
     }
@@ -260,7 +242,6 @@ const BookingHistory = () => {
     
     try {
       const date = new Date(dateString);
-      // Kiểm tra xem date có hợp lệ không
       if (isNaN(date.getTime()) || date.getFullYear() < 1900) {
         return 'Chưa xác định';
       }
@@ -393,14 +374,12 @@ const BookingHistory = () => {
                           Xem chi tiết
                         </a>
                         {(() => {
-                          // Xử lý ngày khởi hành - thử nhiều trường có thể chứa ngày
                           let departureDate = null;
                           let departureDateString = booking.departureDate || booking.departureInfo?.startDate || booking.departureInfo?.departureDate || booking.startDate;
                           
                           if (departureDateString && departureDateString !== 'Invalid Date') {
                             try {
                               departureDate = new Date(departureDateString);
-                              // Kiểm tra xem Date có hợp lệ không
                               if (isNaN(departureDate.getTime())) {
                                 departureDate = null;
                               }
@@ -413,7 +392,6 @@ const BookingHistory = () => {
                           const currentDate = new Date();
                           const isBeforeDeparture = departureDate && departureDate > currentDate;
                           
-                          // Debug log để kiểm tra dữ liệu
                           console.log('🔍 Booking Cancel Debug:', {
                             bookingId: booking.id,
                             status: booking.status,
@@ -426,7 +404,6 @@ const BookingHistory = () => {
                             timeDiff: departureDate ? `${Math.ceil((departureDate - currentDate) / (1000 * 60 * 60 * 24))} ngày` : 'N/A'
                           });
                           
-                          // Kiểm tra điều kiện có thể hủy tour
                           const isPending = booking.status === 'PENDING' || booking.status === 'CONFIRMED';
                           const isNotCancelled = booking.status !== 'CANCELLED';
                           const canCancelTour = isPending && isBeforeDeparture && isNotCancelled;
