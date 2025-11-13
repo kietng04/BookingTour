@@ -35,7 +35,6 @@ public class CorsPreflightGlobalFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        // Ensure runs early
         return Ordered.HIGHEST_PRECEDENCE;
     }
 }

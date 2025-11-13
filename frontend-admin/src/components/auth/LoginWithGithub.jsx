@@ -9,13 +9,11 @@ const LoginWithGithub = () => {
     setError(null);
 
     try {
-      // Set admin-specific OAuth flow
       sessionStorage.setItem('oauthProvider', 'github');
       sessionStorage.setItem('authTarget', 'admin');
 
       const userServiceUrl = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:8081';
 
-      // Start OAuth flow
       window.location.href = `${userServiceUrl}/auth/start-oauth/github`;
     } catch (err) {
       console.error('GitHub OAuth error:', err);

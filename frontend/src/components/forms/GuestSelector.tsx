@@ -63,21 +63,17 @@ const GuestSelector: React.FC<GuestSelectorProps> = ({
 
   const adjustGuests = (category: GuestCategory, delta: number) => {
     setDistribution((prev) => {
-      // Tính toán giá trị đề xuất
       let proposed = prev[category] + delta;
       
-      // Enforce minimum constraints
       if (category === 'adults') {
         proposed = Math.max(minAdults, proposed);
       } else {
         proposed = Math.max(0, proposed);
       }
 
-      // Create next state
       const next = { ...prev };
       next[category] = proposed;
 
-      // Check total constraint
       const total = next.adults + next.children;
       console.log(`adjustGuests - category: ${category}, delta: ${delta}`, {
         prev,

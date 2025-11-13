@@ -1,8 +1,5 @@
-// Dùng đường dẫn tương đối để trình duyệt gửi same-origin tới Vite dev server
-// và proxy qua gateway → tránh CORS khi chạy MCP Playwright
 const API_BASE_URL = '/api';
 
-// Get admin token from storage
 const getAdminToken = () => {
   return localStorage.getItem('bt-admin-token');
 };
@@ -28,7 +25,6 @@ async function fetchAdminAPI(endpoint, options = {}) {
     const response = await fetch(url, config);
 
     if (response.status === 401) {
-      // Unauthorized - clear token and redirect to login
       console.warn('Unauthorized access, redirecting to login...');
       localStorage.removeItem('bt-admin-token');
       window.location.href = '/auth/login';
@@ -36,7 +32,6 @@ async function fetchAdminAPI(endpoint, options = {}) {
     }
 
     if (response.status === 403) {
-      // Forbidden - insufficient permissions
       throw new Error('Insufficient permissions for this action');
     }
 
@@ -67,7 +62,6 @@ async function fetchAdminAPI(endpoint, options = {}) {
   }
 }
 
-// Legacy function for backward compatibility
 async function fetchAPI(endpoint, options = {}) {
   return fetchAdminAPI(endpoint, options);
 }
@@ -204,7 +198,6 @@ export const usersAPI = {
   }),
 };
 
-// Tour schedules CRUD
 export const schedulesAPI = {
   getAll: (tourId) => fetchAPI(`/tours/${tourId}/schedules`),
   create: (tourId, data) => fetchAPI(`/tours/${tourId}/schedules`, {
@@ -220,7 +213,6 @@ export const schedulesAPI = {
   }),
 };
 
-// Tour images CRUD
 export const imagesAPI = {
   getAll: (tourId) => fetchAPI(`/tours/${tourId}/images`),
   create: (tourId, data) => fetchAPI(`/tours/${tourId}/images`, {
@@ -236,7 +228,6 @@ export const imagesAPI = {
   }),
 };
 
-// Tour discounts CRUD
 export const discountsAPI = {
   getAll: (tourId) => fetchAPI(`/tours/${tourId}/discounts`),
   create: (tourId, data) => fetchAPI(`/tours/${tourId}/discounts`, {
@@ -252,6 +243,27 @@ export const discountsAPI = {
   }),
 };
 
+export const dashboardAPI = {
+  getStats: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchAPI(`/dashboard/stats${query ? `?${query}` : ''}`);
+  },
+
+  getRevenueTrends: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchAPI(`/dashboard/revenue-trends${query ? `?${query}` : ''}`);
+  },
+
+  getTopTours: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchAPI(`/dashboard/top-tours${query ? `?${query}` : ''}`);
+  },
+
+  getBookingStatus: () => fetchAPI('/dashboard/booking-status'),
+
+  getDepartureOccupancy: () => fetchAPI('/dashboard/departure-occupancy'),
+};
+
 export default {
   tours: toursAPI,
   departures: departuresAPI,
@@ -260,5 +272,6 @@ export default {
   schedules: schedulesAPI,
   images: imagesAPI,
   discounts: discountsAPI,
-  fetchAdminAPI, // Export the new auth-aware function
+  dashboard: dashboardAPI,
+  fetchAdminAPI,
 };
