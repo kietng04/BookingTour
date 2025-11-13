@@ -4,12 +4,12 @@ import { ArrowLeft } from 'lucide-react';
 import DepartureForm from '../../components/departures/DepartureForm';
 import Button from '../../components/common/Button';
 import { departuresAPI } from '../../services/api';
-import { useToast } from '../../contexts/ToastContext';
+import { useToast } from '../../context/ToastContext';
 
 const DepartureCreate = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { showToast } = useToast();
+  const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   // Get tourId from query params if coming from TourEdit
@@ -24,7 +24,7 @@ const DepartureCreate = () => {
         totalSlots: data.totalSlots
       });
 
-      showToast('Departure created successfully!', 'success');
+      toast.success('Departure created successfully!');
 
       // Redirect back to tour edit if came from there, otherwise to departures list
       if (tourIdFromQuery) {
@@ -43,9 +43,11 @@ const DepartureCreate = () => {
         errorMessage = 'Tour not found';
       } else if (error.response?.status === 409) {
         errorMessage = 'A departure already exists for this date range';
+      } else if (error.message) {
+        errorMessage = error.message;
       }
 
-      showToast(errorMessage, 'error');
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

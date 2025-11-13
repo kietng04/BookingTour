@@ -95,7 +95,7 @@ const TourEdit = () => {
         <p className="text-sm text-slate-500">Update details, pricing, or availability. Reflects PUT /tours/:id behavior.</p>
       </div>
       <div className="flex justify-end">
-        <Button to={`/departures`} variant="secondary" size="sm">
+        <Button to={`/departures?tourId=${tourId}`} variant="secondary" size="sm">
           Manage departures
         </Button>
       </div>

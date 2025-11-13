@@ -5,12 +5,12 @@ import DepartureForm from '../../components/departures/DepartureForm';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import { departuresAPI, toursAPI } from '../../services/api';
-import { useToast } from '../../contexts/ToastContext';
+import { useToast } from '../../context/ToastContext';
 
 const DepartureEdit = () => {
   const navigate = useNavigate();
   const { departureId } = useParams();
-  const { showToast } = useToast();
+  const toast = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -41,7 +41,7 @@ const DepartureEdit = () => {
 
         if (!foundDeparture) {
           setError('Departure not found');
-          showToast('Departure not found', 'error');
+          toast.error('Departure not found');
           navigate('/departures');
           return;
         }
@@ -53,7 +53,7 @@ const DepartureEdit = () => {
       } catch (error) {
         console.error('Failed to fetch departure:', error);
         setError('Failed to load departure');
-        showToast('Failed to load departure details', 'error');
+        toast.error('Failed to load departure details');
       } finally {
         setIsLoadingData(false);
       }
@@ -71,7 +71,7 @@ const DepartureEdit = () => {
         totalSlots: data.totalSlots
       });
 
-      showToast('Departure updated successfully!', 'success');
+      toast.success('Departure updated successfully!');
       navigate(`/departures/${departureId}`);
     } catch (error) {
       console.error('Failed to update departure:', error);
@@ -83,9 +83,11 @@ const DepartureEdit = () => {
         errorMessage = 'Departure not found';
       } else if (error.response?.status === 409) {
         errorMessage = 'Cannot update: conflicts with existing departure or bookings';
+      } else if (error.message) {
+        errorMessage = error.message;
       }
 
-      showToast(errorMessage, 'error');
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

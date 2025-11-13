@@ -23,15 +23,18 @@ const DepartureList = () => {
 
   useEffect(() => {
     fetchDepartures();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update filters if tourId in query params changes
   useEffect(() => {
     const tourIdFromQuery = searchParams.get('tourId');
     if (tourIdFromQuery && tourIdFromQuery !== filters.tourId) {
-      setFilters(prev => ({ ...prev, tourId: tourIdFromQuery }));
-      fetchDepartures();
+      const newFilters = { ...filters, tourId: tourIdFromQuery };
+      setFilters(newFilters);
+      fetchDepartures(newFilters);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const fetchDepartures = async (appliedFilters = filters) => {
@@ -177,7 +180,7 @@ const DepartureList = () => {
       label: 'Actions',
       render: (row) => (
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={() => handleViewDetails(row)}>
+          <Button size="sm" variant="secondary" onClick={() => handleViewDetails(row)}>
             View Details
           </Button>
         </div>

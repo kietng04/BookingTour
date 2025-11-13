@@ -14,7 +14,7 @@ const DepartureDetail = () => {
   const { departureId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { showToast } = useToast();
+  const toast = useToast();
   const departure = location.state?.departure;
 
   const [bookings, setBookings] = useState([]);
@@ -62,7 +62,7 @@ const DepartureDetail = () => {
     setIsDeleting(true);
     try {
       await departuresAPI.delete(departure.tourId, departureId);
-      showToast('Departure deleted successfully', 'success');
+      toast.success('Departure deleted successfully');
       navigate('/departures');
     } catch (error) {
       console.error('Failed to delete departure:', error);
@@ -72,9 +72,11 @@ const DepartureDetail = () => {
         errorMessage = 'Cannot delete departure with active bookings';
       } else if (error.response?.status === 404) {
         errorMessage = 'Departure not found';
+      } else if (error.message) {
+        errorMessage = error.message;
       }
 
-      showToast(errorMessage, 'error');
+      toast.error(errorMessage);
       setShowDeleteDialog(false);
     } finally {
       setIsDeleting(false);
@@ -89,7 +91,7 @@ const DepartureDetail = () => {
       key: 'bookingId',
       label: 'Booking ID',
       render: (row) => (
-        <span className="font-mono text-sm text-slate-700">#{row.id}</span>
+        <span className="font-mono text-sm text-slate-700">#{row.bookingId ?? row.id}</span>
       ),
     },
     {
@@ -168,7 +170,7 @@ const DepartureDetail = () => {
                 onClick={handleDeleteClick}
                 variant="danger"
                 className="flex items-center gap-2"
-                disabled={hasBookings && reservedSlots > 0}
+                disabled={reservedSlots > 0}
                 title={hasBookings && reservedSlots > 0 ? 'Cannot delete departure with bookings' : 'Delete departure'}
               >
                 <Trash2 className="h-4 w-4" />

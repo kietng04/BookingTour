@@ -41,8 +41,15 @@ async function fetchAdminAPI(endpoint, options = {}) {
     }
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message || `HTTP ${response.status}`);
+      const errorData = await response.json().catch(() => ({ message: 'Request failed' }));
+      const error = new Error(errorData.message || `HTTP ${response.status}`);
+      // Attach response information for better error handling
+      error.response = {
+        status: response.status,
+        statusText: response.statusText,
+        data: errorData
+      };
+      throw error;
     }
 
     return await response.json();
