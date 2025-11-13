@@ -5,6 +5,7 @@ import Card from '../common/Card.jsx';
 import Input from '../common/Input.jsx';
 import Select from '../common/Select.jsx';
 import Button from '../common/Button.jsx';
+import ImageUpload from '../common/ImageUpload.jsx';
 
 const difficultyOptions = [
   { value: 'easy', label: 'Easy' },
@@ -32,9 +33,11 @@ const defaultValues = {
 };
 
 const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
-  const { register, control, handleSubmit, formState: { errors } } = useForm({
+  const { register, control, handleSubmit, formState: { errors }, setValue, watch } = useForm({
     defaultValues: { ...defaultValues, ...initialValues }
   });
+
+  const heroImageValue = watch('heroImage');
 
   const { fields: tagFields, append: appendTag, remove: removeTag } = useFieldArray({
     control,
@@ -102,12 +105,25 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
               {...register('difficulty')}
             />
           </div>
-          <Input
-            label="Hero image URL"
-            placeholder="https://..."
-            {...register('heroImage')}
-            disabled={submitting}
-          />
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Hero image
+            </label>
+            <ImageUpload
+              onUploadSuccess={(imageUrl) => {
+                setValue('heroImage', imageUrl);
+              }}
+              multiple={false}
+            />
+            {heroImageValue && (
+              <div className="mt-3">
+                <p className="text-xs text-slate-500 mb-1">URL hiện tại:</p>
+                <p className="text-xs text-slate-700 font-mono bg-slate-50 p-2 rounded break-all">
+                  {heroImageValue}
+                </p>
+              </div>
+            )}
+          </div>
         </Card>
 
         <Card className="space-y-4">
