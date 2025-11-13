@@ -90,8 +90,6 @@ services:
       - LOGGING_LEVEL_ROOT=DEBUG
       - LOGGING_LEVEL_COM_EXAMPLE=DEBUG
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - LOGGING_LEVEL_ROOT=DEBUG
-      - LOGGING_LEVEL_COM_EXAMPLE=DEBUG
     depends_on:
       eureka-server:
         condition: service_healthy
