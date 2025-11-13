@@ -238,6 +238,28 @@ export const discountsAPI = {
   }),
 };
 
+// Dashboard API
+export const dashboardAPI = {
+  getStats: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchAPI(`/dashboard/stats${query ? `?${query}` : ''}`);
+  },
+
+  getRevenueTrends: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchAPI(`/dashboard/revenue-trends${query ? `?${query}` : ''}`);
+  },
+
+  getTopTours: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchAPI(`/dashboard/top-tours${query ? `?${query}` : ''}`);
+  },
+
+  getBookingStatus: () => fetchAPI('/dashboard/booking-status'),
+
+  getDepartureOccupancy: () => fetchAPI('/dashboard/departure-occupancy'),
+};
+
 export default {
   tours: toursAPI,
   departures: departuresAPI,
@@ -246,5 +268,6 @@ export default {
   schedules: schedulesAPI,
   images: imagesAPI,
   discounts: discountsAPI,
+  dashboard: dashboardAPI,
   fetchAdminAPI, // Export the new auth-aware function
 };
