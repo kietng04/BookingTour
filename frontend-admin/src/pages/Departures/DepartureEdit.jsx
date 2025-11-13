@@ -17,10 +17,13 @@ const DepartureEdit = () => {
   const [departure, setDeparture] = useState(null);
   const [error, setError] = useState(null);
 
+  // Fetch departure details
   useEffect(() => {
     const fetchDeparture = async () => {
       try {
         setIsLoadingData(true);
+        // We need to get all departures and find the one we want
+        // because the API doesn't have a single departure endpoint
         const toursData = await toursAPI.getAll();
         const tours = toursData.content || toursData || [];
 
@@ -82,7 +85,7 @@ const DepartureEdit = () => {
 
       let errorMessage = 'Failed to update departure';
       if (error.response?.status === 400) {
-        errorMessage = error.response.data?.message || 'Invalid departure data';
+        errorMessage = error.response.data?.message || 'Invalid departure data. Check that total slots is not less than reserved slots.';
       } else if (error.response?.status === 404) {
         errorMessage = 'Departure not found';
       } else if (error.response?.status === 409) {
@@ -134,6 +137,7 @@ const DepartureEdit = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
@@ -150,6 +154,7 @@ const DepartureEdit = () => {
         </div>
       </div>
 
+      {/* Warning if departure has bookings */}
       {reservedSlots > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
           <div className="flex gap-3">
@@ -172,6 +177,7 @@ const DepartureEdit = () => {
         </div>
       )}
 
+      {/* Info Card */}
       {departure.status === 'DAKHOIHANH' && (
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
           <div className="flex gap-3">
@@ -190,6 +196,7 @@ const DepartureEdit = () => {
         </div>
       )}
 
+      {/* Form */}
       <DepartureForm
         initialValues={{
           tourId: String(departure.tourId),
@@ -209,4 +216,3 @@ const DepartureEdit = () => {
 };
 
 export default DepartureEdit;
-

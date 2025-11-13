@@ -13,6 +13,7 @@ const STATUS_COLORS = {
   unactive: 'bg-slate-200 text-slate-600',
   full: 'bg-red-100 text-red-700',
   end: 'bg-slate-200 text-slate-500',
+  // Departure statuses
   concho: 'bg-green-100 text-green-700',
   sapfull: 'bg-yellow-100 text-yellow-700',
   dakhoihanh: 'bg-gray-200 text-gray-600'

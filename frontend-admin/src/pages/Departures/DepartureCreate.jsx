@@ -12,6 +12,7 @@ const DepartureCreate = () => {
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
+  // Get tourId from query params if coming from TourEdit
   const tourIdFromQuery = searchParams.get('tourId');
 
   const handleSubmit = async (data) => {
@@ -25,6 +26,7 @@ const DepartureCreate = () => {
 
       toast.success('Departure created successfully!');
 
+      // Redirect back to tour edit if came from there, otherwise to departures list
       if (tourIdFromQuery) {
         navigate(`/tours/${tourIdFromQuery}/edit`);
       } else {
@@ -33,6 +35,7 @@ const DepartureCreate = () => {
     } catch (error) {
       console.error('Failed to create departure:', error);
 
+      // Handle specific error cases
       let errorMessage = 'Failed to create departure';
       if (error.response?.status === 400) {
         errorMessage = error.response.data?.message || 'Invalid departure data';
@@ -60,6 +63,7 @@ const DepartureCreate = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
@@ -76,6 +80,7 @@ const DepartureCreate = () => {
         </div>
       </div>
 
+      {/* Info Card */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div className="flex gap-3">
           <div className="flex-shrink-0">
@@ -97,6 +102,7 @@ const DepartureCreate = () => {
         </div>
       </div>
 
+      {/* Form */}
       <DepartureForm
         initialValues={tourIdFromQuery ? { tourId: tourIdFromQuery } : undefined}
         mode="create"
@@ -110,4 +116,3 @@ const DepartureCreate = () => {
 };
 
 export default DepartureCreate;
-

@@ -23,8 +23,10 @@ const DepartureList = () => {
 
   useEffect(() => {
     fetchDepartures();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Update filters if tourId in query params changes
   useEffect(() => {
     const tourIdFromQuery = searchParams.get('tourId');
     if (tourIdFromQuery && tourIdFromQuery !== filters.tourId) {
@@ -32,18 +34,21 @@ const DepartureList = () => {
       setFilters(newFilters);
       fetchDepartures(newFilters);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const fetchDepartures = async (appliedFilters = filters) => {
     try {
       setLoading(true);
 
+      // If tourId is specified, fetch departures for that tour
       if (appliedFilters.tourId) {
         const params = {};
         if (appliedFilters.fromDate) params.from = appliedFilters.fromDate;
         if (appliedFilters.toDate) params.to = appliedFilters.toDate;
         if (appliedFilters.status) params.status = appliedFilters.status;
 
+        // First, get the tour details to include tour name
         let tourName = 'Unknown Tour';
         let tourData = null;
         try {
@@ -55,6 +60,7 @@ const DepartureList = () => {
 
         const data = await departuresAPI.getByTour(appliedFilters.tourId, params);
 
+        // Map and normalize the data - be less strict with filtering
         const normalizedData = (data || [])
           .filter(d => d && typeof d === 'object')
           .map(d => ({
@@ -71,8 +77,10 @@ const DepartureList = () => {
 
         setDepartures(normalizedData);
       } else {
+        // Otherwise fetch all departures
         const data = await departuresAPI.getAll();
 
+        // Filter out any invalid entries first - must have departureId, dates, and slots
         let validData = (data || []).filter(d =>
           d &&
           typeof d === 'object' &&
@@ -80,9 +88,10 @@ const DepartureList = () => {
           d.startDate &&
           d.endDate &&
           d.totalSlots !== undefined &&
-          d.tourName
+          d.tourName  // Also require tourName for the list view
         );
 
+        // Apply client-side filtering if needed
         let filteredData = validData;
 
         if (appliedFilters.fromDate) {
@@ -136,6 +145,7 @@ const DepartureList = () => {
   };
 
   const handleAddDeparture = () => {
+    // If filtered by tour, pass tourId to create page
     if (filters.tourId) {
       navigate(`/departures/new?tourId=${filters.tourId}`);
     } else {
@@ -287,6 +297,7 @@ const DepartureList = () => {
         onReset={handleResetFilters}
       />
 
+      {/* Departures Table */}
       {departures.length === 0 ? (
         <Card className="text-center py-12">
           <svg className="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

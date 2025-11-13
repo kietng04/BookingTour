@@ -14,6 +14,7 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
       try {
         const data = await toursAPI.getAll();
         const toursArray = data.content || data || [];
+        // Normalize tour data to ensure tourId field exists
         const normalizedTours = toursArray.map(tour => ({
           ...tour,
           tourId: tour.id ?? tour.tourId,
@@ -59,6 +60,7 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Tour Filter */}
         <div>
           <Select
             label="Tour"
@@ -75,6 +77,7 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
           </Select>
         </div>
 
+        {/* From Date */}
         <div>
           <Input
             label="From Date"
@@ -84,6 +87,7 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
           />
         </div>
 
+        {/* To Date */}
         <div>
           <Input
             label="To Date"
@@ -94,6 +98,7 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
           />
         </div>
 
+        {/* Status Filter */}
         <div>
           <Select
             label="Status"
@@ -109,12 +114,14 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
         </div>
       </div>
 
+      {/* Apply Button */}
       <div className="mt-4 flex justify-end">
         <Button onClick={onApply}>
           Apply Filters
         </Button>
       </div>
 
+      {/* Active Filters Summary */}
       {(filters.tourId || filters.fromDate || filters.toDate || filters.status) && (
         <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
           <span className="text-sm text-slate-600">Active filters:</span>

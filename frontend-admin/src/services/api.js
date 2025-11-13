@@ -38,6 +38,7 @@ async function fetchAdminAPI(endpoint, options = {}) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ message: 'Request failed' }));
       const error = new Error(errorData.message || `HTTP ${response.status}`);
+      // Attach response information for better error handling
       error.response = {
         status: response.status,
         statusText: response.statusText,
@@ -46,11 +47,13 @@ async function fetchAdminAPI(endpoint, options = {}) {
       throw error;
     }
 
+    // Handle empty response body (e.g., 204 No Content or DELETE with 200 OK but no body)
     const contentLength = response.headers.get('content-length');
     if (contentLength === '0' || response.status === 204) {
       return null;
     }
 
+    // Try to parse JSON, return null if empty
     const text = await response.text();
     return text ? JSON.parse(text) : null;
   } catch (error) {
@@ -179,6 +182,20 @@ export const usersAPI = {
   },
 
   getById: (userId) => fetchAPI(`/users/${userId}`),
+
+  create: (data) => fetchAPI('/users', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+
+  update: (userId, data) => fetchAPI(`/users/${userId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+
+  delete: (userId) => fetchAPI(`/users/${userId}`, {
+    method: 'DELETE',
+  }),
 };
 
 export const schedulesAPI = {
