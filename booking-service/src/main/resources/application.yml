@@ -43,3 +43,8 @@ management:
     mail:
       enabled: false
 
+# External service URLs
+tour:
+  service:
+    url: http://localhost:8082
+

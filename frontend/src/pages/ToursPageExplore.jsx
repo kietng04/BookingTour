@@ -251,14 +251,12 @@ const ToursPageExplore = () => {
   const [isProvincesLoading, setProvincesLoading] = useState(false);
   const [regionError, setRegionError] = useState(null);
 
-  // Mapping từ region slug sang region ID (chỉ 3 miền: Bắc, Trung, Nam)
   const regionMapping = {
     'north': '1',    // Miền Bắc
     'central': '2',  // Miền Trung  
     'south': '3'     // Miền Nam
   };
 
-  // Khởi tạo filters từ URL parameters khi component mount hoặc URL thay đổi
   useEffect(() => {
     const regionParam = searchParams.get('region');
     const destinationParam = searchParams.get('destination');
@@ -266,9 +264,7 @@ const ToursPageExplore = () => {
     console.log('URL params changed:', { regionParam, destinationParam });
     
     if (regionParam && regionMapping[regionParam]) {
-      // Với destination, tìm province ID thay vì set vào search
       if (destinationParam) {
-        // Decode URL parameter
         const decodedDestination = decodeURIComponent(destinationParam);
         console.log('Setting filters with destination:', decodedDestination);
         setFilters(prev => ({
@@ -284,7 +280,6 @@ const ToursPageExplore = () => {
         }));
       }
     } else {
-      // Reset filters if no region param
       setFilters(prev => ({
         ...prev,
         region: '',
@@ -315,7 +310,6 @@ const ToursPageExplore = () => {
       }
       if (keyword.trim()) {
         params.keyword = keyword.trim();
-        // Tìm kiếm theo điểm đến cụ thể
         params.destination = keyword.trim();
       }
       if (filters.startDate) {
@@ -434,7 +428,6 @@ const ToursPageExplore = () => {
           
           setProvinces(processedProvinces);
 
-          // Auto-select province if destinationName matches
           if (filters.destinationName) {
             console.log('Looking for destination:', filters.destinationName);
             console.log('Available provinces:', processedProvinces.map(p => p.name));
@@ -453,7 +446,6 @@ const ToursPageExplore = () => {
                 destinationName: undefined // Clear temporary field
               }));
             } else {
-              // If exact match not found, try partial match
               const partialMatch = processedProvinces.find(
                 province => province.name.toLowerCase().includes(filters.destinationName.toLowerCase()) ||
                            filters.destinationName.toLowerCase().includes(province.name.toLowerCase())

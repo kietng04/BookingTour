@@ -7,6 +7,13 @@ export default defineConfig({
     port: 5174,
     open: true,
     proxy: {
+      '/api/dashboard': {
+        target: 'http://localhost:8093',
+        changeOrigin: true,
+        secure: false,
+        ws: false,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      },
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,

@@ -26,7 +26,6 @@ const AdminOAuthCallback = () => {
 
       const userData = await response.json();
 
-      // Check if user has admin role
       if (userData.role !== 'ADMIN' && userData.role !== 'SUPER_ADMIN') {
         throw new Error('Access denied. Admin privileges required.');
       }
@@ -50,7 +49,6 @@ const AdminOAuthCallback = () => {
         const role = searchParams.get('role');
         const error = searchParams.get('error');
 
-        // Check for OAuth errors
         if (error) {
           setMessage(`Lỗi đăng nhập: ${decodeURIComponent(error)}`);
           setStatus('error');
@@ -58,7 +56,6 @@ const AdminOAuthCallback = () => {
           return;
         }
 
-        // Validate required parameters
         if (!token || !username) {
           setMessage('Thiếu thông tin đăng nhập. Vui lòng thử lại.');
           setStatus('error');
@@ -66,7 +63,6 @@ const AdminOAuthCallback = () => {
           return;
         }
 
-        // Store admin-specific data
         localStorage.setItem('bt-admin-token', token);
         localStorage.setItem('bt-admin-username', username || '');
         localStorage.setItem('bt-admin-email', email || '');
@@ -76,7 +72,6 @@ const AdminOAuthCallback = () => {
         localStorage.setItem('bt-admin-userId', userId || '');
         localStorage.setItem('bt-admin-lastActivity', Date.now().toString());
 
-        // Set default admin permissions
         const defaultPermissions = [
           'TOUR_READ',
           'TOUR_CREATE',
@@ -92,20 +87,16 @@ const AdminOAuthCallback = () => {
 
         localStorage.setItem('bt-admin-permissions', JSON.stringify(defaultPermissions));
 
-        // Validate admin role and permissions
         await validateAdminRole(token);
 
-        // Clean up session storage
         sessionStorage.removeItem('oauthProvider');
         sessionStorage.removeItem('authTarget');
 
-        // Refresh auth state
         refresh();
 
         setMessage('Đăng nhập thành công! Đang chuyển hướng...');
         setStatus('success');
 
-        // Redirect to admin dashboard
         setTimeout(() => navigate('/'), 1500);
 
       } catch (error) {

@@ -40,23 +40,18 @@ public class AuthService {
             throw new RuntimeException("Username already exists!");
         }
 
-        // Kiểm tra email đã tồn tại
         Optional<User> existingUserOpt = userRepository.findByEmail(request.getEmail());
         if (existingUserOpt.isPresent()) {
             User existingUser = existingUserOpt.get();
-            // Nếu user chưa verify (active = false), xóa user cũ để cho phép đăng ký lại
             if (existingUser.getActive() == null || !existingUser.getActive()) {
                 logger.info("Email {} exists but not verified. Deleting old user to allow re-registration.", request.getEmail());
-                // Xóa verification records cũ
                 emailVerificationService.deleteVerificationsByEmail(request.getEmail());
-                // Xóa user cũ
                 userRepository.delete(existingUser);
             } else {
                 throw new RuntimeException("Email already exists!");
             }
         }
 
-        // Tạo user mới nhưng chưa kích hoạt
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
@@ -68,16 +63,13 @@ public class AuthService {
         User savedUser = userRepository.save(user);
         logger.info("Created new user: {} with email: {}", savedUser.getUsername(), savedUser.getEmail());
 
-        // Gửi mã xác thực email
         try {
             emailVerificationService.createAndSendVerificationCode(savedUser);
             logger.info("Verification email sent to: {}", savedUser.getEmail());
         } catch (Exception e) {
             logger.error("Failed to send verification email to: {}", savedUser.getEmail(), e);
-            // Có thể xóa user nếu không gửi được email, hoặc để người dùng resend
         }
 
-        // Không tạo token ngay, yêu cầu verify email trước
         return new RegisterResponse(
                 null, // Không có token
                 savedUser.getUsername(),
@@ -98,14 +90,11 @@ public class AuthService {
             throw new RuntimeException("Invalid username or password!");
         }
 
-        // Kiểm tra email đã được verify chưa
         if (user.getActive() == null || !user.getActive()) {
-            // Kiểm tra trong hệ thống email verification
             if (!emailVerificationService.isEmailVerified(user.getEmail())) {
                 throw new RuntimeException("Please verify your email before logging in. Check your inbox for verification code.");
             }
             
-            // Nếu đã verify nhưng user.active chưa được cập nhật
             user.setActive(true);
             userRepository.save(user);
         }

@@ -21,21 +21,17 @@ const Register = () => {
   const [tempUserData, setTempUserData] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
 
-  // Validation functions
   const validateForm = () => {
     const errors = {};
     
-    // Validate first name
     if (!firstName.trim()) {
       errors.firstName = 'Họ không được để trống';
     }
     
-    // Validate last name
     if (!lastName.trim()) {
       errors.lastName = 'Tên không được để trống';
     }
     
-    // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim()) {
       errors.email = 'Email không được để trống';
@@ -43,21 +39,18 @@ const Register = () => {
       errors.email = 'Email không hợp lệ';
     }
     
-    // Validate password
     if (!password) {
       errors.password = 'Mật khẩu không được để trống';
     } else if (password.length < 6) {
       errors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
     }
     
-    // Validate confirm password
     if (!confirmPassword) {
       errors.confirmPassword = 'Vui lòng xác nhận mật khẩu';
     } else if (password !== confirmPassword) {
       errors.confirmPassword = 'Mật khẩu xác nhận không khớp';
     }
     
-    // Validate phone (optional but if provided, must be valid)
     if (phone && phone.trim()) {
       const phoneRegex = /^[0-9]{10,11}$/;
       if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
@@ -65,7 +58,6 @@ const Register = () => {
       }
     }
     
-    // Validate username
     if (!username.trim()) {
       const derivedUsername = email ? email.split('@')[0] : '';
       if (!derivedUsername) {
@@ -83,7 +75,6 @@ const Register = () => {
     event.preventDefault();
     setError('');
     
-    // Validate form first
     if (!validateForm()) {
       return;
     }
@@ -96,7 +87,6 @@ const Register = () => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
       
-      // Step 1: Register user and send verification email
       const response = await fetch(`${apiUrl}/api/users/auth/register`, {
         method: 'POST',
         headers: {
@@ -117,7 +107,6 @@ const Register = () => {
         throw new Error(data.error || data.message || 'Đăng ký thất bại');
       }
 
-      // Save temporary user data for verification step
       setTempUserData({
         username: derivedUsername,
         email,
@@ -126,7 +115,6 @@ const Register = () => {
         userId: data.userId
       });
       
-      // Show verification form instead of direct login
       setShowVerification(true);
       setError(''); // Clear any previous errors
       
@@ -138,7 +126,6 @@ const Register = () => {
     }
   };
 
-  // Handle email verification
   const handleVerification = async (event) => {
     event.preventDefault();
     setError('');
@@ -164,7 +151,6 @@ const Register = () => {
         throw new Error(data.error || data.message || 'Mã xác nhận không đúng');
       }
 
-      // Successful verification - login user
       localStorage.setItem('authToken', data.token || '');
       localStorage.setItem('username', tempUserData.username);
       localStorage.setItem('email', tempUserData.email);
@@ -194,7 +180,6 @@ const Register = () => {
     }
   };
 
-  // Resend verification code
   const handleResendCode = async () => {
     setError('');
     setIsSubmitting(true);
@@ -226,7 +211,6 @@ const Register = () => {
     }
   };
 
-  // Show verification form if email verification is required
   if (showVerification) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-50 via-white to-slate-100 px-4 py-12">

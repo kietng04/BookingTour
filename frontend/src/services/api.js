@@ -33,26 +33,22 @@ async function fetchAPI(endpoint, options = {}) {
 }
 
 export const toursAPI = {
-  // get all có filter
   getAll: (params = {}) => {
     const query = new URLSearchParams(params).toString();
     return fetchAPI(`/tours${query ? `?${query}` : ''}`);
   },
 
-  // get chi tiết tour
   getById: (tourId) => fetchAPI(`/tours/${tourId}`),
 
   getBySlug: (slug) => fetchAPI(`/tours/by-slug/${slug}`),
 
 
-  // lấy thông tin danh sách tour hiện có
   getDepartures: (tourId, params = {}) => {
     const query = new URLSearchParams(params).toString();
     return fetchAPI(`/tours/${tourId}/departures${query ? `?${query}` : ''}`);
   },
 
 
-  // lấy danh sách tour còn dùng được
   getDepartureAvailability: (tourId, departureId) =>
     fetchAPI(`/tours/${tourId}/departures/availability?departureId=${departureId}`),
 };

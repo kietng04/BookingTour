@@ -132,7 +132,6 @@
                 const numGuests = parseInt(document.getElementById('numGuests').value);
                 const totalAmount = selectedTour.price * numGuests;
                 
-                // Get first departure
                 const departuresResponse = await fetch(`${API_BASE}/tours/${selectedTour.id}/departures`);
                 const departures = await departuresResponse.json();
                 const departureId = departures[0]?.id || 1;
@@ -192,7 +191,6 @@
                 document.getElementById('step4').classList.add('hidden');
                 document.getElementById('step5').classList.remove('hidden');
                 
-                // Display QR code
                 document.getElementById('qrCode').src = momoResponse.qrCodeUrl || 
                     `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${momoResponse.deeplink}`;
                 

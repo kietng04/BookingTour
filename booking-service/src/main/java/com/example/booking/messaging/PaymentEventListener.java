@@ -57,7 +57,6 @@ public class PaymentEventListener {
                 log.info("[BOOKING-SERVICE] Booking {} confirmed successfully. Status: PENDING → CONFIRMED",
                         bookingId);
 
-                // Gửi email invoice sau khi thanh toán thành công
                 try {
                     sendBookingInvoiceEmail(booking);
                 } catch (Exception e) {
@@ -91,7 +90,6 @@ public class PaymentEventListener {
      */
     private void sendBookingInvoiceEmail(Booking booking) {
         try {
-            // Lấy thông tin user từ user-service
             Map<String, Object> userInfo = getUserInfo(booking.getUserId());
             String userEmail = (String) userInfo.get("email");
             String fullName = (String) userInfo.get("fullName");
@@ -101,15 +99,12 @@ public class PaymentEventListener {
                 return;
             }
 
-            // Lấy thông tin tour từ tour-service
             Map<String, Object> tourInfo = getTourInfo(booking.getTourId());
             String tourName = (String) tourInfo.get("title");
 
-            // Lấy thông tin departure
             Map<String, Object> departureInfo = getDepartureInfo(booking.getDepartureId());
             String departureDate = (String) departureInfo.get("departureDate");
 
-            // Tạo request gửi email
             Map<String, Object> emailRequest = new HashMap<>();
             emailRequest.put("toEmail", userEmail);
             emailRequest.put("fullName", fullName != null ? fullName : "Khách hàng");
@@ -120,7 +115,6 @@ public class PaymentEventListener {
             emailRequest.put("departureDate", departureDate != null ? departureDate : "Đang cập nhật");
             emailRequest.put("paymentMethod", booking.getPaymentOverride() != null ? booking.getPaymentOverride() : "MOMO");
 
-            // Gửi request đến user-service
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(emailRequest, headers);
