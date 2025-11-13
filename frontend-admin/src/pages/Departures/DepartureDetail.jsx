@@ -8,7 +8,7 @@ import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import { bookingsAPI, departuresAPI } from '../../services/api.js';
-import { useToast } from '../../contexts/ToastContext';
+import { useToast } from '../../context/ToastContext';
 
 const DepartureDetail = () => {
   const { departureId } = useParams();
