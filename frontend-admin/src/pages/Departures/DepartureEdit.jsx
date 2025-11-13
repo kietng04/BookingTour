@@ -24,17 +24,24 @@ const DepartureEdit = () => {
         setIsLoadingData(true);
         // We need to get all departures and find the one we want
         // because the API doesn't have a single departure endpoint
-        const tours = await toursAPI.getAll();
+        const toursData = await toursAPI.getAll();
+        const tours = toursData.content || toursData || [];
 
         let foundDeparture = null;
         let foundTourId = null;
 
         for (const tour of tours) {
-          const departures = await departuresAPI.getByTour(tour.tourId);
-          const match = departures.find(d => d.departureId === parseInt(departureId));
+          const tourId = tour.id ?? tour.tourId;
+          if (!tourId) continue;
+
+          const departures = await departuresAPI.getByTour(tourId);
+          const match = departures.find(d => (d.id || d.departureId) === parseInt(departureId));
           if (match) {
-            foundDeparture = match;
-            foundTourId = tour.tourId;
+            foundDeparture = {
+              ...match,
+              departureId: match.id || match.departureId
+            };
+            foundTourId = tourId;
             break;
           }
         }
@@ -60,7 +67,7 @@ const DepartureEdit = () => {
     };
 
     fetchDeparture();
-  }, [departureId, navigate, showToast]);
+  }, [departureId, navigate, toast]);
 
   const handleSubmit = async (data) => {
     setIsLoading(true);
@@ -192,7 +199,7 @@ const DepartureEdit = () => {
       {/* Form */}
       <DepartureForm
         initialValues={{
-          tourId: departure.tourId,
+          tourId: String(departure.tourId),
           startDate: departure.startDate,
           endDate: departure.endDate,
           totalSlots: departure.totalSlots,

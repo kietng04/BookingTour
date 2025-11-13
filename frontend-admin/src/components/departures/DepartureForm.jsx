@@ -40,9 +40,17 @@ const DepartureForm = ({
     const fetchTours = async () => {
       try {
         const data = await toursAPI.getAll({ status: 'ACTIVE' });
-        setTours(data);
+        const toursArray = data.content || data || [];
+        // Normalize tour data to ensure tourId field exists
+        const normalizedTours = toursArray.map(tour => ({
+          ...tour,
+          tourId: tour.id ?? tour.tourId,
+          tourName: tour.tourName || tour.tour_name
+        }));
+        setTours(normalizedTours);
       } catch (error) {
         console.error('Failed to fetch tours:', error);
+        setTours([]);
       } finally {
         setLoadingTours(false);
       }
@@ -88,6 +96,7 @@ const DepartureForm = ({
   const handleFormSubmit = (data) => {
     onSubmit({
       ...data,
+      tourId: parseInt(data.tourId),
       totalSlots: parseInt(data.totalSlots)
     });
   };
@@ -99,13 +108,15 @@ const DepartureForm = ({
         <div>
           <Select
             label="Tour"
-            {...register('tourId', { required: 'Tour is required' })}
+            {...register('tourId', {
+              required: mode === 'edit' ? false : 'Tour is required'
+            })}
             error={errors.tourId?.message}
             disabled={disableTourSelection || loadingTours || mode === 'edit'}
           >
             <option value="">Select a tour</option>
             {tours.map((tour) => (
-              <option key={tour.tourId} value={tour.tourId}>
+              <option key={tour.tourId} value={String(tour.tourId)}>
                 {tour.tourName}
               </option>
             ))}

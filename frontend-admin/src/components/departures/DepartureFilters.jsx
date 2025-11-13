@@ -13,9 +13,17 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
     const fetchTours = async () => {
       try {
         const data = await toursAPI.getAll();
-        setTours(data);
+        const toursArray = data.content || data || [];
+        // Normalize tour data to ensure tourId field exists
+        const normalizedTours = toursArray.map(tour => ({
+          ...tour,
+          tourId: tour.id ?? tour.tourId,
+          tourName: tour.tourName || tour.tour_name
+        }));
+        setTours(normalizedTours);
       } catch (error) {
         console.error('Failed to fetch tours:', error);
+        setTours([]);
       } finally {
         setLoadingTours(false);
       }

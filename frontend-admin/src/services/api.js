@@ -52,7 +52,15 @@ async function fetchAdminAPI(endpoint, options = {}) {
       throw error;
     }
 
-    return await response.json();
+    // Handle empty response body (e.g., 204 No Content or DELETE with 200 OK but no body)
+    const contentLength = response.headers.get('content-length');
+    if (contentLength === '0' || response.status === 204) {
+      return null;
+    }
+
+    // Try to parse JSON, return null if empty
+    const text = await response.text();
+    return text ? JSON.parse(text) : null;
   } catch (error) {
     console.error(`Admin API Error (${endpoint}):`, error);
     throw error;
@@ -96,25 +104,34 @@ export const departuresAPI = {
   getAll: async (params = {}) => {
     try {
       const toursData = await toursAPI.getAll(params);
-      const tours = toursData.content || toursData;
+      const tours = toursData.content || toursData || [];
+
+      if (!Array.isArray(tours)) {
+        console.error('Tours data is not an array:', tours);
+        return [];
+      }
 
       const allDepartures = [];
       for (const tour of tours) {
-        try {
-          const tourId = tour.id ?? tour.tourId;
-          if (!tourId) continue;
+        const tourId = tour.id ?? tour.tourId;
+        if (!tourId) continue;
 
+        try {
           const departures = await fetchAPI(`/tours/${tourId}/departures`);
-          departures.forEach(dep => {
-            allDepartures.push({
-              ...dep,
-              departureId: dep.id ?? dep.departureId,
-              tourName: tour.tourName,
-              tourId,
+          if (Array.isArray(departures)) {
+            departures.forEach(dep => {
+              if (dep && typeof dep === 'object') {
+                allDepartures.push({
+                  ...dep,
+                  departureId: dep.id ?? dep.departureId,
+                  tourName: tour.tourName || tour.tour_name,
+                  tourId,
+                });
+              }
             });
-          });
+          }
         } catch (err) {
-          console.error(`Failed to fetch departures for tour ${tour.tourId}`, err);
+          console.error(`Failed to fetch departures for tour ${tourId}:`, err);
         }
       }
       return allDepartures;

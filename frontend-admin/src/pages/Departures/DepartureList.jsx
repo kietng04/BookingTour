@@ -6,7 +6,7 @@ import Table from '../../components/common/Table.jsx';
 import Button from '../../components/common/Button.jsx';
 import StatusPill from '../../components/common/StatusPill.jsx';
 import DepartureFilters from '../../components/departures/DepartureFilters.jsx';
-import { departuresAPI } from '../../services/api.js';
+import { departuresAPI, toursAPI } from '../../services/api.js';
 
 const DepartureList = () => {
   const navigate = useNavigate();
@@ -43,35 +43,72 @@ const DepartureList = () => {
 
       // If tourId is specified, fetch departures for that tour
       if (appliedFilters.tourId) {
-        const params = {
-          from: appliedFilters.fromDate || undefined,
-          to: appliedFilters.toDate || undefined,
-          status: appliedFilters.status || undefined
-        };
+        const params = {};
+        if (appliedFilters.fromDate) params.from = appliedFilters.fromDate;
+        if (appliedFilters.toDate) params.to = appliedFilters.toDate;
+        if (appliedFilters.status) params.status = appliedFilters.status;
+
+        // First, get the tour details to include tour name
+        let tourName = 'Unknown Tour';
+        let tourData = null;
+        try {
+          tourData = await toursAPI.getById(appliedFilters.tourId);
+          tourName = tourData?.tourName || tourData?.tour_name || 'Unknown Tour';
+        } catch (err) {
+          console.error('Failed to fetch tour details:', err);
+        }
+
         const data = await departuresAPI.getByTour(appliedFilters.tourId, params);
-        setDepartures(data);
+
+        // Map and normalize the data - be less strict with filtering
+        const normalizedData = (data || [])
+          .filter(d => d && typeof d === 'object')
+          .map(d => ({
+            ...d,
+            departureId: d.id || d.departureId,
+            tourId: d.tourId || parseInt(appliedFilters.tourId),
+            tourName: d.tourName || tourName,
+            startDate: d.startDate || d.start_date,
+            endDate: d.endDate || d.end_date,
+            totalSlots: d.totalSlots ?? d.total_slots,
+            remainingSlots: d.remainingSlots ?? d.remaining_slots,
+            status: d.status || 'CONCHO'
+          }));
+
+        setDepartures(normalizedData);
       } else {
         // Otherwise fetch all departures
         const data = await departuresAPI.getAll();
 
+        // Filter out any invalid entries first - must have departureId, dates, and slots
+        let validData = (data || []).filter(d =>
+          d &&
+          typeof d === 'object' &&
+          d.departureId &&
+          d.startDate &&
+          d.endDate &&
+          d.totalSlots !== undefined &&
+          d.tourName  // Also require tourName for the list view
+        );
+
         // Apply client-side filtering if needed
-        let filteredData = data;
+        let filteredData = validData;
 
         if (appliedFilters.fromDate) {
           filteredData = filteredData.filter(d =>
-            new Date(d.startDate) >= new Date(appliedFilters.fromDate)
+            d.startDate && new Date(d.startDate) >= new Date(appliedFilters.fromDate)
           );
         }
 
         if (appliedFilters.toDate) {
           filteredData = filteredData.filter(d =>
-            new Date(d.endDate) <= new Date(appliedFilters.toDate)
+            d.endDate && new Date(d.endDate) <= new Date(appliedFilters.toDate)
           );
         }
 
         if (appliedFilters.status) {
           filteredData = filteredData.filter(d =>
-            d.status.toLowerCase() === appliedFilters.status.toLowerCase()
+            d.status && d.status.toLowerCase() === appliedFilters.status.toLowerCase()
           );
         }
 
@@ -82,6 +119,7 @@ const DepartureList = () => {
     } catch (err) {
       console.error('Failed to fetch departures:', err);
       setError('Failed to load departures');
+      setDepartures([]);
     } finally {
       setLoading(false);
     }
@@ -123,35 +161,55 @@ const DepartureList = () => {
     {
       key: 'tourName',
       label: 'Tour',
-      render: (row) => (
-        <div>
-          <p className="font-medium text-slate-900">{row.tourName}</p>
-          <p className="text-xs text-slate-500">ID: {row.tourId}</p>
-        </div>
-      ),
+      render: (value, row) => {
+        if (!row) return <span className="text-slate-400">N/A</span>;
+        return (
+          <div>
+            <p className="font-medium text-slate-900">{row.tourName || 'Unknown Tour'}</p>
+            <p className="text-xs text-slate-500">ID: {row.tourId || 'N/A'}</p>
+          </div>
+        );
+      },
     },
     {
       key: 'startDate',
       label: 'Departure Date',
-      render: (row) => (
-        <div>
-          <p className="text-sm text-slate-900">
-            {new Date(row.startDate).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </p>
-          <p className="text-xs text-slate-500">
-            to {new Date(row.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-          </p>
-        </div>
-      ),
+      render: (value, row) => {
+        if (!row || !row.startDate || !row.endDate) {
+          return <span className="text-sm text-slate-400">Date not available</span>;
+        }
+        try {
+          const startDate = new Date(row.startDate);
+          const endDate = new Date(row.endDate);
+          if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            return <span className="text-sm text-slate-400">Invalid date</span>;
+          }
+          return (
+            <div>
+              <p className="text-sm text-slate-900">
+                {startDate.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </p>
+              <p className="text-xs text-slate-500">
+                to {endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </p>
+            </div>
+          );
+        } catch (error) {
+          return <span className="text-sm text-slate-400">Invalid date</span>;
+        }
+      },
     },
     {
       key: 'slots',
       label: 'Availability',
-      render: (row) => {
+      render: (value, row) => {
+        if (!row || row.remainingSlots === undefined || row.totalSlots === undefined) {
+          return <span className="text-sm text-slate-400">N/A</span>;
+        }
         const availabilityPercent = (row.remainingSlots / row.totalSlots) * 100;
         return (
           <div className="space-y-1">
@@ -173,12 +231,12 @@ const DepartureList = () => {
     {
       key: 'status',
       label: 'Status',
-      render: (row) => <StatusPill status={row.status} />,
+      render: (value, row) => <StatusPill status={row.status} />,
     },
     {
       key: 'actions',
       label: 'Actions',
-      render: (row) => (
+      render: (value, row) => (
         <div className="flex gap-2">
           <Button size="sm" variant="secondary" onClick={() => handleViewDetails(row)}>
             View Details
