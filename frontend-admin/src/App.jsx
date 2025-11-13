@@ -13,6 +13,7 @@ import DepartureCreate from './pages/Departures/DepartureCreate.jsx';
 import DepartureEdit from './pages/Departures/DepartureEdit.jsx';
 import BookingList from './pages/Bookings/BookingList.jsx';
 import BookingDetail from './pages/Bookings/BookingDetail.jsx';
+import CustomTourList from './pages/CustomTours/CustomTourList.jsx';
 import UserList from './pages/Users/UserList.jsx';
 import Settings from './pages/Settings/Settings.jsx';
 import Login from './pages/Login.jsx';
@@ -56,6 +57,7 @@ const App = () => (
         <Route path="/departures/:departureId/edit" element={<DepartureEdit />} />
         <Route path="/bookings" element={<BookingList />} />
         <Route path="/bookings/:bookingId" element={<BookingDetail />} />
+        <Route path="/custom-tours" element={<CustomTourList />} />
         <Route
           path="/users"
           element={
