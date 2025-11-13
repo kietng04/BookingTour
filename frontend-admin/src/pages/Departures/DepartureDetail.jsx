@@ -1,20 +1,27 @@
 import { useState, useEffect } from 'react';
-import { useParams, useLocation, Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, Users, MapPin } from 'lucide-react';
+import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Calendar, Users, MapPin, Edit, Trash2 } from 'lucide-react';
 import Card from '../../components/common/Card.jsx';
 import Table from '../../components/common/Table.jsx';
 import StatusPill from '../../components/common/StatusPill.jsx';
 import Badge from '../../components/common/Badge.jsx';
-import { bookingsAPI } from '../../services/api.js';
+import Button from '../../components/common/Button.jsx';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
+import { bookingsAPI, departuresAPI } from '../../services/api.js';
+import { useToast } from '../../context/ToastContext';
 
 const DepartureDetail = () => {
   const { departureId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
+  const toast = useToast();
   const departure = location.state?.departure;
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 0, size: 20 });
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (departureId) {
@@ -39,12 +46,52 @@ const DepartureDetail = () => {
     }
   };
 
+  const handleEdit = () => {
+    navigate(`/departures/${departureId}/edit`, {
+      state: { departure }
+    });
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!departure) return;
+
+    setIsDeleting(true);
+    try {
+      await departuresAPI.delete(departure.tourId, departureId);
+      toast.success('Departure deleted successfully');
+      navigate('/departures');
+    } catch (error) {
+      console.error('Failed to delete departure:', error);
+
+      let errorMessage = 'Failed to delete departure';
+      if (error.response?.status === 400) {
+        errorMessage = 'Cannot delete departure with active bookings';
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Departure not found';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error(errorMessage);
+      setShowDeleteDialog(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const hasBookings = bookings && bookings.length > 0;
+  const reservedSlots = departure ? (departure.totalSlots - departure.remainingSlots) : 0;
+
   const columns = [
     {
       key: 'bookingId',
       label: 'Booking ID',
       render: (row) => (
-        <span className="font-mono text-sm text-slate-700">#{row.id}</span>
+        <span className="font-mono text-sm text-slate-700">#{row.bookingId ?? row.id}</span>
       ),
     },
     {
@@ -105,10 +152,51 @@ const DepartureDetail = () => {
 
       {departure && (
         <>
-          <div>
-            <h1 className="text-2xl font-semibold text-slate-900">{departure.tourName}</h1>
-            <p className="text-sm text-slate-500">Departure Details</p>
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold text-slate-900">{departure.tourName}</h1>
+              <p className="text-sm text-slate-500">Departure Details</p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleEdit}
+                variant="secondary"
+                className="flex items-center gap-2"
+              >
+                <Edit className="h-4 w-4" />
+                Edit
+              </Button>
+              <Button
+                onClick={handleDeleteClick}
+                variant="danger"
+                className="flex items-center gap-2"
+                disabled={reservedSlots > 0}
+                title={hasBookings && reservedSlots > 0 ? 'Cannot delete departure with bookings' : 'Delete departure'}
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </Button>
+            </div>
           </div>
+
+          {hasBookings && reservedSlots > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div className="flex gap-3">
+                <div className="flex-shrink-0">
+                  <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-amber-900">Cannot Delete</h3>
+                  <p className="mt-1 text-sm text-amber-700">
+                    This departure has {reservedSlots} active booking(s) and cannot be deleted.
+                    Cancel all bookings before deleting the departure.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid gap-6 md:grid-cols-3">
             <Card className="space-y-3">
@@ -190,6 +278,23 @@ const DepartureDetail = () => {
           </Card>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Departure"
+        message={`Are you sure you want to delete this departure? This action cannot be undone. ${
+          hasBookings
+            ? 'All bookings associated with this departure will be affected.'
+            : ''
+        }`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 };
