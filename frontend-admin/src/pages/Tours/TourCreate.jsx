@@ -20,15 +20,11 @@ const TourCreate = () => {
 
     return {
       tourName: form.name,
-      // Backend sẽ tự generate slug từ tourName nếu không truyền, nhưng giữ trường hợp có nhập
-      // slug: form.slug,
       description: 'Tour được tạo từ trang quản trị',
       days,
       nights: Math.max(days - 1, 0),
       adultPrice: Number(form.price) || 0,
       childPrice: 0,
-      // TourStatus mặc định ACTIVE ở backend, có thể bỏ nếu không cần
-      // status: 'ACTIVE',
       regionId: 1,
       provinceId: 11,
       departurePoint: 'Hà Nội',

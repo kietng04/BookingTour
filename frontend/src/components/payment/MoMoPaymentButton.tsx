@@ -72,19 +72,15 @@ export const MoMoPaymentButton: React.FC<MoMoPaymentButtonProps> = ({
         })
       );
 
-      // Tự động chuyển hướng đến MoMo
       if (response.deeplink) {
-        // Thử mở MoMo app trước
         window.location.href = response.deeplink;
         
-        // Fallback: Nếu app không mở được sau 1.5 giây, mở trang web
         setTimeout(() => {
           if (response.payUrl) {
             window.location.href = response.payUrl;
           }
         }, 1500);
       } else if (response.payUrl) {
-        // Nếu không có deeplink, chuyển hướng trực tiếp đến trang web MoMo
         window.location.href = response.payUrl;
       }
     } catch (error) {

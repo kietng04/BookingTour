@@ -11,7 +11,6 @@ const navigation = [
   { icon: Calendar, label: 'Departures', to: '/departures' },
   { icon: CalendarClock, label: 'Bookings', to: '/bookings' },
   { icon: Users, label: 'Users', to: '/users' },
-  // { icon: Star, label: 'Reviews', to: '/reviews' }, // Tạm ẩn Reviews
   { icon: Settings, label: 'Settings', to: '/settings' }
 ];
 
@@ -25,7 +24,6 @@ const AdminLayout = () => {
     navigate('/auth/login');
   };
 
-  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     navigate('/auth/login');
     return null;

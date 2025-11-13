@@ -201,7 +201,6 @@ public class AuthController {
                 request.getEmail(), request.getCode(), request.getCode() != null ? request.getCode().length() : 0);
             boolean verified = emailVerificationService.verifyCode(request.getEmail(), request.getCode());
             if (verified) {
-                // Generate token and return login response after successful verification
                 LoginResponse loginResponse = authService.createLoginResponseAfterVerification(request.getEmail());
                 return ResponseEntity.ok(loginResponse);
             } else {
@@ -404,7 +403,6 @@ public class AuthController {
         private String paymentMethod;
         private String paymentTime;
 
-        // Getters and setters
         public String getToEmail() { return toEmail; }
         public void setToEmail(String toEmail) { this.toEmail = toEmail; }
         public String getCustomerName() { return customerName; }
@@ -439,7 +437,6 @@ public class AuthController {
         private String departureDate;
         private String paymentMethod;
 
-        // Getters and setters
         public String getToEmail() { return toEmail; }
         public void setToEmail(String toEmail) { this.toEmail = toEmail; }
         public String getFullName() { return fullName; }
@@ -463,7 +460,6 @@ public class AuthController {
         private String code;
         private String newPassword;
 
-        // Getters and setters
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
         public String getCode() { return code; }

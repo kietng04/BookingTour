@@ -38,7 +38,6 @@ const Tours = () => {
   const [provinces, setProvinces] = useState([]);
 
 
-  // helper gom params
   const buildTourParams = (filters) => {
     const params = { page: 0, size: 100, status: 'ACTIVE' };
     if (filters.search)
@@ -58,7 +57,6 @@ const Tours = () => {
     return params;
   };
 
-  // tải toàn bộ vùng tỉnh thành
   useEffect(() => {
     let cancelled = false;
     const loadRegions = async () => {
@@ -81,7 +79,6 @@ const Tours = () => {
     };
   }, []);
 
-  // Handle khi user click region thì gọi api
   useEffect(() => {
     if (!filters.regionId) {
       setProvinces([]);
@@ -115,7 +112,6 @@ const Tours = () => {
     };
   }, [filters.regionId]);
 
-  // useEffect chạy filter
   useEffect(() => {
     let cancelled = false;
 

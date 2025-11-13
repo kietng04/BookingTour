@@ -24,7 +24,6 @@ const ForgotPassword = () => {
     }));
   };
 
-  // Step 1: Request verification code
   const handleSendCode = async (e) => {
     e.preventDefault();
     
@@ -59,7 +58,6 @@ const ForgotPassword = () => {
     }
   };
 
-  // Step 2: Verify code and reset password
   const handleResetPassword = async (e) => {
     e.preventDefault();
 
@@ -112,7 +110,6 @@ const ForgotPassword = () => {
     }
   };
 
-  // Resend verification code
   const handleResendCode = async () => {
     await handleSendCode({ preventDefault: () => {} });
   };

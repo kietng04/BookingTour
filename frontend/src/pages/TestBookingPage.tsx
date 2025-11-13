@@ -8,7 +8,6 @@ const TestBookingPage: React.FC = () => {
 
   const handleCreateBooking = async () => {
     try {
-      // Simulate booking creation
       const mockBooking = {
         id: Math.floor(Math.random() * 1000),
         totalAmount: 500000,
@@ -25,7 +24,6 @@ const TestBookingPage: React.FC = () => {
 
   const handleMoMoPayment = async () => {
     try {
-      // Simulate MoMo payment
       const mockMoMoResponse = {
         orderId: `MOMO_${Date.now()}`,
         payUrl: 'https://test-payment.momo.vn/v2/gateway/pay?token=mock_token',
@@ -34,7 +32,6 @@ const TestBookingPage: React.FC = () => {
       
       console.log('MoMo payment initiated:', mockMoMoResponse);
       
-      // Show QR code
       setStep(3);
     } catch (err) {
       console.error('Error initiating MoMo payment:', err);

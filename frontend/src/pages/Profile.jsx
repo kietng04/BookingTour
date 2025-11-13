@@ -9,7 +9,6 @@ const Profile = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
-  // Form states
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -19,7 +18,6 @@ const Profile = () => {
     confirmPassword: ''
   });
   
-  // Modal states
   const [showChangePhoneModal, setShowChangePhoneModal] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
@@ -70,7 +68,6 @@ const Profile = () => {
         throw new Error('Cập nhật thất bại');
       }
 
-      // Update localStorage
       if (formData.fullName) {
         localStorage.setItem('fullName', formData.fullName);
       }
@@ -78,7 +75,6 @@ const Profile = () => {
         localStorage.setItem('phoneNumber', formData.phone);
       }
       
-      // Trigger auth context refresh
       window.dispatchEvent(new Event('auth-changed'));
       
       alert('Cập nhật thông tin thành công!');
@@ -91,7 +87,6 @@ const Profile = () => {
   };
 
   const handleChangePassword = async () => {
-    // Validate mật khẩu
     if (!formData.currentPassword) {
       alert('Vui lòng nhập mật khẩu hiện tại!');
       return;
@@ -146,8 +141,6 @@ const Profile = () => {
   const handleChangePhone = async () => {
     setLoading(true);
     try {
-      // Gửi mã xác nhận qua email
-      // await userAPI.sendPhoneChangeVerification(newPhone);
       alert('Mã xác nhận đã được gửi qua email của bạn!');
       setShowChangePhoneModal(true);
     } catch (error) {
@@ -160,7 +153,6 @@ const Profile = () => {
   const handleVerifyPhoneChange = async () => {
     setIsVerifying(true);
     try {
-      // await userAPI.verifyPhoneChange(newPhone, verificationCode);
       alert('Thay đổi số điện thoại thành công!');
       setShowChangePhoneModal(false);
       setVerificationCode('');
@@ -183,10 +175,8 @@ const Profile = () => {
     );
   }
 
-  // Kiểm tra nếu user đăng nhập qua OAuth (Google/GitHub) thì không cho chỉnh sửa mật khẩu
     const isOAuthUser = user?.provider && (user.provider === 'google' || user.provider === 'github');
   
-  // Check if user has missing information
   const hasMissingInfo = !user?.phoneNumber || !user?.fullName;
 
   return (

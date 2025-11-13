@@ -172,24 +172,19 @@ public class GoogleOAuthService {
                 ? email
                 : providerId + "@users.noreply.google.com";
 
-        // First try to find by Google provider ID
         Optional<User> existingUser = userRepository.findByProviderId(providerId);
 
-        // If not found by provider ID, try to find by email
         if (existingUser.isEmpty() && StringUtils.hasText(email)) {
             existingUser = userRepository.findByEmail(email);
             
-            // If found user by email but it's NOT an OAuth user, link this Google account
             if (existingUser.isPresent()) {
                 User user = existingUser.get();
                 
-                // Link Google account to existing regular account
                 logger.info("Linking Google account to existing user: email={}", email);
                 user.setProvider("GOOGLE");
                 user.setProviderId(providerId);
                 user.setIsOAuthUser(true);
                 
-                // Update avatar and full name if not set
                 if (!StringUtils.hasText(user.getAvatar())) {
                     user.setAvatar(userResponse.picture());
                 }
@@ -204,7 +199,6 @@ public class GoogleOAuthService {
             }
         }
 
-        // Create new user if not found
         User user = existingUser.orElseGet(User::new);
 
         if (user.getId() == null) {

@@ -50,10 +50,8 @@ public class EmailVerificationService {
      * Tạo và gửi mã xác thực cho user
      */
     public void createAndSendVerificationCode(User user) {
-        // Xóa các mã cũ của user này
         verificationRepository.deleteByEmailAndVerifiedFalse(user.getEmail());
 
-        // Tạo mã xác thực mới
         String code;
         if (developmentMode) {
             code = defaultCode; // Development mode: sử dụng mã cố định
@@ -72,7 +70,6 @@ public class EmailVerificationService {
 
         verificationRepository.save(verification);
 
-        // Gửi email (chỉ khi không phải development mode)
         if (!developmentMode) {
             try {
                 emailService.sendVerificationEmail(user.getEmail(), user.getFullName(), code);
@@ -91,7 +88,6 @@ public class EmailVerificationService {
     public boolean verifyCode(String email, String code) {
         logger.info("Attempting to verify email: {} with code: {}", email, code);
         
-        // Tìm tất cả verification records cho email này để debug
         List<EmailVerification> allVerifications = verificationRepository.findByEmailAndVerifiedFalse(email);
         logger.info("Found {} unverified records for email: {}", allVerifications.size(), email);
         
@@ -100,34 +96,27 @@ public class EmailVerificationService {
                 v.getVerificationCode(), v.getExpiresAt(), v.getAttempts());
         }
         
-        // Tìm verification record chưa verified với email và mã
         Optional<EmailVerification> verificationOpt = verificationRepository
             .findByEmailAndVerificationCodeAndVerifiedFalse(email, code);
 
         if (verificationOpt.isEmpty()) {
             logger.warn("No unverified verification record found for email: {} with code: {}", email, code);
             
-            // Tìm record với email để tăng attempts (mã sai)
             Optional<EmailVerification> anyVerificationOpt = verificationRepository
                 .findTopByEmailOrderByCreatedAtDesc(email);
             
             if (anyVerificationOpt.isPresent()) {
                 EmailVerification anyVerification = anyVerificationOpt.get();
                 
-                // Chỉ xử lý nếu chưa verified và chưa hết hạn
                 if (!anyVerification.getVerified() && !anyVerification.isExpired()) {
-                    // Tăng attempts
                     anyVerification.setAttempts(anyVerification.getAttempts() + 1);
                     
-                    // Kiểm tra nếu đã vượt quá max attempts
                     if (!anyVerification.canAttempt(maxAttempts)) {
                         logger.warn("Maximum attempts ({}) exceeded for email: {} after wrong code input. Current attempts: {}", 
                             maxAttempts, email, anyVerification.getAttempts());
                         
-                        // Xóa verification record
                         verificationRepository.delete(anyVerification);
                         
-                        // Xóa user chưa verify nếu được config
                         if (deleteUnverifiedUsers) {
                             deleteUnverifiedUser(email, "Maximum verification attempts exceeded (wrong code)");
                         }
@@ -144,7 +133,6 @@ public class EmailVerificationService {
 
         EmailVerification verification = verificationOpt.get();
 
-        // Kiểm tra hết hạn với logging chi tiết
         LocalDateTime now = LocalDateTime.now();
         logger.info("Checking expiration: Current time: {}, Expires at: {}, Is expired: {}", 
             now, verification.getExpiresAt(), verification.isExpired());
@@ -153,10 +141,8 @@ public class EmailVerificationService {
             logger.warn("Verification code expired for email: {}. Expires at: {}, Current time: {}", 
                 email, verification.getExpiresAt(), now);
             
-            // Xóa verification record
             verificationRepository.delete(verification);
             
-            // Xóa user chưa verify nếu được config
             if (deleteUnverifiedUsers) {
                 deleteUnverifiedUser(email, "Verification code expired");
             }
@@ -164,15 +150,12 @@ public class EmailVerificationService {
             return false;
         }
 
-        // Kiểm tra số lần thử (trước khi tăng attempts)
         if (!verification.canAttempt(maxAttempts)) {
             logger.warn("Maximum attempts ({}) exceeded for email: {}. Current attempts: {}", 
                 maxAttempts, email, verification.getAttempts());
             
-            // Xóa verification record
             verificationRepository.delete(verification);
             
-            // Xóa user chưa verify nếu được config
             if (deleteUnverifiedUsers) {
                 deleteUnverifiedUser(email, "Maximum verification attempts exceeded");
             }
@@ -180,12 +163,10 @@ public class EmailVerificationService {
             return false;
         }
 
-        // Mã đúng (vì đã tìm bằng code trong query) - xác thực thành công
         verification.setVerified(true);
         verification.setVerifiedAt(LocalDateTime.now());
         verificationRepository.save(verification);
         
-        // Kích hoạt tài khoản user
         try {
             userRepository.findByEmail(email).ifPresent(user -> {
                 user.setActive(true);
@@ -196,7 +177,6 @@ public class EmailVerificationService {
             logger.error("Failed to activate user account for: {}", email, e);
         }
         
-        // Gửi email chào mừng
         try {
             emailService.sendWelcomeEmail(email, "User");
             logger.info("Welcome email sent to: {}", email);
@@ -221,14 +201,11 @@ public class EmailVerificationService {
 
         EmailVerification verification = verificationOpt.get();
         
-        // Kiểm tra nếu mã đã hết hạn - xóa user và verification record
         if (verification.isExpired()) {
             logger.warn("Cannot resend - verification code already expired for email: {}", email);
             
-            // Xóa verification record
             verificationRepository.delete(verification);
             
-            // Xóa user chưa verify
             if (deleteUnverifiedUsers) {
                 deleteUnverifiedUser(email, "Verification code expired before resend");
             }
@@ -236,7 +213,6 @@ public class EmailVerificationService {
             return false;
         }
         
-        // Tạo mã mới
         String newCode;
         if (developmentMode) {
             newCode = defaultCode; // Development mode: sử dụng mã cố định
@@ -251,7 +227,6 @@ public class EmailVerificationService {
 
         verificationRepository.save(verification);
 
-        // Gửi email với mã mới (chỉ khi không phải development mode)
         if (!developmentMode) {
             try {
                 emailService.sendVerificationEmail(email, "User", newCode);
@@ -282,7 +257,6 @@ public class EmailVerificationService {
             Optional<User> userOpt = userRepository.findByEmail(email);
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
-                // Chỉ xóa nếu user chưa được active (chưa verify)
                 if (user.getActive() == null || !user.getActive()) {
                     userRepository.delete(user);
                     logger.info("Deleted unverified user account for email: {}. Reason: {}", email, reason);
@@ -309,7 +283,6 @@ public class EmailVerificationService {
      * Tạo và gửi mã xác thực cho reset password
      */
     public void sendPasswordResetCode(String email) {
-        // Kiểm tra user có tồn tại không
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
             logger.warn("Cannot send password reset code - user not found for email: {}", email);
@@ -318,10 +291,8 @@ public class EmailVerificationService {
 
         User user = userOpt.get();
         
-        // Xóa các mã reset cũ của user này
         verificationRepository.deleteByEmailAndVerifiedFalse(email);
 
-        // Tạo mã xác thực mới
         String code;
         if (developmentMode) {
             code = defaultCode;
@@ -340,7 +311,6 @@ public class EmailVerificationService {
 
         verificationRepository.save(verification);
 
-        // Gửi email
         if (!developmentMode) {
             try {
                 emailService.sendVerificationEmail(email, user.getFullName(), code);
@@ -360,14 +330,12 @@ public class EmailVerificationService {
     public void resetPasswordWithCode(String email, String code, String newPassword) {
         logger.info("Attempting to reset password for email: {} with code: {}", email, code);
         
-        // Tìm verification record
         Optional<EmailVerification> verificationOpt = verificationRepository
             .findByEmailAndVerificationCodeAndVerifiedFalse(email, code);
 
         if (verificationOpt.isEmpty()) {
             logger.warn("No verification record found for email: {} with code: {}", email, code);
             
-            // Tăng attempts cho record hiện tại
             Optional<EmailVerification> anyVerificationOpt = verificationRepository
                 .findTopByEmailOrderByCreatedAtDesc(email);
             
@@ -390,21 +358,18 @@ public class EmailVerificationService {
 
         EmailVerification verification = verificationOpt.get();
 
-        // Kiểm tra hết hạn
         if (verification.isExpired()) {
             logger.warn("Password reset code expired for email: {}", email);
             verificationRepository.delete(verification);
             throw new RuntimeException("Mã xác thực đã hết hạn");
         }
 
-        // Kiểm tra số lần thử
         if (!verification.canAttempt(maxAttempts)) {
             logger.warn("Maximum attempts exceeded for password reset: {}", email);
             verificationRepository.delete(verification);
             throw new RuntimeException("Đã vượt quá số lần thử");
         }
 
-        // Cập nhật password cho user
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
             logger.error("User not found for email: {}", email);
@@ -415,7 +380,6 @@ public class EmailVerificationService {
         user.setPassword(passwordEncoder.encode(newPassword)); // Mã hóa password trước khi lưu
         userRepository.save(user);
         
-        // Đánh dấu verification đã sử dụng
         verification.setVerified(true);
         verification.setVerifiedAt(LocalDateTime.now());
         verificationRepository.save(verification);

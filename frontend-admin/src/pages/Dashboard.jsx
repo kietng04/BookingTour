@@ -1,79 +1,187 @@
-import { DollarSign, TicketPercent, Users as UsersIcon, ThumbsUp } from 'lucide-react';
+import { DollarSign, TicketPercent, Users as UsersIcon, TrendingUp } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard.jsx';
 import RevenueChart from '../components/dashboard/RevenueChart.jsx';
 import RecentBookings from '../components/dashboard/RecentBookings.jsx';
+import DateRangeFilter from '../components/dashboard/DateRangeFilter.jsx';
+import TopToursChart from '../components/dashboard/TopToursChart.jsx';
+import BookingStatusChart from '../components/dashboard/BookingStatusChart.jsx';
+import DepartureOccupancyChart from '../components/dashboard/DepartureOccupancyChart.jsx';
 import Card from '../components/common/Card.jsx';
 import { useEffect, useState } from 'react';
-import { bookingsAPI } from '../services/api.js';
+import { dashboardAPI, bookingsAPI } from '../services/api.js';
 
 const iconMap = {
   revenue: DollarSign,
   bookings: TicketPercent,
-  refunds: UsersIcon,
-  nps: ThumbsUp
+  users: UsersIcon,
+  conversion: TrendingUp
 };
 
 const Dashboard = () => {
   const [stats, setStats] = useState([
-    { id: 'revenue', title: 'Net revenue', value: '—', change: 0, subtitle: '30 ngày gần đây' },
-    { id: 'bookings', title: 'Confirmed bookings', value: '—', change: 0, subtitle: 'Tổng đơn' },
-    { id: 'refunds', title: 'Refund requests', value: '—', change: 0, subtitle: 'Yêu cầu hoàn' },
-    { id: 'nps', title: 'NPS score', value: '—', change: 0, subtitle: 'Khảo sát' },
+    { id: 'revenue', title: 'Net revenue', value: '—', change: 0, subtitle: 'Confirmed bookings' },
+    { id: 'bookings', title: 'Total bookings', value: '—', change: 0, subtitle: 'All statuses' },
+    { id: 'users', title: 'Active users', value: '—', change: 0, subtitle: 'Made bookings' },
+    { id: 'conversion', title: 'Conversion rate', value: '—', change: 0, subtitle: 'Confirmed %' },
   ]);
-  const [recent, setRecent] = useState([]);
-  const [chartData, setChartData] = useState([]);
+  const [recentBookings, setRecentBookings] = useState([]);
+  const [revenueTrends, setRevenueTrends] = useState([]);
+  const [topTours, setTopTours] = useState([]);
+  const [bookingStatusStats, setBookingStatusStats] = useState([]);
+  const [departureOccupancy, setDepartureOccupancy] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dateRange, setDateRange] = useState({
+    startDate: '',
+    endDate: ''
+  });
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const page = await bookingsAPI.getAll({ page: 0, size: 10 });
-        const content = page.content || [];
+    const today = new Date();
+    const last30Days = new Date(today);
+    last30Days.setDate(today.getDate() - 30);
 
-        // Tạo danh sách recent bookings hiển thị
-        const recentAdapted = content.map((b) => ({
+    const endDate = today.toISOString().split('T')[0];
+    const startDate = last30Days.toISOString().split('T')[0];
+
+    setDateRange({ startDate, endDate });
+  }, []);
+
+  useEffect(() => {
+    if (!dateRange.startDate || !dateRange.endDate) return;
+
+    loadDashboardData();
+  }, [dateRange]);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+
+      const [
+        statsData,
+        trendsData,
+        toursData,
+        statusData,
+        occupancyData,
+        recentData
+      ] = await Promise.all([
+        dashboardAPI.getStats(dateRange),
+        dashboardAPI.getRevenueTrends(dateRange),
+        dashboardAPI.getTopTours({ limit: 5 }),
+        dashboardAPI.getBookingStatus(),
+        dashboardAPI.getDepartureOccupancy(),
+        bookingsAPI.getAll({ page: 0, size: 10 })
+      ]);
+
+      if (statsData) {
+        const updatedStats = [
+          {
+            id: 'revenue',
+            title: 'Net revenue',
+            value: formatCurrency(statsData.revenue?.confirmed || 0),
+            change: statsData.revenue?.change || 0,
+            subtitle: 'Confirmed bookings'
+          },
+          {
+            id: 'bookings',
+            title: 'Total bookings',
+            value: String(statsData.bookings?.total || 0),
+            change: 0,
+            subtitle: 'All statuses'
+          },
+          {
+            id: 'users',
+            title: 'Active users',
+            value: String(statsData.users?.activeUsers || 0),
+            change: 0,
+            subtitle: 'Made bookings'
+          },
+          {
+            id: 'conversion',
+            title: 'Conversion rate',
+            value: `${(statsData.bookings?.conversionRate || 0).toFixed(1)}%`,
+            change: 0,
+            subtitle: 'Confirmed %'
+          }
+        ];
+        setStats(updatedStats);
+      }
+
+      if (trendsData && Array.isArray(trendsData)) {
+        const formattedTrends = trendsData.map(item => ({
+          month: formatDateShort(item.period),
+          revenue: Number(item.revenue) || 0
+        }));
+        setRevenueTrends(formattedTrends);
+      }
+
+      if (toursData && Array.isArray(toursData)) {
+        const formattedTours = toursData.map(tour => ({
+          tourId: tour.tourId,
+          tourName: truncateText(tour.tourName, 20),
+          revenue: Number(tour.revenue) || 0,
+          bookingCount: tour.bookingCount || 0,
+          occupancyRate: tour.occupancyRate || 0
+        }));
+        setTopTours(formattedTours);
+      }
+
+      if (statusData && Array.isArray(statusData)) {
+        setBookingStatusStats(statusData);
+      }
+
+      if (occupancyData && Array.isArray(occupancyData)) {
+        setDepartureOccupancy(occupancyData);
+      }
+
+      if (recentData && recentData.content) {
+        const formattedBookings = recentData.content.map((b) => ({
           id: String(b.id),
           tourName: `Tour #${b.tourId}`,
           guestName: `User #${b.userId}`,
-          travelDate: (b.createdAt || '').toString(),
+          travelDate: b.createdAt || '',
           amount: Number(b.totalAmount || 0),
           status: (b.status || 'PENDING').toLowerCase(),
         }));
-        setRecent(recentAdapted);
-
-        // Cập nhật số liệu tổng quan
-        const confirmedCount = content.filter((b) => (b.status || '').toUpperCase() === 'CONFIRMED').length;
-        const totalAmount = content.reduce((sum, b) => sum + Number(b.totalAmount || 0), 0);
-        setStats((prev) => prev.map((s) => {
-          if (s.id === 'bookings') return { ...s, value: String(confirmedCount) };
-          if (s.id === 'revenue') return { ...s, value: new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount) };
-          return s;
-        }));
-
-        // Dữ liệu biểu đồ doanh thu (nhóm theo tháng từ createdAt)
-        const byMonth = new Map();
-        content.forEach((b) => {
-          const d = b.createdAt ? new Date(b.createdAt) : new Date();
-          const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-          const cur = byMonth.get(key) || 0;
-          byMonth.set(key, cur + Number(b.totalAmount || 0));
-        });
-        const chart = Array.from(byMonth.entries()).sort(([a],[b]) => a.localeCompare(b)).map(([ym, revenue]) => {
-          const [y,m] = ym.split('-');
-          return { month: `${m}/${y}`, revenue };
-        });
-        setChartData(chart);
-      } catch (e) {
-        console.error('Load dashboard failed', e);
-      } finally {
-        setLoading(false);
+        setRecentBookings(formattedBookings);
       }
-    };
-    load();
-  }, []);
+
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDateRangeChange = (newDateRange) => {
+    setDateRange(newDateRange);
+  };
+
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0
+    }).format(value);
+  };
+
+  const formatDateShort = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const truncateText = (text, maxLength) => {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
 
   return (
     <div className="space-y-8">
+      <DateRangeFilter onDateRangeChange={handleDateRangeChange} />
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <StatCard
@@ -88,25 +196,23 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
-        <RevenueChart data={chartData} />
-        <RecentBookings bookings={recent} />
+        <RevenueChart data={revenueTrends} />
+        <RecentBookings bookings={recentBookings} />
       </div>
 
-      <Card className="grid gap-6 rounded-3xl border-dashed border-primary-200 bg-primary-50/60 p-8 text-primary-700 md:grid-cols-2">
-        <div className="space-y-3">
-          <p className="text-xs uppercase tracking-widest text-primary-500">Automation roadmap</p>
-          <h3 className="text-2xl font-semibold">Workflow sync with backend events</h3>
-          <p className="text-sm text-primary-600">
-            Kết nối sự kiện đặt chỗ, cập nhật tour, và xử lý thanh toán để tự động hóa.
-          </p>
-        </div>
-        <ul className="space-y-2 text-sm text-primary-600">
-          <li>• booking.confirmed → gửi biên nhận thanh toán</li>
-          <li>• tour.updated → quy trình duyệt nội dung & dịch</li>
-          <li>• payment.failed → cảnh báo và hỗ trợ thủ công</li>
-        </ul>
-      </Card>
-      {loading && <p className="text-xs text-slate-400">Đang tải dữ liệu dashboard...</p>}
+      <div className="grid gap-6 xl:grid-cols-2">
+        <TopToursChart data={topTours} />
+        <BookingStatusChart data={bookingStatusStats} />
+      </div>
+
+      <DepartureOccupancyChart data={departureOccupancy} />
+
+      {loading && (
+        <Card className="text-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mb-2"></div>
+          <p className="text-sm text-slate-400">Loading dashboard data...</p>
+        </Card>
+      )}
     </div>
   );
 };

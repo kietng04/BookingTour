@@ -13,7 +13,6 @@ async function getAdminToken() {
 
 test.describe('Admin Tours', () => {
   test.beforeEach(async ({ page }) => {
-    // Seed admin session with real gateway token
     const token = await getAdminToken();
     await page.addInitScript((tkn) => {
       localStorage.setItem('bt-admin-token', tkn);
@@ -26,7 +25,6 @@ test.describe('Admin Tours', () => {
   test('create tour real API returns 201 (workaround token)', async ({ page }) => {
     await page.goto('http://localhost:5176/tours/new');
     await page.getByRole('textbox', { name: 'Tour name' }).fill('E2E Tour');
-    // Slug hiện đang required ở form, điền để qua validate
     await page.getByRole('textbox', { name: 'Slug' }).fill('e2e-tour');
     await page.getByRole('spinbutton', { name: 'Base price' }).fill('1999');
     await page.getByRole('spinbutton', { name: 'Duration (days)' }).fill('5');
@@ -40,7 +38,6 @@ test.describe('Admin Tours', () => {
   });
 
   test('edit tour shows success toast and navigates to list (stubbed)', async ({ page }) => {
-    // Stub GET /api/tours/1 and PUT /api/tours/1
     await page.route('**/api/tours/1', async (route) => {
       if (route.request().method() === 'GET') {
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({

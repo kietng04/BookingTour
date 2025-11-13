@@ -9,13 +9,11 @@ const LoginWithGoogle = () => {
     setError(null);
 
     try {
-      // Set admin-specific OAuth flow
       sessionStorage.setItem('oauthProvider', 'google');
       sessionStorage.setItem('authTarget', 'admin');
 
       const userServiceUrl = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:8081';
 
-      // Start OAuth flow
       window.location.href = `${userServiceUrl}/auth/start-oauth/google`;
     } catch (err) {
       console.error('Google OAuth error:', err);

@@ -77,14 +77,12 @@ public class UserController {
     public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String token,
                                            @RequestBody UpdateProfileRequest request) {
         try {
-            // Extract token from Bearer
             String jwtToken = token.substring(7);
             String email = jwtUtil.extractEmail(jwtToken);
             
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // Update allowed fields for OAuth users
             if (request.getFullName() != null && !request.getFullName().trim().isEmpty()) {
                 user.setFullName(request.getFullName().trim());
             }
@@ -104,7 +102,6 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String token) {
         try {
-            // Extract token from Bearer
             String jwtToken = token.substring(7);
             String email = jwtUtil.extractEmail(jwtToken);
             
@@ -121,32 +118,27 @@ public class UserController {
     public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String token,
                                             @RequestBody ChangePasswordRequest request) {
         try {
-            // Extract token from Bearer
             String jwtToken = token.substring(7);
             String email = jwtUtil.extractEmail(jwtToken);
             
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // Check if user is OAuth user
             if (Boolean.TRUE.equals(user.getIsOAuthUser())) {
                 return ResponseEntity.badRequest()
                         .body("{\"error\": \"Tài khoản OAuth không thể đổi mật khẩu\"}");
             }
 
-            // Verify current password
             if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
                 return ResponseEntity.badRequest()
                         .body("{\"error\": \"Mật khẩu hiện tại không đúng\"}");
             }
 
-            // Validate new password
             if (request.getNewPassword() == null || request.getNewPassword().length() < 6) {
                 return ResponseEntity.badRequest()
                         .body("{\"error\": \"Mật khẩu mới phải có ít nhất 6 ký tự\"}");
             }
 
-            // Update password
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
             userRepository.save(user);
 
@@ -161,7 +153,6 @@ public class UserController {
         return ResponseEntity.ok("User Service is healthy!");
     }
 
-    // DTO for change password request
     public static class ChangePasswordRequest {
         private String currentPassword;
         private String newPassword;

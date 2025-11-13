@@ -40,7 +40,6 @@ public class EmailVerification {
         createdAt = LocalDateTime.now();
     }
 
-    // Constructors
     public EmailVerification() {}
 
     public EmailVerification(String email, Long userId, String verificationCode, LocalDateTime expiresAt) {
@@ -50,7 +49,6 @@ public class EmailVerification {
         this.expiresAt = expiresAt;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -123,7 +121,6 @@ public class EmailVerification {
         this.createdAt = createdAt;
     }
 
-    // Helper methods
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(expiresAt);
     }

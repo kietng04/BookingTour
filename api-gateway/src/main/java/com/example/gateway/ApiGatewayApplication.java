@@ -14,5 +14,4 @@ public class ApiGatewayApplication {
         SpringApplication.run(ApiGatewayApplication.class, args);
     }
 
-    // Gỡ bean CorsWebFilter, dùng cấu hình spring.cloud.gateway.globalcors trong application.yml
 }

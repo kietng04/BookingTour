@@ -38,17 +38,14 @@ const SiteHeader: React.FC = () => {
     return user.fullName || user.username || '';
   }, [user]);
 
-  // Fetch regions and provinces data
   useEffect(() => {
     const fetchRegionsAndProvinces = async () => {
       setLoadingRegions(true);
       try {
-        // Fetch regions
         const regionsData = await regionsAPI.getAll();
         const regionsList = Array.isArray(regionsData) ? regionsData : [];
         setRegions(regionsList);
 
-        // Fetch provinces for each region
         const provincesMap = {};
         await Promise.all(
           regionsList.map(async (region) => {

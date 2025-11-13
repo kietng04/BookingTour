@@ -1,6 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-// Single source of truth for the context default value
 const AdminAuthContext = createContext({
   isAuthenticated: false,
   token: null,
@@ -15,7 +14,6 @@ const AdminAuthContext = createContext({
   isSessionExpired: () => true,
 });
 
-// Admin-specific storage keys
 const ADMIN_STORAGE_KEYS = [
   'bt-admin-token',
   'bt-admin-username',
@@ -28,7 +26,6 @@ const ADMIN_STORAGE_KEYS = [
   'bt-admin-lastActivity'
 ];
 
-// Session timeout: 15 minutes in milliseconds
 const SESSION_TIMEOUT = 15 * 60 * 1000;
 
 const normalizeToken = (rawToken) => {
@@ -140,7 +137,6 @@ export const AdminAuthProvider = ({ children }) => {
     clearStorage();
     setState({ token: null, profile: null, permissions: [], lastActivity: Date.now() });
 
-    // Dispatch auth changed event for other components
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('admin-auth-changed'));
     }
@@ -152,7 +148,6 @@ export const AdminAuthProvider = ({ children }) => {
     return state.permissions.includes(permission);
   }, [state.token, state.profile?.role, state.permissions]);
 
-  // Check session expiration
   useEffect(() => {
     const checkInterval = setInterval(() => {
       if (isSessionExpired() && state.token) {
@@ -164,7 +159,6 @@ export const AdminAuthProvider = ({ children }) => {
     return () => clearInterval(checkInterval);
   }, [isSessionExpired, logout, state.token]);
 
-  // Auto-logout on token expiration warning
   useEffect(() => {
     const handleWarning = () => {
       const timeUntilExpiration = SESSION_TIMEOUT - (Date.now() - state.lastActivity);
@@ -177,7 +171,6 @@ export const AdminAuthProvider = ({ children }) => {
     return () => clearInterval(warningInterval);
   }, [state.lastActivity, state.token]);
 
-  // Listen for storage changes
   useEffect(() => {
     const handleStorage = (event) => {
       if (event.key === null || ADMIN_STORAGE_KEYS.includes(event.key)) {
@@ -200,7 +193,6 @@ export const AdminAuthProvider = ({ children }) => {
     }
   }, [refresh]);
 
-  // Update last activity on user interaction
   useEffect(() => {
     if (!state.token) return;
 
