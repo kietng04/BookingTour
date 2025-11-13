@@ -264,6 +264,113 @@ export const dashboardAPI = {
   getDepartureOccupancy: () => fetchAPI('/dashboard/departure-occupancy'),
 };
 
+export const exportAPI = {
+  /**
+   * Download bookings as Excel file
+   * @param {Object} params - Filter parameters (userId, tourId, status, startDate, endDate)
+   */
+  downloadBookingsExcel: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const url = `${API_BASE_URL}/export/bookings/excel${query ? `?${query}` : ''}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${getAdminToken()}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download bookings Excel');
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `bookings_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Error downloading bookings Excel:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Download booking invoice as PDF
+   * @param {number} bookingId - Booking ID
+   */
+  downloadInvoicePdf: async (bookingId) => {
+    const url = `${API_BASE_URL}/export/bookings/${bookingId}/invoice`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${getAdminToken()}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download invoice PDF');
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `invoice_${bookingId}_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Error downloading invoice PDF:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Download dashboard stats as Excel file
+   * @param {string} startDate - Start date (YYYY-MM-DD)
+   * @param {string} endDate - End date (YYYY-MM-DD)
+   */
+  downloadDashboardExcel: async (startDate, endDate) => {
+    const query = new URLSearchParams({ startDate, endDate }).toString();
+    const url = `${API_BASE_URL}/export/dashboard/excel?${query}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${getAdminToken()}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download dashboard Excel');
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `dashboard_stats_${startDate}_to_${endDate}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Error downloading dashboard Excel:', error);
+      throw error;
+    }
+  },
+};
+
 export default {
   tours: toursAPI,
   departures: departuresAPI,
@@ -273,5 +380,6 @@ export default {
   images: imagesAPI,
   discounts: discountsAPI,
   dashboard: dashboardAPI,
+  export: exportAPI,
   fetchAdminAPI,
 };

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { Download } from 'lucide-react';
 import BookingTable from '../../components/bookings/BookingTable.jsx';
 import Card from '../../components/common/Card.jsx';
 import Select from '../../components/common/Select.jsx';
-import { bookingsAPI, departuresAPI } from '../../services/api.js';
+import Button from '../../components/common/Button.jsx';
+import { bookingsAPI, departuresAPI, exportAPI } from '../../services/api.js';
 
 const BookingList = () => {
   const [bookings, setBookings] = useState([]);
@@ -10,6 +12,7 @@ const BookingList = () => {
   const [loading, setLoading] = useState(true);
   const [selectedDeparture, setSelectedDeparture] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     fetchDepartures();
@@ -50,6 +53,28 @@ const BookingList = () => {
     }
   };
 
+  const handleExportToExcel = async () => {
+    try {
+      setExporting(true);
+      const params = {};
+
+      if (selectedDeparture) {
+        params.departureId = selectedDeparture;
+      }
+      if (selectedStatus) {
+        params.status = selectedStatus;
+      }
+
+      await exportAPI.downloadBookingsExcel(params);
+      alert('Bookings exported successfully!');
+    } catch (err) {
+      console.error('Failed to export bookings:', err);
+      alert('Failed to export bookings. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -61,7 +86,18 @@ const BookingList = () => {
 
       {/* Filters */}
       <Card className="space-y-4">
-        <h3 className="text-sm font-semibold text-slate-900">Filters</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-slate-900">Filters</h3>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleExportToExcel}
+            disabled={exporting || loading || bookings.length === 0}
+          >
+            <Download className="h-4 w-4" />
+            {exporting ? 'Exporting...' : 'Export to Excel'}
+          </Button>
+        </div>
         <div className="grid gap-4 md:grid-cols-3">
           <Select
             label="Filter by Departure"
