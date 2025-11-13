@@ -1,32 +1,114 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import Card from '../../components/common/Card.jsx';
 import Table from '../../components/common/Table.jsx';
 import Button from '../../components/common/Button.jsx';
 import StatusPill from '../../components/common/StatusPill.jsx';
+import DepartureFilters from '../../components/departures/DepartureFilters.jsx';
 import { departuresAPI } from '../../services/api.js';
 
 const DepartureList = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [departures, setDepartures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({
+    tourId: searchParams.get('tourId') || '',
+    fromDate: '',
+    toDate: '',
+    status: ''
+  });
 
   useEffect(() => {
     fetchDepartures();
   }, []);
 
-  const fetchDepartures = async () => {
+  // Update filters if tourId in query params changes
+  useEffect(() => {
+    const tourIdFromQuery = searchParams.get('tourId');
+    if (tourIdFromQuery && tourIdFromQuery !== filters.tourId) {
+      setFilters(prev => ({ ...prev, tourId: tourIdFromQuery }));
+      fetchDepartures();
+    }
+  }, [searchParams]);
+
+  const fetchDepartures = async (appliedFilters = filters) => {
     try {
       setLoading(true);
-      const data = await departuresAPI.getAll();
-      setDepartures(data);
+
+      // If tourId is specified, fetch departures for that tour
+      if (appliedFilters.tourId) {
+        const params = {
+          from: appliedFilters.fromDate || undefined,
+          to: appliedFilters.toDate || undefined,
+          status: appliedFilters.status || undefined
+        };
+        const data = await departuresAPI.getByTour(appliedFilters.tourId, params);
+        setDepartures(data);
+      } else {
+        // Otherwise fetch all departures
+        const data = await departuresAPI.getAll();
+
+        // Apply client-side filtering if needed
+        let filteredData = data;
+
+        if (appliedFilters.fromDate) {
+          filteredData = filteredData.filter(d =>
+            new Date(d.startDate) >= new Date(appliedFilters.fromDate)
+          );
+        }
+
+        if (appliedFilters.toDate) {
+          filteredData = filteredData.filter(d =>
+            new Date(d.endDate) <= new Date(appliedFilters.toDate)
+          );
+        }
+
+        if (appliedFilters.status) {
+          filteredData = filteredData.filter(d =>
+            d.status.toLowerCase() === appliedFilters.status.toLowerCase()
+          );
+        }
+
+        setDepartures(filteredData);
+      }
+
       setError(null);
     } catch (err) {
       console.error('Failed to fetch departures:', err);
       setError('Failed to load departures');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFiltersChange = (newFilters) => {
+    setFilters(newFilters);
+  };
+
+  const handleApplyFilters = () => {
+    fetchDepartures(filters);
+  };
+
+  const handleResetFilters = () => {
+    const resetFilters = {
+      tourId: '',
+      fromDate: '',
+      toDate: '',
+      status: ''
+    };
+    setFilters(resetFilters);
+    fetchDepartures(resetFilters);
+  };
+
+  const handleAddDeparture = () => {
+    // If filtered by tour, pass tourId to create page
+    if (filters.tourId) {
+      navigate(`/departures/new?tourId=${filters.tourId}`);
+    } else {
+      navigate('/departures/new');
     }
   };
 
@@ -129,7 +211,7 @@ const DepartureList = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">Departures</h1>
@@ -137,15 +219,58 @@ const DepartureList = () => {
             Manage tour departures and track availability
           </p>
         </div>
+        <Button
+          onClick={handleAddDeparture}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Add Departure
+        </Button>
       </div>
 
-      <Card>
-        <Table columns={columns} data={departures} />
-      </Card>
+      {/* Filters */}
+      <DepartureFilters
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        onApply={handleApplyFilters}
+        onReset={handleResetFilters}
+      />
 
-      {departures.length === 0 && (
+      {/* Departures Table */}
+      {departures.length === 0 ? (
         <Card className="text-center py-12">
-          <p className="text-sm text-slate-500">No departures found</p>
+          <svg className="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <h3 className="mt-2 text-sm font-medium text-slate-900">No departures found</h3>
+          <p className="mt-1 text-sm text-slate-500">
+            {Object.values(filters).some(v => v)
+              ? 'Try adjusting your filters or create a new departure.'
+              : 'Get started by creating a new departure.'}
+          </p>
+          <div className="mt-6">
+            <Button onClick={handleAddDeparture}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Departure
+            </Button>
+          </div>
+        </Card>
+      ) : (
+        <Card>
+          <Table columns={columns} data={departures} />
+          <div className="mt-4 pt-4 border-t text-sm text-slate-600 flex justify-between items-center">
+            <span>
+              Showing <span className="font-semibold">{departures.length}</span> departure{departures.length !== 1 ? 's' : ''}
+            </span>
+            {Object.values(filters).some(v => v) && (
+              <button
+                onClick={handleResetFilters}
+                className="text-primary-600 hover:text-primary-700"
+              >
+                Clear all filters
+              </button>
+            )}
+          </div>
         </Card>
       )}
     </div>
