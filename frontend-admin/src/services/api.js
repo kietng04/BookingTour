@@ -164,6 +164,20 @@ export const usersAPI = {
   },
 
   getById: (userId) => fetchAPI(`/users/${userId}`),
+
+  create: (data) => fetchAPI('/users', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+
+  update: (userId, data) => fetchAPI(`/users/${userId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+
+  delete: (userId) => fetchAPI(`/users/${userId}`, {
+    method: 'DELETE',
+  }),
 };
 
 // Tour schedules CRUD
