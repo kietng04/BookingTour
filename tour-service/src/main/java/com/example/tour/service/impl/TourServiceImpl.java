@@ -187,10 +187,11 @@ public class TourServiceImpl implements TourService {
         if (request.getHeroImageUrl() != null && !request.getHeroImageUrl().isBlank()) {
             tour.setHeroImageUrl(request.getHeroImageUrl().trim());
         }
-        
-    
-        if (request.getAdultPrice() != null && request.getChildPrice() != null) 
-            validatePrice(request.getChildPrice(), request.getAdultPrice());
+
+        // Validate prices after setting them
+        if (request.getAdultPrice() != null || request.getChildPrice() != null) {
+            validatePrice(tour.getChildPrice(), tour.getAdultPrice());
+        }
         
         if (request.getStatus() != null) 
             tour.setStatus(Tour.TourStatus.valueOf(request.getStatus()));
@@ -248,10 +249,11 @@ public class TourServiceImpl implements TourService {
     }
     
     private void validatePrice(BigDecimal childPrice, BigDecimal adultPrice){
-        if ( adultPrice == null || adultPrice.compareTo(BigDecimal.ZERO) <= 0)
-            throw new IllegalArgumentException("Giá người lớn phải là số dương");
+        // Allow 0 prices for promotional/free tours
+        if ( adultPrice == null || adultPrice.compareTo(BigDecimal.ZERO) < 0)
+            throw new IllegalArgumentException("Giá người lớn không được là số âm");
         if ( childPrice == null || childPrice.compareTo(BigDecimal.ZERO) < 0)
-            throw new IllegalArgumentException("Giá trẻ em phải là số dương");
+            throw new IllegalArgumentException("Giá trẻ em không được là số âm");
         if (childPrice.compareTo(adultPrice) > 0) {
             throw new IllegalArgumentException("Giá trẻ em không thể cao hơn giá người lớn");
         }

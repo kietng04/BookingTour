@@ -49,6 +49,25 @@ public class ReviewServiceImpl implements ReviewService {
             throw new RuntimeException("Rating must be between 1.0 and 5.0");
         }
 
+        // Validate title length (10-200 characters)
+        if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+            throw new RuntimeException("Title is required");
+        }
+        if (request.getTitle().trim().length() < 10) {
+            throw new RuntimeException("Title must be at least 10 characters");
+        }
+        if (request.getTitle().trim().length() > 200) {
+            throw new RuntimeException("Title must not exceed 200 characters");
+        }
+
+        // Validate comment length (minimum 20 characters)
+        if (request.getComment() == null || request.getComment().trim().isEmpty()) {
+            throw new RuntimeException("Comment is required");
+        }
+        if (request.getComment().trim().length() < 20) {
+            throw new RuntimeException("Comment must be at least 20 characters");
+        }
+
         // Create review
         TourReview review = new TourReview();
         review.setTour(tour);
@@ -95,9 +114,20 @@ public class ReviewServiceImpl implements ReviewService {
             review.setRating(request.getRating().setScale(1, RoundingMode.HALF_UP));
         }
         if (request.getTitle() != null) {
+            // Validate title length (10-200 characters)
+            if (request.getTitle().trim().length() < 10) {
+                throw new RuntimeException("Title must be at least 10 characters");
+            }
+            if (request.getTitle().trim().length() > 200) {
+                throw new RuntimeException("Title must not exceed 200 characters");
+            }
             review.setTitle(request.getTitle());
         }
         if (request.getComment() != null) {
+            // Validate comment length (minimum 20 characters)
+            if (request.getComment().trim().length() < 20) {
+                throw new RuntimeException("Comment must be at least 20 characters");
+            }
             review.setComment(request.getComment());
         }
         if (request.getBadges() != null) {
