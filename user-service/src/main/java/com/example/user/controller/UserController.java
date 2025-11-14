@@ -153,6 +153,32 @@ public class UserController {
         return ResponseEntity.ok("User Service is healthy!");
     }
 
+    @PostMapping("/init-admin")
+    public ResponseEntity<?> initAdmin() {
+        try {
+            // Check if admin already exists
+            if (userRepository.existsByEmail("admin@gmail.com")) {
+                return ResponseEntity.ok().body("{\"message\": \"Admin user already exists\", \"email\": \"admin@gmail.com\"}");
+            }
+
+            // Create new admin user
+            User admin = new User();
+            admin.setUsername("admin");
+            admin.setEmail("admin@gmail.com");
+            admin.setPassword(passwordEncoder.encode("admin"));
+            admin.setFullName("Administrator");
+            admin.setPhoneNumber("0000000000");
+            admin.setIsOAuthUser(false);
+            admin.setActive(true);
+
+            userRepository.save(admin);
+
+            return ResponseEntity.ok().body("{\"message\": \"Admin user created successfully\", \"email\": \"admin@gmail.com\", \"password\": \"admin\"}");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"error\": \"Failed to create admin user: " + e.getMessage() + "\"}");
+        }
+    }
+
     public static class ChangePasswordRequest {
         private String currentPassword;
         private String newPassword;

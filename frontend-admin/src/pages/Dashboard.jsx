@@ -1,4 +1,4 @@
-import { DollarSign, TicketPercent, Users as UsersIcon, TrendingUp } from 'lucide-react';
+import { DollarSign, TicketPercent, Users as UsersIcon, TrendingUp, Download } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard.jsx';
 import RevenueChart from '../components/dashboard/RevenueChart.jsx';
 import RecentBookings from '../components/dashboard/RecentBookings.jsx';
@@ -7,8 +7,9 @@ import TopToursChart from '../components/dashboard/TopToursChart.jsx';
 import BookingStatusChart from '../components/dashboard/BookingStatusChart.jsx';
 import DepartureOccupancyChart from '../components/dashboard/DepartureOccupancyChart.jsx';
 import Card from '../components/common/Card.jsx';
+import Button from '../components/common/Button.jsx';
 import { useEffect, useState } from 'react';
-import { dashboardAPI, bookingsAPI } from '../services/api.js';
+import { dashboardAPI, bookingsAPI, exportAPI } from '../services/api.js';
 
 const iconMap = {
   revenue: DollarSign,
@@ -30,6 +31,7 @@ const Dashboard = () => {
   const [bookingStatusStats, setBookingStatusStats] = useState([]);
   const [departureOccupancy, setDepartureOccupancy] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [dateRange, setDateRange] = useState({
     startDate: '',
     endDate: ''
@@ -156,6 +158,23 @@ const Dashboard = () => {
     setDateRange(newDateRange);
   };
 
+  const handleExportDashboard = async () => {
+    if (!dateRange.startDate || !dateRange.endDate) {
+      alert('Please select a valid date range');
+      return;
+    }
+
+    try {
+      setExporting(true);
+      await exportAPI.downloadDashboardExcel(dateRange.startDate, dateRange.endDate);
+    } catch (err) {
+      console.error('Failed to export dashboard:', err);
+      alert('Failed to export dashboard. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -180,7 +199,18 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-8">
-      <DateRangeFilter onDateRangeChange={handleDateRangeChange} />
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <DateRangeFilter onDateRangeChange={handleDateRangeChange} />
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={handleExportDashboard}
+          disabled={exporting || loading || !dateRange.startDate || !dateRange.endDate}
+        >
+          <Download className="h-4 w-4" />
+          {exporting ? 'Exporting...' : 'Export Dashboard'}
+        </Button>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (

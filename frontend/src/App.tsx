@@ -12,6 +12,8 @@ import BookingHistory from './pages/BookingHistory.jsx';
 import PaymentResultPage from './pages/PaymentResultPage';
 import NotFoundPage from './pages/NotFoundPage';
 import Profile from './pages/Profile';
+import CustomTourRequest from './pages/CustomTourRequest';
+import MyCustomTours from './pages/MyCustomTours';
 import SiteHeader from './components/layout/SiteHeader';
 import SiteFooter from './components/layout/SiteFooter';
 import ScrollToTop from './components/layout/ScrollToTop';
@@ -31,6 +33,8 @@ const App: React.FC = () => {
             <Route path="/booking/:slug" element={<BookingPage />} />
             <Route path="/booking-history" element={<BookingHistory />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/custom-tour-request" element={<CustomTourRequest />} />
+            <Route path="/my-custom-tours" element={<MyCustomTours />} />
             <Route path="/payment-result" element={<PaymentResultPage />} />
             <Route path="/destinations" element={<PlaceholderPage title="Destinations coming soon" />} />
             <Route path="/auth/callback" element={<OAuth2Callback />} />

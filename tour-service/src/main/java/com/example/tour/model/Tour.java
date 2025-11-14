@@ -61,6 +61,9 @@ public class Tour {
     @Column(name = "child_price", precision = 12, scale = 2)
     private BigDecimal childPrice;
 
+    @Column(name = "hero_image_url", length = 500)
+    private String heroImageUrl;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

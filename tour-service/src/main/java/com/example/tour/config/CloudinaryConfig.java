@@ -1,6 +1,7 @@
 package com.example.tour.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.cloudinary.Cloudinary;
@@ -20,7 +21,7 @@ public class CloudinaryConfig {
     private String apiSecret;
     private String folder;
 
-
+    @Bean
     public Cloudinary cloudinary(){
         return new Cloudinary(ObjectUtils.asMap(
             "cloud_name", cloudName,
