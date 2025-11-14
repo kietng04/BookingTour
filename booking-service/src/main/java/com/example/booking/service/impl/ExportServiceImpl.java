@@ -62,7 +62,7 @@ public class ExportServiceImpl implements ExportService {
 
             // Create header style
             CellStyle headerStyle = workbook.createCellStyle();
-            Font headerFont = workbook.createFont();
+            org.apache.poi.ss.usermodel.Font headerFont = workbook.createFont();
             headerFont.setBold(true);
             headerFont.setFontHeightInPoints((short) 12);
             headerStyle.setFont(headerFont);
@@ -91,8 +91,8 @@ public class ExportServiceImpl implements ExportService {
                 row.createCell(0).setCellValue(booking.getId());
                 row.createCell(1).setCellValue(tourName);
                 row.createCell(2).setCellValue(userEmail);
-                row.createCell(3).setCellValue(booking.getDepartureDate() != null ?
-                    booking.getDepartureDate().toString() : "N/A");
+                row.createCell(3).setCellValue(booking.getDepartureId() != null ?
+                    "Departure ID: " + booking.getDepartureId() : "N/A");
                 row.createCell(4).setCellValue(booking.getNumSeats());
                 row.createCell(5).setCellValue(booking.getTotalAmount().doubleValue());
                 row.createCell(6).setCellValue(booking.getStatus().name());
@@ -127,7 +127,7 @@ public class ExportServiceImpl implements ExportService {
             document.open();
 
             // Company Header
-            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.BLACK);
+            com.itextpdf.text.Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.BLACK);
             Paragraph title = new Paragraph("BOOKING TOUR VIETNAM", titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
             document.add(title);
@@ -137,7 +137,7 @@ public class ExportServiceImpl implements ExportService {
             document.add(Chunk.NEWLINE);
 
             // Invoice Title
-            Font invoiceFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16, BaseColor.BLUE);
+            com.itextpdf.text.Font invoiceFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16, BaseColor.BLUE);
             Paragraph invoiceTitle = new Paragraph("HÓA ĐƠN ĐẶT TOUR", invoiceFont);
             invoiceTitle.setAlignment(Element.ALIGN_CENTER);
             document.add(invoiceTitle);
@@ -160,8 +160,8 @@ public class ExportServiceImpl implements ExportService {
 
             document.add(new Paragraph("THÔNG TIN TOUR", FontFactory.getFont(FontFactory.HELVETICA_BOLD)));
             document.add(new Paragraph("Tên tour: " + tourName));
-            document.add(new Paragraph("Ngày khởi hành: " + (booking.getDepartureDate() != null ?
-                booking.getDepartureDate().toString() : "N/A")));
+            document.add(new Paragraph("Mã khởi hành: " + (booking.getDepartureId() != null ?
+                booking.getDepartureId().toString() : "N/A")));
             document.add(new Paragraph("Số người: " + booking.getNumSeats()));
             document.add(Chunk.NEWLINE);
 
@@ -192,7 +192,7 @@ public class ExportServiceImpl implements ExportService {
             document.add(table);
             document.add(Chunk.NEWLINE);
 
-            Font footerFont = FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 12, BaseColor.GRAY);
+            com.itextpdf.text.Font footerFont = FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 12, BaseColor.GRAY);
             Paragraph footer = new Paragraph("Cảm ơn quý khách đã tin tưởng BookingTour!", footerFont);
             footer.setAlignment(Element.ALIGN_CENTER);
             document.add(footer);
@@ -227,7 +227,7 @@ public class ExportServiceImpl implements ExportService {
             titleCell.setCellValue("DASHBOARD STATISTICS");
 
             CellStyle titleStyle = workbook.createCellStyle();
-            Font titleFont = workbook.createFont();
+            org.apache.poi.ss.usermodel.Font titleFont = workbook.createFont();
             titleFont.setBold(true);
             titleFont.setFontHeightInPoints((short) 14);
             titleStyle.setFont(titleFont);
@@ -239,23 +239,23 @@ public class ExportServiceImpl implements ExportService {
             // Revenue Stats
             summarySheet.createRow(rowNum++).createCell(0).setCellValue("REVENUE STATISTICS");
             summarySheet.createRow(rowNum++).createCell(0).setCellValue("Total Revenue: " +
-                formatCurrency(stats.getRevenueStats().getTotalRevenue()) + " VNĐ");
+                formatCurrency(stats.getRevenue().getTotal()) + " VNĐ");
             summarySheet.createRow(rowNum++).createCell(0).setCellValue("Confirmed Revenue: " +
-                formatCurrency(stats.getRevenueStats().getConfirmedRevenue()) + " VNĐ");
+                formatCurrency(stats.getRevenue().getConfirmed()) + " VNĐ");
             summarySheet.createRow(rowNum++).createCell(0).setCellValue("Pending Revenue: " +
-                formatCurrency(stats.getRevenueStats().getPendingRevenue()) + " VNĐ");
+                formatCurrency(stats.getRevenue().getPending()) + " VNĐ");
             rowNum++;
 
             // Booking Stats
             summarySheet.createRow(rowNum++).createCell(0).setCellValue("BOOKING STATISTICS");
             summarySheet.createRow(rowNum++).createCell(0).setCellValue("Total Bookings: " +
-                stats.getBookingStats().getTotalBookings());
+                stats.getBookings().getTotal());
             summarySheet.createRow(rowNum++).createCell(0).setCellValue("Confirmed Bookings: " +
-                stats.getBookingStats().getConfirmedBookings());
+                stats.getBookings().getConfirmed());
             summarySheet.createRow(rowNum++).createCell(0).setCellValue("Pending Bookings: " +
-                stats.getBookingStats().getPendingBookings());
+                stats.getBookings().getPending());
             summarySheet.createRow(rowNum++).createCell(0).setCellValue("Cancelled Bookings: " +
-                stats.getBookingStats().getCancelledBookings());
+                stats.getBookings().getCancelled());
 
             summarySheet.autoSizeColumn(0);
 
