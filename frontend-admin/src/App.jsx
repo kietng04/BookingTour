@@ -5,6 +5,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import TourList from './pages/Tours/TourList.jsx';
+import TourDetail from './pages/Tours/TourDetail.jsx';
 import TourCreate from './pages/Tours/TourCreate.jsx';
 import TourEdit from './pages/Tours/TourEdit.jsx';
 import DepartureList from './pages/Departures/DepartureList.jsx';
@@ -15,6 +16,7 @@ import BookingList from './pages/Bookings/BookingList.jsx';
 import BookingDetail from './pages/Bookings/BookingDetail.jsx';
 import CustomTourList from './pages/CustomTours/CustomTourList.jsx';
 import UserList from './pages/Users/UserList.jsx';
+import ReviewList from './pages/Reviews/ReviewList.jsx';
 import Login from './pages/Login.jsx';
 import AdminOAuthCallback from './pages/AdminOAuthCallback.jsx';
 import UnauthorizedPage from './pages/UnauthorizedPage.jsx';
@@ -42,8 +44,9 @@ const App = () => (
             </ProtectedRoute>
           }
         />
+        <Route path="/tours/:id" element={<TourDetail />} />
         <Route
-          path="/tours/:tourId"
+          path="/tours/:id/edit"
           element={
             <ProtectedRoute requiredPermissions={['TOUR_UPDATE']}>
               <TourEdit />
@@ -57,6 +60,7 @@ const App = () => (
         <Route path="/bookings" element={<BookingList />} />
         <Route path="/bookings/:bookingId" element={<BookingDetail />} />
         <Route path="/custom-tours" element={<CustomTourList />} />
+        <Route path="/reviews" element={<ReviewList />} />
         <Route
           path="/users"
           element={

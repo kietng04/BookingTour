@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { MessageCircle, MessageSquareHeart } from 'lucide-react';
 import SectionTitle from '../components/common/SectionTitle.jsx';
 import ReviewSummary from '../components/reviews/ReviewSummary.jsx';
@@ -7,8 +7,8 @@ import ReviewList from '../components/reviews/ReviewList.jsx';
 import EmptyState from '../components/common/EmptyState.jsx';
 import Card from '../components/common/Card.jsx';
 import Button from '../components/common/Button.jsx';
-import { reviews as reviewData } from '../data/mockReviews.js';
 import { tours } from '../data/mockTours.js';
+import { reviewsAPI } from '../services/api.js';
 
 const defaultFilters = {
   tour: 'all',
@@ -19,6 +19,9 @@ const defaultFilters = {
 
 const Reviews = () => {
   const [filters, setFilters] = useState(() => ({ ...defaultFilters }));
+  const [reviewData, setReviewData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const tourLookup = useMemo(
     () => Object.fromEntries(tours.map((tour) => [tour.id, tour.name])),
@@ -29,6 +32,50 @@ const Reviews = () => {
     const badgeSet = new Set();
     reviewData.forEach((review) => review.badges?.forEach((badge) => badgeSet.add(badge)));
     return Array.from(badgeSet).sort((a, b) => a.localeCompare(b));
+  }, [reviewData]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchReviews = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await reviewsAPI.getAllApproved(); // Get all approved reviews via /reviews/approved endpoint
+        if (!isMounted) return;
+
+        // Transform backend format to frontend format
+        const transformedReviews = (Array.isArray(data) ? data : []).map((review) => ({
+          id: `rv-${review.reviewId}`,
+          tourId: review.tourId,
+          guest: review.guestName,
+          avatar: review.guestAvatar || `https://i.pravatar.cc/100?u=${review.userId}`,
+          rating: parseFloat(review.rating),
+          title: review.title,
+          comment: review.comment,
+          createdAt: review.createdAt,
+          badges: review.badges || []
+        }));
+
+        setReviewData(transformedReviews);
+      } catch (error) {
+        console.error('Failed to load reviews:', error);
+        if (isMounted) {
+          setReviewData([]);
+          setError(error.message || 'Không thể tải đánh giá.');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchReviews();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const overallStats = useMemo(() => {
@@ -44,7 +91,7 @@ const Reviews = () => {
       average: total > 0 ? sum / total : 0,
       distribution
     };
-  }, []);
+  }, [reviewData]);
 
   const filteredReviews = useMemo(() => {
     const ratingThreshold = filters.rating === 'all' ? 0 : Number(filters.rating);
@@ -64,7 +111,7 @@ const Reviews = () => {
         return matchesTour && matchesRating && matchesBadge;
       })
       .sort(sorters[filters.sort]);
-  }, [filters]);
+  }, [filters, reviewData]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-14 md:px-8">

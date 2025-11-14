@@ -387,6 +387,63 @@ export const exportAPI = {
   },
 };
 
+const reviewsAPI = {
+  /**
+   * Get all reviews with filters (admin)
+   * @param {Object} params - Query parameters (tourId, status, minRating)
+   */
+  getAll: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchAdminAPI(`/reviews/admin${query ? `?${query}` : ''}`);
+  },
+
+  /**
+   * Update review status (admin)
+   * @param {number} reviewId - Review ID
+   * @param {string} status - New status (APPROVED, REJECTED, PENDING)
+   */
+  updateStatus: (reviewId, status) => {
+    return fetchAdminAPI(`/reviews/admin/${reviewId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+  },
+
+  /**
+   * Delete review (admin)
+   * @param {number} reviewId - Review ID
+   */
+  delete: (reviewId) => {
+    return fetchAdminAPI(`/reviews/admin/${reviewId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  /**
+   * Get review summary for all tours
+   */
+  getOverallStats: async () => {
+    try {
+      // Aggregate from all tours - this is a workaround until we have a dedicated endpoint
+      const reviews = await fetchAdminAPI('/reviews/admin');
+      const reviewList = Array.isArray(reviews) ? reviews : [];
+
+      return {
+        total: reviewList.length,
+        pending: reviewList.filter(r => r.status === 'PENDING').length,
+        approved: reviewList.filter(r => r.status === 'APPROVED').length,
+        rejected: reviewList.filter(r => r.status === 'REJECTED').length,
+        averageRating: reviewList.length > 0
+          ? reviewList.reduce((sum, r) => sum + parseFloat(r.rating), 0) / reviewList.length
+          : 0
+      };
+    } catch (error) {
+      console.error('Failed to get review stats:', error);
+      return { total: 0, pending: 0, approved: 0, rejected: 0, averageRating: 0 };
+    }
+  },
+};
+
 export default {
   tours: toursAPI,
   departures: departuresAPI,
@@ -397,5 +454,6 @@ export default {
   discounts: discountsAPI,
   dashboard: dashboardAPI,
   export: exportAPI,
+  reviews: reviewsAPI,
   fetchAdminAPI,
 };

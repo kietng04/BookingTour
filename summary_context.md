@@ -46,6 +46,7 @@
   - Province/Region Management
   - Discount Management
   - Departure Management
+  - **Review & Rating System** (NEW)
 - **Key Controllers**:
   - `TourController`: `/tours/*` với pagination, filtering
   - `ScheduleController`: Tour itineraries
@@ -53,8 +54,12 @@
   - `ImageController`: Tour photos
   - `DiscountController`: Promotions
   - `ProvinceController`, `RegionController`: Location hierarchy
+  - **`ReviewController`**: `/reviews/*` - Review CRUD & moderation (NEW)
 - **Messaging**: RabbitMQ cho seat reservation events
-- **External Integration**: Cloudinary cho image storage
+- **External Integration**:
+  - Cloudinary cho image storage
+  - **User Service client** cho fetching user info in reviews (NEW)
+- **Service Discovery**: Uses @LoadBalanced RestTemplate to communicate with user-service
 
 ### 5. **Booking Service** (Port 8083)
 - **Database**: PostgreSQL `bookingdb` riêng
@@ -99,6 +104,11 @@
 - `departures` - Tour dates & availability
 - `tour_discounts` - Promotions
 - `tour_logs` - Audit trail
+- **`tour_reviews`** - Review & rating system (NEW)
+  - Stores user reviews với rating (1-5 stars)
+  - Status workflow: PENDING → APPROVED/REJECTED
+  - Badges for categorization (e.g., "Luxury", "Family")
+  - Guest info cached (name & avatar) from user-service
 
 ### Booking Database `bookingdb`
 **Tables**:
@@ -112,6 +122,59 @@
 - `payment_methods` - Saved payment methods
 - `payment_logs` - Payment audit trail
 - `refunds` - Refund management
+
+---
+
+## ⭐ Review & Rating System (NEW)
+
+### Architecture
+- **Backend**: Tour Service handles all review operations
+- **Database**: `tour_reviews` table in shared `tour_management` database
+- **User Integration**: RestTemplate with @LoadBalanced to fetch user info from user-service
+- **Moderation**: Admin approval workflow (PENDING → APPROVED/REJECTED)
+
+### API Endpoints (via `/api/reviews/*`)
+**Public Endpoints**:
+- `GET /reviews/approved` - Get all approved reviews
+- `GET /reviews/approved/tour/{tourId}` - Get approved reviews for a tour
+- `GET /reviews/summary/{tourId}` - Get rating summary & distribution
+
+**Authenticated User Endpoints**:
+- `POST /reviews/tour/{tourId}` - Create review (requires X-User-Id header)
+- `GET /reviews/my-reviews` - Get user's own reviews
+- `PUT /reviews/{reviewId}` - Update own review (resets to PENDING)
+- `DELETE /reviews/{reviewId}` - Delete own review
+
+**Admin Endpoints**:
+- `GET /reviews/admin` - Get all reviews with filters (status, tourId, minRating)
+- `PATCH /reviews/admin/{reviewId}/status` - Approve/Reject review
+- `DELETE /reviews/admin/{reviewId}` - Delete any review
+
+### Review Workflow
+1. **User submits review** → Status: PENDING, fetches user info from user-service
+2. **Admin reviews** → Can APPROVE or REJECT
+3. **Approved reviews** → Displayed on tour detail page & reviews page
+4. **User updates review** → Status resets to PENDING (requires re-moderation)
+
+### Frontend Integration
+**Client Frontend**:
+- Tour Detail page: Display approved reviews with rating summary
+- Reviews page: Browse all approved reviews with filters
+- My Reviews page: User's review management (CRUD)
+- Review Form: Create/edit reviews with star rating, title, comment, badges
+
+**Admin Frontend**:
+- Reviews page: Review moderation table with filters
+- Dashboard: Review statistics card (total, pending, average rating)
+- Actions: Approve, Reject, Delete reviews with confirmation
+
+### Key Features
+- Star rating (1-5 with 0.5 increments)
+- Badge categorization (e.g., "Luxury", "Family", "Adventure")
+- Guest info caching (fullName, avatar) from user-service
+- Fallback handling if user-service unavailable
+- Review statistics & rating distribution
+- Filter by status, tour, rating, badges
 
 ---
 
@@ -148,11 +211,23 @@
   - `components/booking/` - Booking flow, timeline, forms
   - `components/home/` - Hero, filters, search
   - `components/common/` - Reusable UI components
+  - **`components/reviews/`** - Review display, form, filters (NEW)
+- **Pages**:
+  - `/tours/:id` - Tour detail with reviews
+  - `/reviews` - Browse all approved reviews
+  - **`/my-reviews`** - User's review management (NEW)
 
-### Admin Frontend (Port 5174) - CHƯA INTEGRATE
+### Admin Frontend (Port 5174)
 - **Tech Stack**: React 18 + Vite + TailwindCSS
 - **Dependencies**: Similar to client but thêm `recharts` cho admin dashboard
-- **Status**: ❌ CHƯA ĐƯỢC INTEGRATE VÀO SYSTEM
+- **Status**: ✅ **NOW INTEGRATED** (Dashboard, Tours, Departures, Bookings, Reviews, Users)
+- **Pages**:
+  - `/` - Dashboard with stats (revenue, bookings, users, reviews)
+  - `/tours` - Tour management
+  - `/departures` - Departure management
+  - `/bookings` - Booking management
+  - **`/reviews`** - Review moderation (NEW)
+  - `/users` - User management
 
 ---
 
@@ -204,9 +279,19 @@ docker-compose logs -f
 - [x] Docker Compose deployment
 - [x] Client Frontend với booking flow
 - [x] Database schemas cho all services
+- [x] **Review & Rating System** (NEW)
+  - [x] Backend API in tour-service
+  - [x] User service integration for guest info
+  - [x] Client frontend review pages
+  - [x] Admin review moderation interface
+  - [x] Dashboard integration with review stats
+- [x] **Frontend Admin integration** (COMPLETE)
+  - [x] Dashboard with comprehensive stats
+  - [x] Tour, Departure, Booking management
+  - [x] Review moderation system
+  - [x] User management interface
 
 ### 🚧 In Progress
-- [ ] Frontend Admin integration
 - [ ] JWT Filter cho protected endpoints
 - [ ] Role-based authorization (ADMIN/USER)
 - [ ] Idempotency checks cho message consumers
@@ -248,28 +333,33 @@ docker-compose logs -f
 
 ## 📍 Next Steps for Development
 
-1. **Complete Admin Frontend Integration**
-   - Connect admin dashboard to backend APIs
-   - Implement management features for tours, bookings, users
-
-2. **Enhance Security**
+1. **Enhance Security**
    - Add JWT filters to all protected endpoints
-   - Implement role-based access control
+   - Implement role-based access control (ADMIN/USER)
+   - Secure review endpoints with proper authorization
 
-3. **Improve Reliability**
-   - Add circuit breakers for external service calls
+2. **Improve Reliability**
+   - Add circuit breakers for user-service calls in tour-service
    - Implement comprehensive error handling
+   - Add retry logic for inter-service communication
 
-4. **Operations**
+3. **Operations**
    - Centralized logging với ELK stack
    - Distributed tracing for microservices debugging
    - Performance monitoring and alerting
 
-5. **Testing & Documentation**
-   - Comprehensive unit/integration tests
-   - API documentation with Swagger
+4. **Testing & Documentation**
+   - Comprehensive unit/integration tests for review system
+   - API documentation with Swagger/OpenAPI
    - End-to-end testing automation
+   - Performance testing for review queries
+
+5. **Enhancements**
+   - Review analytics dashboard
+   - Email notifications for review status changes
+   - Review helpful/unhelpful voting system
+   - Image attachments in reviews
 
 ---
 
-*Updated: November 2025 - Initial comprehensive codebase analysis*"
+*Updated: November 2025 - Added comprehensive Review & Rating System*"

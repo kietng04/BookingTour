@@ -81,6 +81,12 @@ export const regionsAPI = {
 };
 
 export const reviewsAPI = {
+  // Get all approved reviews (public)
+  getAllApproved: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchAPI(`/reviews/approved${query ? `?${query}` : ''}`);
+  },
+
   // Get approved reviews for a tour (public)
   getByTourId: (tourId, params = {}) => {
     const query = new URLSearchParams(params).toString();
@@ -92,34 +98,51 @@ export const reviewsAPI = {
 
   // Create a new review (authenticated)
   create: (tourId, reviewData, token) => {
+    // Extract userId from localStorage for X-User-Id header
+    const userId = localStorage.getItem('userId');
     return fetchAPI(`/reviews/tours/${tourId}`, {
       method: 'POST',
       body: JSON.stringify(reviewData),
       authToken: token,
+      headers: {
+        'X-User-Id': userId,
+      },
     });
   },
 
   // Update own review (authenticated)
   update: (reviewId, reviewData, token) => {
+    const userId = localStorage.getItem('userId');
     return fetchAPI(`/reviews/${reviewId}`, {
       method: 'PUT',
       body: JSON.stringify(reviewData),
       authToken: token,
+      headers: {
+        'X-User-Id': userId,
+      },
     });
   },
 
   // Delete own review (authenticated)
   delete: (reviewId, token) => {
+    const userId = localStorage.getItem('userId');
     return fetchAPI(`/reviews/${reviewId}`, {
       method: 'DELETE',
       authToken: token,
+      headers: {
+        'X-User-Id': userId,
+      },
     });
   },
 
   // Get current user's reviews (authenticated)
   getMyReviews: (token) => {
+    const userId = localStorage.getItem('userId');
     return fetchAPI('/reviews/my-reviews', {
       authToken: token,
+      headers: {
+        'X-User-Id': userId,
+      },
     });
   },
 

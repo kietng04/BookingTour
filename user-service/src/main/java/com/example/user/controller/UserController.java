@@ -55,9 +55,27 @@ public class UserController {
         Optional<User> existingUser = userRepository.findById(id);
         if (existingUser.isPresent()) {
             User user = existingUser.get();
-            user.setUsername(updatedUser.getUsername());
-            user.setEmail(updatedUser.getEmail());
-            user.setFullName(updatedUser.getFullName());
+
+            // Only update non-null fields to allow partial updates
+            if (updatedUser.getUsername() != null) {
+                user.setUsername(updatedUser.getUsername());
+            }
+            if (updatedUser.getEmail() != null) {
+                user.setEmail(updatedUser.getEmail());
+            }
+            if (updatedUser.getFullName() != null) {
+                user.setFullName(updatedUser.getFullName());
+            }
+            if (updatedUser.getActive() != null) {
+                user.setActive(updatedUser.getActive());
+            }
+            if (updatedUser.getPhoneNumber() != null) {
+                user.setPhoneNumber(updatedUser.getPhoneNumber());
+            }
+            if (updatedUser.getAvatar() != null) {
+                user.setAvatar(updatedUser.getAvatar());
+            }
+
             User savedUser = userRepository.save(user);
             return ResponseEntity.ok(savedUser);
         }
