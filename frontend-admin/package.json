@@ -21,16 +21,16 @@
     "recharts": "^2.7.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.48.2",
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.10",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.19",
-    "@vitejs/plugin-react": "^5.0.4",
+    "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.9.3",
-    "vite": "^5.0.10",
-    "@playwright/test": "^1.48.2"
+    "vite": "^7.2.2"
   }
 }

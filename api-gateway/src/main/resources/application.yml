@@ -90,6 +90,18 @@ spring:
             - Path=/api/tours/**
           filters:
             - StripPrefix=1
+        - id: custom-tours
+          uri: lb://tour-service
+          predicates:
+            - Path=/api/custom-tours/**
+          filters:
+            - StripPrefix=1
+        - id: file-upload
+          uri: lb://tour-service
+          predicates:
+            - Path=/api/upload/**
+          filters:
+            - StripPrefix=1
         - id: booking-service
           uri: lb://booking-service
           predicates:
@@ -100,6 +112,12 @@ spring:
           uri: lb://booking-service
           predicates:
             - Path=/api/dashboard/**
+          filters:
+            - StripPrefix=1
+        - id: export-service
+          uri: lb://booking-service
+          predicates:
+            - Path=/api/export/**
           filters:
             - StripPrefix=1
         - id: payment-service

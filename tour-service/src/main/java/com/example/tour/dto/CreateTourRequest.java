@@ -5,6 +5,7 @@ import java.util.List;
 
 public class CreateTourRequest {
     private String tourName;
+    private String slug;
     private Integer regionId;
     private Integer provinceId;
     private String description;
@@ -14,6 +15,7 @@ public class CreateTourRequest {
     private String mainDestination;
     private BigDecimal adultPrice;
     private BigDecimal childPrice;
+    private String heroImageUrl;
     private List<TourScheduleRequest> schedules;
 
     public String getTourName() {
@@ -102,6 +104,22 @@ public class CreateTourRequest {
 
     public void setSchedules(List<TourScheduleRequest> schedules) {
         this.schedules = schedules;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
+    }
+
+    public String getHeroImageUrl() {
+        return heroImageUrl;
+    }
+
+    public void setHeroImageUrl(String heroImageUrl) {
+        this.heroImageUrl = heroImageUrl;
     }
 }
 

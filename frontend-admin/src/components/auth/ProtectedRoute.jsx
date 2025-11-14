@@ -13,7 +13,6 @@ const ProtectedRoute = ({
     isAdmin,
     isSuperAdmin,
     hasPermission,
-    isSessionExpired,
     updateLastActivity
   } = useAdminAuth();
 
@@ -23,11 +22,7 @@ const ProtectedRoute = ({
     updateLastActivity();
   }, [updateLastActivity]);
 
-  if (isSessionExpired()) {
-    console.warn('Session expired, redirecting to login');
-    return <Navigate to={redirectTo} state={{ from: location.pathname, reason: 'session_expired' }} replace />;
-  }
-
+  // isAuthenticated already includes session expiry check
   if (!isAuthenticated) {
     return <Navigate to={redirectTo} state={{ from: location.pathname }} replace />;
   }

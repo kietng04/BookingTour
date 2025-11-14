@@ -33,6 +33,11 @@ public class RabbitMQConfig {
     public static final String TOUR_SEAT_FAILED_KEY = "tour.seat.reservationFailed";
     public static final String TOUR_SEAT_RELEASED_KEY = "tour.seat.released";
 
+    // Email notification
+    public static final String EMAIL_EXCHANGE = "email.exchange";
+    public static final String EMAIL_BOOKING_CONFIRMED_QUEUE = "email.booking.confirmed.queue";
+    public static final String EMAIL_BOOKING_CONFIRMED_KEY = "email.booking.confirmed";
+
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
@@ -112,6 +117,24 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(tourSeatReleasedQueue())
                 .to(tourEventsExchange())
                 .with(TOUR_SEAT_RELEASED_KEY);
+    }
+
+    // Email notification beans
+    @Bean
+    public DirectExchange emailExchange() {
+        return new DirectExchange(EMAIL_EXCHANGE);
+    }
+
+    @Bean
+    public Queue emailBookingConfirmedQueue() {
+        return new Queue(EMAIL_BOOKING_CONFIRMED_QUEUE, true);
+    }
+
+    @Bean
+    public Binding bindingEmailBookingConfirmed() {
+        return BindingBuilder.bind(emailBookingConfirmedQueue())
+                .to(emailExchange())
+                .with(EMAIL_BOOKING_CONFIRMED_KEY);
     }
 }
 

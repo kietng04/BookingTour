@@ -1,11 +1,7 @@
 import PropTypes from "prop-types";
-import { Mail, Shield } from "lucide-react";
+import { Mail } from "lucide-react";
 import Table from "../common/Table.jsx";
-import Button from "../common/Button.jsx";
-import StatusPill from "../common/StatusPill.jsx";
-import { useState } from "react";
-import UserCreateModal from "./UserCreateModal.jsx";
-import UserEditModal from "./UserEditModal.jsx";
+import Badge from "../common/Badge.jsx";
 
 const providerLabel = (value, isOAuth) => {
   if (!value || value.toLowerCase() === "local") {
@@ -14,14 +10,11 @@ const providerLabel = (value, isOAuth) => {
   return value.toUpperCase();
 };
 
-const UserTable = ({ users, onCreate, onEdit, onDelete }) => {
-  const [isCreateOpen, setCreateOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
-
+const UserTable = ({ users, onToggleActive }) => {
   const columns = [
     {
       key: "fullName",
-      label: "User",
+      label: "Người dùng",
       render: (_, row) => (
         <div>
           <p className="font-medium text-slate-800">
@@ -40,69 +33,66 @@ const UserTable = ({ users, onCreate, onEdit, onDelete }) => {
     },
     {
       key: "provider",
-      /*...*/
+      label: "Provider",
+      render: (_, row) => (
+        <Badge variant="secondary">
+          {providerLabel(row.provider, row.isOAuthUser)}
+        </Badge>
+      ),
+    },
+    {
+      key: "role",
+      label: "Role",
+      render: (value) => (
+        <Badge variant={value === "ADMIN" ? "primary" : "secondary"}>
+          {value || "CUSTOMER"}
+        </Badge>
+      ),
+    },
+    {
+      key: "active",
+      label: "Trạng thái",
+      render: (value) => (
+        <Badge variant={value ? "success" : "danger"}>
+          {value ? "Active" : "Inactive"}
+        </Badge>
+      ),
     },
   ];
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Users</h2>
-        <Button variant="primary" onClick={() => setCreateOpen(true)}>
-          Create User
-        </Button>
-      </div>
-
-      <Table
-        columns={columns}
-        data={users}
-        renderRowActions={(row) => (
-          <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setEditingUser(row)}
-            >
-              Edit
-            </Button>
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => onDelete && onDelete(row)}
-            >
-              Delete
-            </Button>
-          </div>
-        )}
-      />
-
-      <UserCreateModal
-        open={isCreateOpen}
-        onClose={() => setCreateOpen(false)}
-        onSubmit={(data) => {
-          setCreateOpen(false);
-          onCreate && onCreate(data);
-        }}
-      />
-
-      <UserEditModal
-        open={!!editingUser}
-        user={editingUser}
-        onClose={() => setEditingUser(null)}
-        onSubmit={(data) => {
-          setEditingUser(null);
-          onEdit && onEdit(data);
-        }}
-      />
-    </div>
+    <Table
+      columns={columns}
+      data={users}
+      renderRowActions={(row) => (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onToggleActive && onToggleActive(row)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+              row.active ? 'bg-primary-600' : 'bg-slate-300'
+            }`}
+            role="switch"
+            aria-checked={row.active}
+            title={row.active ? 'Vô hiệu hóa' : 'Kích hoạt'}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                row.active ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+          <span className="text-xs text-slate-500">
+            {row.active ? 'Kích hoạt' : 'Vô hiệu hóa'}
+          </span>
+        </div>
+      )}
+    />
   );
 };
 
 UserTable.propTypes = {
   users: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onCreate: PropTypes.func,
-  onEdit: PropTypes.func,
-  onDelete: PropTypes.func,
+  onToggleActive: PropTypes.func,
 };
 
 export default UserTable;

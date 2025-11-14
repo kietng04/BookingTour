@@ -1,23 +1,20 @@
-import { Link, useNavigate } from 'react-router-dom';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
-import { useAdminAuth } from '../context/AdminAuthContext.jsx';
 import Button from '../components/common/Button.jsx';
 import Input from '../components/common/Input.jsx';
-import LoginWithGoogle from '../components/auth/LoginWithGoogle.jsx';
-import LoginWithGithub from '../components/auth/LoginWithGithub.jsx';
-
-const API_BASE_URL = '';
+import { useAdminAuth } from '../context/AdminAuthContext.jsx';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, isAuthenticated, refresh } = useAdminAuth();
+  const { isAuthenticated, refresh } = useAdminAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
+  // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/', { replace: true });
@@ -86,10 +83,14 @@ const Login = () => {
           sessionStorage.removeItem('bt-admin-session-token');
         }
 
+        // Trigger AdminAuthContext to refresh from localStorage
+        // This ensures the context picks up the new auth state immediately
         refresh();
 
+        // Dispatch event to notify all listeners
         window.dispatchEvent(new Event('admin-auth-changed'));
 
+        // Navigate to dashboard (replace history to prevent back to login)
         navigate('/', { replace: true });
       } catch (err) {
         setError(err.message || 'Đã xảy ra lỗi. Vui lòng thử lại.');
@@ -97,7 +98,7 @@ const Login = () => {
         setSubmitting(false);
       }
     },
-    [email, password, rememberMe, navigate]
+    [email, password, rememberMe, refresh, navigate]
   );
 
   const checkboxId = useMemo(() => `remember-${Math.random().toString(36).slice(2)}`, []);
@@ -116,7 +117,7 @@ const Login = () => {
           <Input
             label="Email / Username"
             type="text"
-            placeholder="admin@bookingtour.com"
+            placeholder="admin@gmail.com"
             autoComplete="username"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -144,33 +145,16 @@ const Login = () => {
           </label>
           {error && <p className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-2 text-xs font-medium text-danger">{error}</p>}
 
-          {/* OAuth2 Login Options */}
-          <div className="mt-6 space-y-3">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-600" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-slate-800 px-2 text-slate-300">Hoặc đăng nhập với</span>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <LoginWithGoogle />
-              <LoginWithGithub />
-            </div>
-          </div>
-
           <Button type="submit" size="lg" className="w-full" disabled={submitting}>
             {submitting ? 'Đang xử lý...' : 'Đăng nhập'}
           </Button>
         </form>
-        <p className="mt-6 text-center text-xs text-slate-300">
-          Cần quyền truy cập?{' '}
-          <Link to="/auth/request" className="font-semibold text-primary-200">
-            Yêu cầu tài khoản admin
-          </Link>
-        </p>
+        <div className="mt-6 rounded-lg border border-slate-600/50 bg-slate-800/50 px-4 py-3">
+          <p className="text-xs text-slate-300 mb-2 font-medium">Thông tin đăng nhập mặc định:</p>
+          <p className="text-xs text-slate-400">Email: <span className="text-slate-200 font-mono">admin@gmail.com</span></p>
+          <p className="text-xs text-slate-400">Password: <span className="text-slate-200 font-mono">admin</span></p>
+          <p className="text-xs text-slate-500 mt-2">💡 Để tạo tài khoản admin, gọi: <span className="text-primary-300 font-mono">POST /api/users/init-admin</span></p>
+        </div>
       </div>
     </div>
   );

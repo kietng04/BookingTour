@@ -113,6 +113,9 @@ public class TourServiceImpl implements TourService {
         
         Tour tour = new Tour();
         tour.setTourName(request.getTourName().trim());
+        if (request.getSlug() != null && !request.getSlug().isBlank()) {
+            tour.setSlug(request.getSlug().trim());
+        }
         tour.setRegionId(request.getRegionId());
         tour.setProvinceId(request.getProvinceId());
         tour.setDescription(request.getDescription().trim());
@@ -122,6 +125,9 @@ public class TourServiceImpl implements TourService {
         tour.setMainDestination(request.getMainDestination().trim());
         tour.setAdultPrice(request.getAdultPrice());
         tour.setChildPrice(request.getChildPrice());
+        if (request.getHeroImageUrl() != null && !request.getHeroImageUrl().isBlank()) {
+            tour.setHeroImageUrl(request.getHeroImageUrl().trim());
+        }
         
         if (request.getSchedules() != null && !request.getSchedules().isEmpty()) {
             List<TourSchedule> schedules = request.getSchedules().stream()
@@ -147,33 +153,40 @@ public class TourServiceImpl implements TourService {
             validateTourName(request.getTourName());
             tour.setTourName(request.getTourName());
         }
-        if (request.getRegionId() != null) 
+        if (request.getSlug() != null && !request.getSlug().isBlank()) {
+            tour.setSlug(request.getSlug().trim());
+        }
+        if (request.getRegionId() != null)
             tour.setRegionId(request.getRegionId());
-        
-        if (request.getProvinceId() != null) 
+
+        if (request.getProvinceId() != null)
             tour.setProvinceId(request.getProvinceId());
-        
+
         if (request.getDescription() != null) {
             validateDescription(request.getDescription());
             tour.setDescription(request.getDescription());
         }
-        if (request.getDays() != null) 
+        if (request.getDays() != null)
             tour.setDays(request.getDays());
-        
-        if (request.getNights() != null) 
+
+        if (request.getNights() != null)
             tour.setNights(request.getNights());
-        
-        if (request.getDeparturePoint() != null) 
+
+        if (request.getDeparturePoint() != null)
             tour.setDeparturePoint(request.getDeparturePoint());
-        
-        if (request.getMainDestination() != null) 
+
+        if (request.getMainDestination() != null)
             tour.setMainDestination(request.getMainDestination());
-        
-        if (request.getAdultPrice() != null) 
+
+        if (request.getAdultPrice() != null)
             tour.setAdultPrice(request.getAdultPrice());
-        
-        if (request.getChildPrice() != null) 
+
+        if (request.getChildPrice() != null)
             tour.setChildPrice(request.getChildPrice());
+
+        if (request.getHeroImageUrl() != null && !request.getHeroImageUrl().isBlank()) {
+            tour.setHeroImageUrl(request.getHeroImageUrl().trim());
+        }
         
     
         if (request.getAdultPrice() != null && request.getChildPrice() != null) 
