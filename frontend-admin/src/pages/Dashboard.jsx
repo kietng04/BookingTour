@@ -1,7 +1,6 @@
-import { DollarSign, TicketPercent, Users as UsersIcon, TrendingUp, Download, MessageCircle, Star } from 'lucide-react';
+import { DollarSign, TicketPercent, Users as UsersIcon, Download, MessageCircle } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard.jsx';
 import RevenueChart from '../components/dashboard/RevenueChart.jsx';
-import RecentBookings from '../components/dashboard/RecentBookings.jsx';
 import DateRangeFilter from '../components/dashboard/DateRangeFilter.jsx';
 import TopToursChart from '../components/dashboard/TopToursChart.jsx';
 import BookingStatusChart from '../components/dashboard/BookingStatusChart.jsx';
@@ -9,25 +8,22 @@ import DepartureOccupancyChart from '../components/dashboard/DepartureOccupancyC
 import Card from '../components/common/Card.jsx';
 import Button from '../components/common/Button.jsx';
 import { useEffect, useState } from 'react';
-import { dashboardAPI, bookingsAPI, exportAPI, reviewsAPI } from '../services/api.js';
+import { dashboardAPI, exportAPI, reviewsAPI } from '../services/api.js';
 
 const iconMap = {
   revenue: DollarSign,
   bookings: TicketPercent,
   users: UsersIcon,
-  conversion: TrendingUp,
   reviews: MessageCircle
 };
 
 const Dashboard = () => {
   const [stats, setStats] = useState([
-    { id: 'revenue', title: 'Net revenue', value: '—', change: 0, subtitle: 'Confirmed bookings' },
-    { id: 'bookings', title: 'Total bookings', value: '—', change: 0, subtitle: 'All statuses' },
-    { id: 'users', title: 'Active users', value: '—', change: 0, subtitle: 'Made bookings' },
-    { id: 'conversion', title: 'Conversion rate', value: '—', change: 0, subtitle: 'Confirmed %' },
-    { id: 'reviews', title: 'Reviews', value: '—', change: 0, subtitle: 'Pending review' },
+    { id: 'revenue', title: 'Doanh thu', value: '—', change: 0, subtitle: 'Từ booking đã xác nhận' },
+    { id: 'bookings', title: 'Tổng đặt tour', value: '—', change: 0, subtitle: 'Tất cả trạng thái' },
+    { id: 'users', title: 'Người dùng', value: '—', change: 0, subtitle: 'Đã đặt tour' },
+    { id: 'reviews', title: 'Đánh giá', value: '—', change: 0, subtitle: 'Chờ duyệt' },
   ]);
-  const [recentBookings, setRecentBookings] = useState([]);
   const [revenueTrends, setRevenueTrends] = useState([]);
   const [topTours, setTopTours] = useState([]);
   const [bookingStatusStats, setBookingStatusStats] = useState([]);
@@ -66,7 +62,6 @@ const Dashboard = () => {
         toursData,
         statusData,
         occupancyData,
-        recentData,
         reviewStatsData
       ] = await Promise.all([
         dashboardAPI.getStats(dateRange),
@@ -74,7 +69,6 @@ const Dashboard = () => {
         dashboardAPI.getTopTours({ limit: 5 }),
         dashboardAPI.getBookingStatus(),
         dashboardAPI.getDepartureOccupancy(),
-        bookingsAPI.getAll({ page: 0, size: 10 }),
         reviewsAPI.getOverallStats()
       ]);
 
@@ -82,38 +76,31 @@ const Dashboard = () => {
         const updatedStats = [
           {
             id: 'revenue',
-            title: 'Net revenue',
+            title: 'Doanh thu',
             value: formatCurrency(statsData.revenue?.confirmed || 0),
             change: statsData.revenue?.change || 0,
-            subtitle: 'Confirmed bookings'
+            subtitle: 'Từ booking đã xác nhận'
           },
           {
             id: 'bookings',
-            title: 'Total bookings',
+            title: 'Tổng đặt tour',
             value: String(statsData.bookings?.total || 0),
             change: 0,
-            subtitle: 'All statuses'
+            subtitle: 'Tất cả trạng thái'
           },
           {
             id: 'users',
-            title: 'Active users',
+            title: 'Người dùng',
             value: String(statsData.users?.activeUsers || 0),
             change: 0,
-            subtitle: 'Made bookings'
-          },
-          {
-            id: 'conversion',
-            title: 'Conversion rate',
-            value: `${(statsData.bookings?.conversionRate || 0).toFixed(1)}%`,
-            change: 0,
-            subtitle: 'Confirmed %'
+            subtitle: 'Đã đặt tour'
           },
           {
             id: 'reviews',
-            title: 'Reviews',
+            title: 'Đánh giá',
             value: String(reviewStatsData?.total || 0),
             change: 0,
-            subtitle: `${reviewStatsData?.pending || 0} pending`
+            subtitle: `${reviewStatsData?.pending || 0} chờ duyệt`
           }
         ];
         setStats(updatedStats);
@@ -146,18 +133,6 @@ const Dashboard = () => {
         setDepartureOccupancy(occupancyData);
       }
 
-      if (recentData && recentData.content) {
-        const formattedBookings = recentData.content.map((b) => ({
-          id: String(b.id),
-          tourName: `Tour #${b.tourId}`,
-          guestName: `User #${b.userId}`,
-          travelDate: b.createdAt || '',
-          amount: Number(b.totalAmount || 0),
-          status: (b.status || 'PENDING').toLowerCase(),
-        }));
-        setRecentBookings(formattedBookings);
-      }
-
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
     } finally {
@@ -171,7 +146,7 @@ const Dashboard = () => {
 
   const handleExportDashboard = async () => {
     if (!dateRange.startDate || !dateRange.endDate) {
-      alert('Please select a valid date range');
+      alert('Vui lòng chọn khoảng thời gian hợp lệ');
       return;
     }
 
@@ -180,7 +155,7 @@ const Dashboard = () => {
       await exportAPI.downloadDashboardExcel(dateRange.startDate, dateRange.endDate);
     } catch (err) {
       console.error('Failed to export dashboard:', err);
-      alert('Failed to export dashboard. Please try again.');
+      alert('Xuất báo cáo thất bại. Vui lòng thử lại.');
     } finally {
       setExporting(false);
     }
@@ -211,19 +186,23 @@ const Dashboard = () => {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <DateRangeFilter onDateRangeChange={handleDateRangeChange} />
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={handleExportDashboard}
-          disabled={exporting || loading || !dateRange.startDate || !dateRange.endDate}
-        >
-          <Download className="h-4 w-4" />
-          {exporting ? 'Exporting...' : 'Export Dashboard'}
-        </Button>
+        <div className="flex-1">
+          <DateRangeFilter onDateRangeChange={handleDateRangeChange} />
+        </div>
+        <div>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleExportDashboard}
+            disabled={exporting || loading || !dateRange.startDate || !dateRange.endDate}
+          >
+            <Download className="h-4 w-4" />
+            {exporting ? 'Đang xuất...' : 'Xuất báo cáo'}
+          </Button>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <StatCard
             key={stat.id}
@@ -236,10 +215,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
-        <RevenueChart data={revenueTrends} />
-        <RecentBookings bookings={recentBookings} />
-      </div>
+      <RevenueChart data={revenueTrends} />
 
       <div className="grid gap-6 xl:grid-cols-2">
         <TopToursChart data={topTours} />
@@ -251,7 +227,7 @@ const Dashboard = () => {
       {loading && (
         <Card className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mb-2"></div>
-          <p className="text-sm text-slate-400">Loading dashboard data...</p>
+          <p className="text-sm text-slate-400">Đang tải dữ liệu dashboard...</p>
         </Card>
       )}
     </div>
