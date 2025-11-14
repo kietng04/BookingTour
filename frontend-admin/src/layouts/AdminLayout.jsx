@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { BarChart2, BookOpen, CalendarClock, LayoutDashboard, LogOut, Settings, Star, Users, Calendar, User, ChevronDown } from 'lucide-react';
+import { BarChart2, BookOpen, CalendarClock, LayoutDashboard, LogOut, Users, Calendar } from 'lucide-react';
 import clsx from 'clsx';
 import { useAdminAuth } from '../context/AdminAuthContext.jsx';
 import Button from '../components/common/Button.jsx';
@@ -10,8 +10,7 @@ const navigation = [
   { icon: BookOpen, label: 'Tours', to: '/tours' },
   { icon: Calendar, label: 'Departures', to: '/departures' },
   { icon: CalendarClock, label: 'Bookings', to: '/bookings' },
-  { icon: Users, label: 'Users', to: '/users' },
-  { icon: Settings, label: 'Settings', to: '/settings' }
+  { icon: Users, label: 'Users', to: '/users' }
 ];
 
 const AdminLayout = () => {
@@ -87,29 +86,20 @@ const AdminLayout = () => {
                 <p className="text-xs text-slate-400">Monitor bookings, revenue, and reviews at a glance.</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-500 md:flex">
-                <span className="inline-flex h-2 w-2 rounded-full bg-success" />
-                Live sync
+            <div className="flex items-center gap-2">
+              <div className="hidden text-right md:block">
+                <p className="text-sm font-semibold text-slate-800">{user?.fullName || user?.username || 'Admin'}</p>
+                <p className="text-xs text-slate-400">{user?.role || 'ADMIN'}</p>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="hidden text-right md:block">
-                  <p className="text-sm font-semibold text-slate-800">{user?.fullName || user?.username || 'Admin'}</p>
-                  <p className="text-xs text-slate-400">{user?.role || 'ADMIN'}</p>
-                </div>
-                <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
-                  {user?.avatar ? (
-                    <img src={user.avatar} alt="Avatar" className="h-8 w-8 rounded-full object-cover" />
-                  ) : (
-                    <span className="text-sm font-medium text-primary-600">
-                      {(user?.fullName || user?.username || 'A').charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
+              <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
+                {user?.avatar ? (
+                  <img src={user.avatar} alt="Avatar" className="h-8 w-8 rounded-full object-cover" />
+                ) : (
+                  <span className="text-sm font-medium text-primary-600">
+                    {(user?.fullName || user?.username || 'A').charAt(0).toUpperCase()}
+                  </span>
+                )}
               </div>
-              <Button to="/auth/login" variant="ghost" size="sm">
-                Switch account
-              </Button>
             </div>
           </div>
         </header>

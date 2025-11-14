@@ -15,7 +15,6 @@ import BookingList from './pages/Bookings/BookingList.jsx';
 import BookingDetail from './pages/Bookings/BookingDetail.jsx';
 import CustomTourList from './pages/CustomTours/CustomTourList.jsx';
 import UserList from './pages/Users/UserList.jsx';
-import Settings from './pages/Settings/Settings.jsx';
 import Login from './pages/Login.jsx';
 import AdminOAuthCallback from './pages/AdminOAuthCallback.jsx';
 import UnauthorizedPage from './pages/UnauthorizedPage.jsx';
@@ -63,15 +62,6 @@ const App = () => (
           element={
             <ProtectedRoute requiredRole="ADMIN">
               <UserList />
-            </ProtectedRoute>
-          }
-        />
-        { /* Reviews tạm gỡ bỏ: chuyển sang dữ liệu thật sau */ }
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute requiredRole="SUPER_ADMIN">
-              <Settings />
             </ProtectedRoute>
           }
         />
