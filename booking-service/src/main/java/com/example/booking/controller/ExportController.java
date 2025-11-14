@@ -187,7 +187,7 @@ public class ExportController {
 
         // Apply specific filters
         if (userId != null) {
-            return bookingRepository.findByUserId(userId);
+            return bookingRepository.findByUserId(userId, org.springframework.data.domain.Pageable.unpaged()).getContent();
         }
 
         if (tourId != null) {
@@ -195,14 +195,15 @@ public class ExportController {
         }
 
         if (status != null) {
-            return bookingRepository.findByStatus(status);
+            return bookingRepository.findByStatus(status, org.springframework.data.domain.Pageable.unpaged()).getContent();
         }
 
         if (startDate != null && endDate != null) {
-            return bookingRepository.findByCreatedAtBetween(
-                    startDate.atStartOfDay(),
-                    endDate.atTime(23, 59, 59)
-            );
+            // Filter by date range using findAll and stream filter
+            return bookingRepository.findAll().stream()
+                    .filter(b -> !b.getCreatedAt().toLocalDate().isBefore(startDate)
+                            && !b.getCreatedAt().toLocalDate().isAfter(endDate))
+                    .toList();
         }
 
         // Default: return all
