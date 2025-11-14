@@ -5,7 +5,7 @@ import Card from '../../components/common/Card.jsx';
 import Button from '../../components/common/Button.jsx';
 import BookingTimeline from '../../components/bookings/BookingTimeline.jsx';
 import StatusPill from '../../components/common/StatusPill.jsx';
-import { bookingsAPI, departuresAPI, usersAPI } from '../../services/api.js';
+import { bookingsAPI, departuresAPI, usersAPI, exportAPI } from '../../services/api.js';
 import { formatCurrency, formatDate } from '../../utils/format.js';
 
 const buildTimelineForStatus = (status) => {
@@ -54,6 +54,7 @@ const BookingDetail = () => {
   const [departure, setDeparture] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
 
   useEffect(() => {
     if (!numericId) {
@@ -98,6 +99,20 @@ const BookingDetail = () => {
 
     fetchData();
   }, [numericId]);
+
+  const handleDownloadInvoice = async () => {
+    if (!numericId) return;
+
+    try {
+      setDownloadingInvoice(true);
+      await exportAPI.downloadInvoicePdf(numericId);
+    } catch (err) {
+      console.error('Failed to download invoice:', err);
+      alert('Failed to download invoice. Please try again.');
+    } finally {
+      setDownloadingInvoice(false);
+    }
+  };
 
   if (loading) {
     return <Card className="py-12 text-center text-sm text-slate-500">Đang tải thông tin đặt chỗ...</Card>;
@@ -180,8 +195,14 @@ const BookingDetail = () => {
             <span>Balance</span>
             <span>{formatCurrency(balanceAmount)}</span>
           </div>
-          <Button variant="secondary" className="w-full text-slate-900">
-            Generate invoice
+          <Button
+            variant="secondary"
+            className="w-full text-slate-900"
+            onClick={handleDownloadInvoice}
+            disabled={downloadingInvoice}
+          >
+            <Download className="h-4 w-4" />
+            {downloadingInvoice ? 'Downloading...' : 'Download Invoice PDF'}
           </Button>
         </Card>
       </div>
