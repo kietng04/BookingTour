@@ -12,23 +12,26 @@ const TourCreate = () => {
   const toast = useToast();
 
   const adaptPayload = (form) => {
-    const days = Number(form.duration) || 1;
+    const days = Number(form.days) || 1;
     const schedules = Array.from({ length: days }, (_, idx) => ({
       dayNumber: idx + 1,
       scheduleDescription: `Lịch trình ngày ${idx + 1}: trải nghiệm và tham quan`,
     }));
 
     return {
-      tourName: form.name,
-      description: 'Tour được tạo từ trang quản trị',
+      tourName: form.tourName,
+      slug: form.slug,
+      status: form.status || 'ACTIVE',
+      regionId: Number(form.regionId),
+      provinceId: Number(form.provinceId),
+      description: form.description || '',
       days,
-      nights: Math.max(days - 1, 0),
-      adultPrice: Number(form.price) || 0,
-      childPrice: 0,
-      regionId: 1,
-      provinceId: 11,
-      departurePoint: 'Hà Nội',
-      mainDestination: 'Vịnh Hạ Long',
+      nights: Number(form.nights) || Math.max(days - 1, 0),
+      departurePoint: form.departurePoint || '',
+      mainDestination: form.mainDestination || '',
+      adultPrice: Number(form.adultPrice) || 0,
+      childPrice: Number(form.childPrice) || 0,
+      heroImageUrl: form.heroImageUrl || '',
       schedules,
     };
   };
