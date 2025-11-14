@@ -81,6 +81,12 @@ export const regionsAPI = {
 };
 
 export const reviewsAPI = {
+  // Get all approved reviews (public)
+  getAllApproved: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchAPI(`/reviews/approved${query ? `?${query}` : ''}`);
+  },
+
   // Get approved reviews for a tour (public)
   getByTourId: (tourId, params = {}) => {
     const query = new URLSearchParams(params).toString();

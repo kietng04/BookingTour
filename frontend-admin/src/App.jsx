@@ -15,6 +15,7 @@ import BookingList from './pages/Bookings/BookingList.jsx';
 import BookingDetail from './pages/Bookings/BookingDetail.jsx';
 import CustomTourList from './pages/CustomTours/CustomTourList.jsx';
 import UserList from './pages/Users/UserList.jsx';
+import ReviewList from './pages/Reviews/ReviewList.jsx';
 import Login from './pages/Login.jsx';
 import AdminOAuthCallback from './pages/AdminOAuthCallback.jsx';
 import UnauthorizedPage from './pages/UnauthorizedPage.jsx';
@@ -57,6 +58,7 @@ const App = () => (
         <Route path="/bookings" element={<BookingList />} />
         <Route path="/bookings/:bookingId" element={<BookingDetail />} />
         <Route path="/custom-tours" element={<CustomTourList />} />
+        <Route path="/reviews" element={<ReviewList />} />
         <Route
           path="/users"
           element={

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, X, Globe2, PhoneCall, User, LogOut, Calendar, ChevronDown } from 'lucide-react';
+import { Menu, X, Globe2, PhoneCall, User, LogOut, Calendar, ChevronDown, MessageCircle } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../../context/AuthContext';
 
@@ -235,6 +235,14 @@ const SiteHeader: React.FC = () => {
                       <Calendar className="h-4 w-4" aria-hidden="true" />
                       Lịch sử đặt tour
                     </Link>
+                    <Link
+                      to="/my-reviews"
+                      className="inline-flex items-center gap-2 rounded-xl px-3 py-2 transition hover:bg-brand-50 hover:text-brand-600"
+                      onClick={() => setProfileMenuOpen(false)}
+                    >
+                      <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                      Đánh giá của tôi
+                    </Link>
                     <button
                       type="button"
                       onClick={() => {
@@ -369,6 +377,14 @@ const SiteHeader: React.FC = () => {
                 >
                   <Calendar className="h-4 w-4" aria-hidden="true" />
                   Lịch sử đặt tour
+                </Link>
+                <Link
+                  to="/my-reviews"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-brand-200 hover:text-gray-900 focus-visible:border-brand-300"
+                >
+                  <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                  Đánh giá của tôi
                 </Link>
                 <button
                   type="button"
