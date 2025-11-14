@@ -5,6 +5,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import TourList from './pages/Tours/TourList.jsx';
+import TourDetail from './pages/Tours/TourDetail.jsx';
 import TourCreate from './pages/Tours/TourCreate.jsx';
 import TourEdit from './pages/Tours/TourEdit.jsx';
 import DepartureList from './pages/Departures/DepartureList.jsx';
@@ -43,8 +44,9 @@ const App = () => (
             </ProtectedRoute>
           }
         />
+        <Route path="/tours/:id" element={<TourDetail />} />
         <Route
-          path="/tours/:tourId"
+          path="/tours/:id/edit"
           element={
             <ProtectedRoute requiredPermissions={['TOUR_UPDATE']}>
               <TourEdit />

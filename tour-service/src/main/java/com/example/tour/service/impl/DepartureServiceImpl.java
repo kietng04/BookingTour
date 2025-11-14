@@ -50,6 +50,9 @@ public class DepartureServiceImpl implements DepartureService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Tour not found for id " + tourId));
 
+        // Validate that date range matches tour duration
+        validateDepartureDuration(request.getStartDate(), request.getEndDate(), tour);
+
         Departure departure = new Departure();
         departure.setTour(tour);
         departure.setStartDate(request.getStartDate());
@@ -73,6 +76,12 @@ public class DepartureServiceImpl implements DepartureService {
         if (request.getEndDate() != null) {
             departure.setEndDate(request.getEndDate());
         }
+
+        // Validate duration after updating dates
+        if (request.getStartDate() != null || request.getEndDate() != null) {
+            validateDepartureDuration(departure.getStartDate(), departure.getEndDate(), departure.getTour());
+        }
+
         if (request.getTotalSlots() != null) {
             int reserved = departure.getTotalSlots() - departure.getRemainingSlots();
             if (request.getTotalSlots() < reserved) {
@@ -183,6 +192,24 @@ public class DepartureServiceImpl implements DepartureService {
         if (startDate != null && endDate != null && endDate.isBefore(startDate)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "endDate must be greater than or equal to startDate");
+        }
+    }
+
+    private void validateDepartureDuration(LocalDate startDate, LocalDate endDate, Tour tour) {
+        if (startDate == null || endDate == null || tour == null) {
+            return;
+        }
+
+        // Calculate actual days between start and end (inclusive)
+        long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
+
+        // Check if it matches the tour's duration
+        if (daysBetween != tour.getDays()) {
+            LocalDate expectedEndDate = startDate.plusDays(tour.getDays() - 1);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    String.format("Departure duration mismatch. Tour is %d days, but departure is %d days. " +
+                            "For start date %s, end date should be %s",
+                            tour.getDays(), daysBetween, startDate, expectedEndDate));
         }
     }
 

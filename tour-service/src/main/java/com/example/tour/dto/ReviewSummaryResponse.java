@@ -1,5 +1,7 @@
 package com.example.tour.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
 import java.util.Map;
 
@@ -7,6 +9,8 @@ public class ReviewSummaryResponse {
 
     private Long totalReviews;
     private BigDecimal averageRating;
+
+    @JsonProperty("distribution")
     private Map<Integer, Long> ratingDistribution;
 
     public ReviewSummaryResponse() {
