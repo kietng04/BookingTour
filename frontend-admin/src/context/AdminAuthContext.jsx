@@ -117,8 +117,13 @@ export const AdminAuthProvider = ({ children }) => {
   const [state, setState] = useState(() => readStateFromStorage());
 
   const isSessionExpired = useCallback(() => {
-    return Date.now() - state.lastActivity > SESSION_TIMEOUT;
-  }, [state.lastActivity]);
+    // Always read from localStorage to avoid stale state after page reload
+    if (typeof window === 'undefined') return true;
+    const rawLastActivity = window.localStorage.getItem('bt-admin-lastActivity');
+    if (!rawLastActivity) return true;
+    const lastActivity = parseInt(rawLastActivity, 10);
+    return Date.now() - lastActivity > SESSION_TIMEOUT;
+  }, []); // No dependencies - always read fresh from localStorage
 
   const updateLastActivity = useCallback(() => {
     const now = Date.now();
