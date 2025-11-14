@@ -39,49 +39,38 @@ const TourEdit = () => {
   }, [tourId]);
 
   const adaptInitial = (t) => {
-    // Map backend status to frontend status
-    const backendToFrontendStatus = {
-      'ACTIVE': 'live',
-      'UNACTIVE': 'draft',
-      'END': 'archived',
-      'FULL': 'live'
-    };
-
     return {
-      name: t.tourName || t.tour_name || t.name || '',
-      slug: t.tourSlug || t.tour_slug || '',
-      status: backendToFrontendStatus[t.status] || 'draft',
-      price: t.adultPrice ?? t.adult_price ?? '',
-      duration: t.days ?? '',
-      seats: '',
-      difficulty: 'moderate',
-      heroImage: '',
-      tags: [],
-      highlights: [],
+      tourName: t.tourName || '',
+      slug: t.slug || '',
+      status: t.status || 'ACTIVE',
+      regionId: t.regionId || '',
+      provinceId: t.provinceId || '',
+      description: t.description || '',
+      days: t.days || '',
+      nights: t.nights || '',
+      departurePoint: t.departurePoint || '',
+      mainDestination: t.mainDestination || '',
+      adultPrice: t.adultPrice || '',
+      childPrice: t.childPrice || '',
+      heroImageUrl: t.heroImageUrl || '',
     };
   };
 
   const adaptPayload = (form) => {
-    // Map frontend status to backend status
-    const statusMap = {
-      'draft': 'UNACTIVE',
-      'live': 'ACTIVE',
-      'archived': 'END'
-    };
-
     return {
-      tour_name: form.name,
-      tour_slug: form.slug,
-      description: tour?.description ?? '',
-      days: Number(form.duration) || 1,
-      nights: Math.max((Number(form.duration) || 1) - 1, 0),
-      adult_price: Number(form.price) || 0,
-      child_price: tour?.childPrice ?? tour?.child_price ?? 0,
-      status: statusMap[form.status?.toLowerCase()] || 'ACTIVE',
-      region_id: tour?.regionId ?? tour?.region_id ?? 1,
-      province_id: tour?.provinceId ?? tour?.province_id ?? 1,
-      departure_point: tour?.departurePoint ?? tour?.departure_point ?? '',
-      main_destination: tour?.mainDestination ?? tour?.main_destination ?? '',
+      tourName: form.tourName,
+      slug: form.slug,
+      status: form.status || 'ACTIVE',
+      regionId: Number(form.regionId),
+      provinceId: Number(form.provinceId),
+      description: form.description || '',
+      days: Number(form.days) || 1,
+      nights: Number(form.nights) || 0,
+      departurePoint: form.departurePoint || '',
+      mainDestination: form.mainDestination || '',
+      adultPrice: Number(form.adultPrice) || 0,
+      childPrice: Number(form.childPrice) || 0,
+      heroImageUrl: form.heroImageUrl || '',
     };
   };
 

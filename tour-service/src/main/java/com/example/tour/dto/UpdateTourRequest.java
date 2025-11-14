@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 public class UpdateTourRequest {
     private String tourName;
+    private String slug;
     private Integer regionId;
     private Integer provinceId;
     private String description;
@@ -13,6 +14,7 @@ public class UpdateTourRequest {
     private String mainDestination;
     private BigDecimal adultPrice;
     private BigDecimal childPrice;
+    private String heroImageUrl;
     private String status;
 
     public String getTourName() {
@@ -101,6 +103,22 @@ public class UpdateTourRequest {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
+    }
+
+    public String getHeroImageUrl() {
+        return heroImageUrl;
+    }
+
+    public void setHeroImageUrl(String heroImageUrl) {
+        this.heroImageUrl = heroImageUrl;
     }
 }
 
