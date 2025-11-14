@@ -84,11 +84,10 @@ const Login = () => {
           sessionStorage.removeItem('bt-admin-session-token');
         }
 
-        refresh();
-
+        // Dispatch auth changed event - AdminAuthContext will auto-refresh
         window.dispatchEvent(new Event('admin-auth-changed'));
 
-        navigate('/', { replace: true });
+        // Let useEffect handle navigation after context updates
       } catch (err) {
         setError(err.message || 'Đã xảy ra lỗi. Vui lòng thử lại.');
       } finally {
