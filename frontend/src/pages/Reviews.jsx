@@ -91,7 +91,7 @@ const Reviews = () => {
       average: total > 0 ? sum / total : 0,
       distribution
     };
-  }, []);
+  }, [reviewData]);
 
   const filteredReviews = useMemo(() => {
     const ratingThreshold = filters.rating === 'all' ? 0 : Number(filters.rating);
@@ -111,7 +111,7 @@ const Reviews = () => {
         return matchesTour && matchesRating && matchesBadge;
       })
       .sort(sorters[filters.sort]);
-  }, [filters]);
+  }, [filters, reviewData]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-14 md:px-8">
