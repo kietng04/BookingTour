@@ -1,11 +1,9 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
 import { useAdminAuth } from '../context/AdminAuthContext.jsx';
 import Button from '../components/common/Button.jsx';
 import Input from '../components/common/Input.jsx';
-import LoginWithGoogle from '../components/auth/LoginWithGoogle.jsx';
-import LoginWithGithub from '../components/auth/LoginWithGithub.jsx';
 
 const API_BASE_URL = '';
 
@@ -144,33 +142,15 @@ const Login = () => {
           </label>
           {error && <p className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-2 text-xs font-medium text-danger">{error}</p>}
 
-          {/* OAuth2 Login Options */}
-          <div className="mt-6 space-y-3">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-600" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-slate-800 px-2 text-slate-300">Hoặc đăng nhập với</span>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <LoginWithGoogle />
-              <LoginWithGithub />
-            </div>
-          </div>
-
           <Button type="submit" size="lg" className="w-full" disabled={submitting}>
             {submitting ? 'Đang xử lý...' : 'Đăng nhập'}
           </Button>
         </form>
-        <p className="mt-6 text-center text-xs text-slate-300">
-          Cần quyền truy cập?{' '}
-          <Link to="/auth/request" className="font-semibold text-primary-200">
-            Yêu cầu tài khoản admin
-          </Link>
-        </p>
+        <div className="mt-6 rounded-lg border border-slate-600/50 bg-slate-800/50 px-4 py-3">
+          <p className="text-xs text-slate-300 mb-2 font-medium">Thông tin đăng nhập mặc định:</p>
+          <p className="text-xs text-slate-400">Email: <span className="text-slate-200 font-mono">admin@bookingtour.com</span></p>
+          <p className="text-xs text-slate-400">Password: <span className="text-slate-200 font-mono">admin123</span></p>
+        </div>
       </div>
     </div>
   );
