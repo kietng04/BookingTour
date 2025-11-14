@@ -214,6 +214,22 @@ public class BookingServiceImpl implements BookingService {
         Map<String, Object> tour = fetchTourInfo(booking.getTourId());
         String tourName = (String) tour.getOrDefault("tourName", "Tour #" + booking.getTourId());
 
+        // Fetch departure information to get start date
+        Map<String, Object> departure = fetchDepartureInfo(booking.getTourId(), booking.getDepartureId());
+        java.time.LocalDate departureDate = null;
+        if (departure.containsKey("startDate")) {
+            Object startDateObj = departure.get("startDate");
+            if (startDateObj instanceof String) {
+                try {
+                    departureDate = java.time.LocalDate.parse((String) startDateObj);
+                } catch (Exception e) {
+                    log.warn("Failed to parse departure date: {}", startDateObj);
+                }
+            } else if (startDateObj instanceof java.time.LocalDate) {
+                departureDate = (java.time.LocalDate) startDateObj;
+            }
+        }
+
         // Create event
         BookingConfirmedEvent event = new BookingConfirmedEvent(
                 booking.getId(),
@@ -222,7 +238,7 @@ public class BookingServiceImpl implements BookingService {
                 userEmail,
                 userName,
                 tourName,
-                booking.getDepartureDate(),
+                departureDate,
                 booking.getNumSeats(),
                 booking.getTotalAmount(),
                 "MOMO", // Default payment method
@@ -265,6 +281,21 @@ public class BookingServiceImpl implements BookingService {
             return response.getBody() != null ? response.getBody() : Map.of();
         } catch (Exception e) {
             log.warn("Failed to fetch tour info for tourId: {}", tourId, e);
+            return Map.of();
+        }
+    }
+
+    /**
+     * Fetch departure information from tour-service
+     */
+    private Map<String, Object> fetchDepartureInfo(Long tourId, Long departureId) {
+        try {
+            String url = tourServiceUrl + "/tours/" + tourId + "/departures/" + departureId;
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
+            return response.getBody() != null ? response.getBody() : Map.of();
+        } catch (Exception e) {
+            log.warn("Failed to fetch departure info for tourId: {}, departureId: {}", tourId, departureId, e);
             return Map.of();
         }
     }
