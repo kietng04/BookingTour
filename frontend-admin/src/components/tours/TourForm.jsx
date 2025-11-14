@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { useForm } from 'react-hook-form';
+import { useState, useEffect } from 'react';
 import Card from '../common/Card.jsx';
 import Input from '../common/Input.jsx';
 import Select from '../common/Select.jsx';
@@ -35,6 +36,53 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
   });
 
   const heroImageValue = watch('heroImageUrl');
+  const selectedRegionId = watch('regionId');
+
+  const [regions, setRegions] = useState([]);
+  const [provinces, setProvinces] = useState([]);
+  const [loadingRegions, setLoadingRegions] = useState(true);
+  const [loadingProvinces, setLoadingProvinces] = useState(false);
+
+  // Fetch regions on component mount
+  useEffect(() => {
+    const fetchRegions = async () => {
+      try {
+        setLoadingRegions(true);
+        const response = await fetch('/api/tours/regions');
+        const data = await response.json();
+        setRegions(data || []);
+      } catch (error) {
+        console.error('Failed to fetch regions:', error);
+        setRegions([]);
+      } finally {
+        setLoadingRegions(false);
+      }
+    };
+    fetchRegions();
+  }, []);
+
+  // Fetch provinces when region changes
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      if (!selectedRegionId) {
+        setProvinces([]);
+        return;
+      }
+
+      try {
+        setLoadingProvinces(true);
+        const response = await fetch(`/api/tours/regions/${selectedRegionId}/provinces`);
+        const data = await response.json();
+        setProvinces(data || []);
+      } catch (error) {
+        console.error('Failed to fetch provinces:', error);
+        setProvinces([]);
+      } finally {
+        setLoadingProvinces(false);
+      }
+    };
+    fetchProvinces();
+  }, [selectedRegionId]);
 
   return (
     <form className="grid gap-6 lg:grid-cols-[2fr_1fr]" onSubmit={handleSubmit(onSubmit)}>
@@ -59,37 +107,47 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
             disabled={submitting}
           />
 
-          <Select
-            label="Trạng thái"
-            options={statusOptions}
-            {...register('status')}
-          />
+          {mode === 'edit' && (
+            <Select
+              label="Trạng thái"
+              options={statusOptions}
+              {...register('status')}
+            />
+          )}
 
           <div className="grid gap-4 md:grid-cols-2">
-            <Input
-              label="Region ID"
-              type="number"
-              min={1}
-              placeholder="1"
+            <Select
+              label="Vùng miền"
               {...register('regionId', {
-                required: 'Region ID là bắt buộc',
+                required: 'Vùng miền là bắt buộc',
                 valueAsNumber: true
               })}
               error={errors.regionId?.message}
-              disabled={submitting}
+              disabled={submitting || loadingRegions}
+              options={[
+                { value: '', label: loadingRegions ? 'Đang tải...' : 'Chọn vùng miền' },
+                ...regions.map(region => ({
+                  value: region.id,
+                  label: region.regionName || `Region ${region.id}`
+                }))
+              ]}
             />
 
-            <Input
-              label="Province ID"
-              type="number"
-              min={1}
-              placeholder="1"
+            <Select
+              label="Tỉnh/Thành phố"
               {...register('provinceId', {
-                required: 'Province ID là bắt buộc',
+                required: 'Tỉnh/Thành phố là bắt buộc',
                 valueAsNumber: true
               })}
               error={errors.provinceId?.message}
-              disabled={submitting}
+              disabled={submitting || !selectedRegionId || loadingProvinces}
+              options={[
+                { value: '', label: !selectedRegionId ? 'Chọn vùng miền trước' : (loadingProvinces ? 'Đang tải...' : 'Chọn tỉnh/thành phố') },
+                ...provinces.map(province => ({
+                  value: province.id,
+                  label: province.provinceName || `Province ${province.id}`
+                }))
+              ]}
             />
           </div>
 

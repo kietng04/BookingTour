@@ -8,7 +8,7 @@ import Button from '../../components/common/Button.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 
 const TourEdit = () => {
-  const { tourId } = useParams();
+  const { id: tourId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

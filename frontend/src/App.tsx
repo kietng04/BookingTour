@@ -14,6 +14,8 @@ import NotFoundPage from './pages/NotFoundPage';
 import Profile from './pages/Profile';
 import CustomTourRequest from './pages/CustomTourRequest';
 import MyCustomTours from './pages/MyCustomTours';
+import Reviews from './pages/Reviews';
+import MyReviews from './pages/MyReviews';
 import SiteHeader from './components/layout/SiteHeader';
 import SiteFooter from './components/layout/SiteFooter';
 import ScrollToTop from './components/layout/ScrollToTop';
@@ -30,6 +32,8 @@ const App: React.FC = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/tours" element={<ToursPageExplore />} />
             <Route path="/tours/:slug" element={<TourDetailPage />} />
+            <Route path="/reviews" element={<Reviews />} />
+            <Route path="/my-reviews" element={<MyReviews />} />
             <Route path="/booking/:slug" element={<BookingPage />} />
             <Route path="/booking-history" element={<BookingHistory />} />
             <Route path="/profile" element={<Profile />} />
