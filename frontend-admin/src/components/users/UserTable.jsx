@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
-import { Mail } from "lucide-react";
+import { Mail, Trash2 } from "lucide-react";
 import Table from "../common/Table.jsx";
 import Badge from "../common/Badge.jsx";
+import Button from "../common/Button.jsx";
 
 const providerLabel = (value, isOAuth) => {
   if (!value || value.toLowerCase() === "local") {
@@ -10,7 +11,7 @@ const providerLabel = (value, isOAuth) => {
   return value.toUpperCase();
 };
 
-const UserTable = ({ users, onToggleActive }) => {
+const UserTable = ({ users, onToggleActive, onDelete }) => {
   const columns = [
     {
       key: "fullName",
@@ -65,25 +66,37 @@ const UserTable = ({ users, onToggleActive }) => {
       columns={columns}
       data={users}
       renderRowActions={(row) => (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => onToggleActive && onToggleActive(row)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-              row.active ? 'bg-primary-600' : 'bg-slate-300'
-            }`}
-            role="switch"
-            aria-checked={row.active}
-            title={row.active ? 'Vô hiệu hóa' : 'Kích hoạt'}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                row.active ? 'translate-x-6' : 'translate-x-1'
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onToggleActive && onToggleActive(row)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+                row.active ? 'bg-primary-600' : 'bg-slate-300'
               }`}
-            />
-          </button>
-          <span className="text-xs text-slate-500">
-            {row.active ? 'Kích hoạt' : 'Vô hiệu hóa'}
-          </span>
+              role="switch"
+              aria-checked={row.active}
+              title={row.active ? 'Vô hiệu hóa' : 'Kích hoạt'}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  row.active ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+            <span className="text-xs text-slate-500">
+              {row.active ? 'Kích hoạt' : 'Vô hiệu hóa'}
+            </span>
+          </div>
+          {onDelete && (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => onDelete(row)}
+              title="Xóa tài khoản"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       )}
     />
@@ -93,6 +106,7 @@ const UserTable = ({ users, onToggleActive }) => {
 UserTable.propTypes = {
   users: PropTypes.arrayOf(PropTypes.object).isRequired,
   onToggleActive: PropTypes.func,
+  onDelete: PropTypes.func,
 };
 
 export default UserTable;

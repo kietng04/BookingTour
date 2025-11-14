@@ -5,12 +5,13 @@ import TourHighlights from '../components/tour/TourHighlights.jsx';
 import TourGallery from '../components/tour/TourGallery.jsx';
 import TourItinerary from '../components/tour/TourItinerary.jsx';
 import ReviewsPanel from '../components/tour/ReviewsPanel.jsx';
+import ReviewForm from '../components/reviews/ReviewForm.jsx';
 import Card from '../components/common/Card.jsx';
 import Button from '../components/common/Button.jsx';
 import SectionTitle from '../components/common/SectionTitle.jsx';
-import { reviews } from '../data/mockReviews.js';
 import { formatCurrency } from '../utils/format.js';
-import { toursAPI } from '../services/api.js';
+import { toursAPI, reviewsAPI } from '../services/api.js';
+import { useAuth } from '../context/AuthContext.tsx';
 
 const DEFAULT_TOUR_IMAGE =
   'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80';
@@ -97,12 +98,18 @@ const transformTourDetail = (data) => {
 
 const TourDetail = () => {
   const { tourId } = useParams();
+  const { isAuthenticated, token, user } = useAuth();
   const [tour, setTour] = useState(null);
   const [loadingTour, setLoadingTour] = useState(true);
   const [tourError, setTourError] = useState(null);
   const [departures, setDepartures] = useState([]);
   const [loadingDepartures, setLoadingDepartures] = useState(false);
   const [departuresError, setDeparturesError] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
+  const [reviewsError, setReviewsError] = useState(null);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -187,10 +194,86 @@ const TourDetail = () => {
     };
   }, [tour?.tourId]);
 
-  const tourReviews = useMemo(
-    () => (tour ? reviews.filter((review) => review.tourId === tour.id) : []),
-    [tour]
-  );
+  useEffect(() => {
+    if (!tour?.tourId) {
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchReviews = async () => {
+      try {
+        setLoadingReviews(true);
+        setReviewsError(null);
+        const data = await reviewsAPI.getByTourId(tour.tourId);
+        if (!isMounted) return;
+
+        // Transform backend format to frontend format
+        const transformedReviews = (Array.isArray(data) ? data : []).map((review) => ({
+          id: `rv-${review.reviewId}`,
+          tourId: tour.id,
+          guest: review.guestName,
+          avatar: review.guestAvatar || `https://i.pravatar.cc/100?u=${review.userId}`,
+          rating: parseFloat(review.rating),
+          title: review.title,
+          comment: review.comment,
+          createdAt: review.createdAt,
+          badges: review.badges || []
+        }));
+
+        setReviews(transformedReviews);
+      } catch (error) {
+        console.error('Failed to load reviews:', error);
+        if (isMounted) {
+          setReviews([]);
+          setReviewsError(error.message || 'Không thể tải đánh giá.');
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingReviews(false);
+        }
+      }
+    };
+
+    fetchReviews();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [tour?.tourId, tour?.id]);
+
+  const handleSubmitReview = async (reviewData) => {
+    if (!isAuthenticated || !token || !user) {
+      throw new Error('Bạn cần đăng nhập để gửi đánh giá');
+    }
+
+    try {
+      await reviewsAPI.create(tour.tourId, reviewData, token);
+      setSubmitSuccess(true);
+      setShowReviewForm(false);
+
+      // Refresh reviews list
+      const updatedReviews = await reviewsAPI.getByTourId(tour.tourId);
+      const transformedReviews = (Array.isArray(updatedReviews) ? updatedReviews : []).map((review) => ({
+        id: `rv-${review.reviewId}`,
+        tourId: tour.id,
+        guest: review.guestName,
+        avatar: review.guestAvatar || `https://i.pravatar.cc/100?u=${review.userId}`,
+        rating: parseFloat(review.rating),
+        title: review.title,
+        comment: review.comment,
+        createdAt: review.createdAt,
+        badges: review.badges || []
+      }));
+      setReviews(transformedReviews);
+
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => setSubmitSuccess(false), 5000);
+    } catch (error) {
+      console.error('Failed to submit review:', error);
+      throw error;
+    }
+  };
 
   if (loadingTour) {
     return (
@@ -393,8 +476,73 @@ const TourDetail = () => {
             </div>
           </Card>
 
-          <ReviewsPanel reviews={tourReviews} />
+          {loadingReviews ? (
+            <Card className="text-center py-12">
+              <p className="text-sm text-slate-500">Đang tải đánh giá...</p>
+            </Card>
+          ) : reviewsError ? (
+            <Card className="text-center py-12">
+              <p className="text-sm text-red-600">Không thể tải đánh giá</p>
+              <p className="text-xs text-red-500">{reviewsError}</p>
+            </Card>
+          ) : reviews.length === 0 ? (
+            <Card className="text-center py-12">
+              <p className="text-sm text-slate-500">Chưa có đánh giá cho tour này</p>
+              <p className="text-xs text-slate-400 mt-2">Hãy là người đầu tiên đánh giá!</p>
+            </Card>
+          ) : (
+            <ReviewsPanel reviews={reviews} />
+          )}
         </div>
+      </section>
+
+      {/* Review Form Section */}
+      <section className="space-y-6">
+        {submitSuccess && (
+          <Card className="bg-green-50 border-green-200">
+            <div className="text-center py-6">
+              <p className="text-green-800 font-medium">Đánh giá của bạn đã được gửi thành công!</p>
+              <p className="text-sm text-green-600 mt-2">
+                Đánh giá sẽ được kiểm duyệt và hiển thị sau khi được duyệt.
+              </p>
+            </div>
+          </Card>
+        )}
+
+        {isAuthenticated ? (
+          !showReviewForm ? (
+            <Card className="text-center py-12">
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                Bạn đã trải nghiệm tour này?
+              </h3>
+              <p className="text-sm text-slate-600 mb-4">
+                Chia sẻ đánh giá của bạn để giúp người khác có thêm thông tin!
+              </p>
+              <Button onClick={() => setShowReviewForm(true)}>
+                Viết đánh giá
+              </Button>
+            </Card>
+          ) : (
+            <ReviewForm
+              tourId={tour.tourId}
+              tourName={tour.name}
+              onSuccess={handleSubmitReview}
+              onCancel={() => setShowReviewForm(false)}
+            />
+          )
+        ) : (
+          <Card className="text-center py-12">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              Đăng nhập để viết đánh giá
+            </h3>
+            <p className="text-sm text-slate-600 mb-4">
+              Bạn cần đăng nhập để chia sẻ trải nghiệm của mình
+            </p>
+            <Button to="/login">
+              Đăng nhập ngay
+            </Button>
+          </Card>
+        )}
       </section>
 
       <SectionTitle

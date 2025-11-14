@@ -52,6 +52,24 @@ const UserList = () => {
     }
   };
 
+  const handleDelete = async (user) => {
+    const confirmMessage = `Xóa vĩnh viễn tài khoản "${user.username || user.fullName}"?\n\nHành động này KHÔNG THỂ HOÀN TÁC!`;
+    const ok = confirm(confirmMessage);
+    if (!ok) return;
+
+    try {
+      setLoading(true);
+      await usersAPI.delete(user.id);
+      toast?.success?.('Đã xóa tài khoản thành công');
+      await fetchUsers();
+    } catch (err) {
+      console.error('Delete user failed', err);
+      toast?.error?.('Không thể xóa tài khoản. Vui lòng thử lại sau.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -66,7 +84,7 @@ const UserList = () => {
       ) : error ? (
         <Card className="py-12 text-center text-sm text-danger">{error}</Card>
       ) : (
-        <UserTable users={users} onToggleActive={handleToggleActive} />
+        <UserTable users={users} onToggleActive={handleToggleActive} onDelete={handleDelete} />
       )}
 
       <Card className="space-y-3 bg-slate-50 border border-slate-200">

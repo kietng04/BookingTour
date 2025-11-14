@@ -44,7 +44,21 @@ const BookingList = () => {
       }
 
       const data = await bookingsAPI.getAll(params);
-      setBookings(data.content || data);
+      const bookingsData = data.content || data || [];
+
+      // Transform bookings to ensure consistent field names
+      const transformedBookings = (Array.isArray(bookingsData) ? bookingsData : []).map(booking => ({
+        id: booking.id || booking.bookingId,
+        guestName: booking.guestName || booking.guest_name || `Guest #${booking.userId || '?'}`,
+        tourName: booking.tourName || booking.tour_name || `Tour #${booking.tourId || '?'}`,
+        travelDate: booking.travelDate || booking.travel_date || booking.departureDate || booking.departure_date || booking.createdAt,
+        guests: booking.guests || booking.guest_count || booking.guestCount || 0,
+        amount: booking.amount || booking.totalAmount || booking.total_amount || 0,
+        status: booking.status || 'PENDING',
+        assignedTo: booking.assignedTo || booking.assigned_to || '—'
+      }));
+
+      setBookings(transformedBookings);
     } catch (err) {
       console.error('Failed to fetch bookings:', err);
       setBookings([]);

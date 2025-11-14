@@ -1,5 +1,6 @@
 package com.example.tour.service.impl;
 
+import com.example.tour.client.UserServiceClient;
 import com.example.tour.dto.*;
 import com.example.tour.model.Tour;
 import com.example.tour.model.TourReview;
@@ -26,6 +27,9 @@ public class ReviewServiceImpl implements ReviewService {
     @Autowired
     private TourRepository tourRepository;
 
+    @Autowired
+    private UserServiceClient userServiceClient;
+
     @Override
     @Transactional
     public ReviewResponse createReview(Long tourId, Long userId, CreateReviewRequest request) {
@@ -45,6 +49,25 @@ public class ReviewServiceImpl implements ReviewService {
             throw new RuntimeException("Rating must be between 1.0 and 5.0");
         }
 
+        // Validate title length (10-200 characters)
+        if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+            throw new RuntimeException("Title is required");
+        }
+        if (request.getTitle().trim().length() < 10) {
+            throw new RuntimeException("Title must be at least 10 characters");
+        }
+        if (request.getTitle().trim().length() > 200) {
+            throw new RuntimeException("Title must not exceed 200 characters");
+        }
+
+        // Validate comment length (minimum 20 characters)
+        if (request.getComment() == null || request.getComment().trim().isEmpty()) {
+            throw new RuntimeException("Comment is required");
+        }
+        if (request.getComment().trim().length() < 20) {
+            throw new RuntimeException("Comment must be at least 20 characters");
+        }
+
         // Create review
         TourReview review = new TourReview();
         review.setTour(tour);
@@ -56,10 +79,16 @@ public class ReviewServiceImpl implements ReviewService {
         review.setBadges(request.getBadges());
         review.setStatus("PENDING"); // Default to pending for moderation
 
-        // TODO: Fetch user info from User Service to populate guestName and guestAvatar
-        // For now, use placeholder
-        review.setGuestName("User " + userId);
-        review.setGuestAvatar(null);
+        // Fetch user info from User Service to populate guestName and guestAvatar
+        UserDTO userInfo = userServiceClient.getUserById(userId);
+        if (userInfo != null) {
+            review.setGuestName(userInfo.getFullName() != null ? userInfo.getFullName() : userInfo.getUsername());
+            review.setGuestAvatar(userInfo.getAvatar());
+        } else {
+            // Fallback if user-service is unavailable or user not found
+            review.setGuestName("User " + userId);
+            review.setGuestAvatar(null);
+        }
 
         TourReview saved = reviewRepository.save(review);
         return new ReviewResponse(saved);
@@ -85,9 +114,20 @@ public class ReviewServiceImpl implements ReviewService {
             review.setRating(request.getRating().setScale(1, RoundingMode.HALF_UP));
         }
         if (request.getTitle() != null) {
+            // Validate title length (10-200 characters)
+            if (request.getTitle().trim().length() < 10) {
+                throw new RuntimeException("Title must be at least 10 characters");
+            }
+            if (request.getTitle().trim().length() > 200) {
+                throw new RuntimeException("Title must not exceed 200 characters");
+            }
             review.setTitle(request.getTitle());
         }
         if (request.getComment() != null) {
+            // Validate comment length (minimum 20 characters)
+            if (request.getComment().trim().length() < 20) {
+                throw new RuntimeException("Comment must be at least 20 characters");
+            }
             review.setComment(request.getComment());
         }
         if (request.getBadges() != null) {

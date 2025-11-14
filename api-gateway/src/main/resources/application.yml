@@ -102,6 +102,12 @@ spring:
             - Path=/api/upload/**
           filters:
             - StripPrefix=1
+        - id: reviews-service
+          uri: lb://tour-service
+          predicates:
+            - Path=/api/reviews/**
+          filters:
+            - StripPrefix=1
         - id: booking-service
           uri: lb://booking-service
           predicates:

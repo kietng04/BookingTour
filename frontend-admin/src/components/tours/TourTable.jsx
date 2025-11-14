@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { Edit3 } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import Table from '../common/Table.jsx';
 import StatusPill from '../common/StatusPill.jsx';
 import Button from '../common/Button.jsx';
@@ -71,9 +71,9 @@ const TourTable = ({ tours }) => {
       columns={columns}
       data={tours}
       renderRowActions={(row) => (
-        <Button to={`/tours/${row.id}`} size="sm" variant="ghost">
-          <Edit3 className="h-4 w-4" />
-          Edit
+        <Button to={`/tours/${row.id}`} size="sm" variant="secondary">
+          <Eye className="h-4 w-4" />
+          Chi tiết
         </Button>
       )}
     />
