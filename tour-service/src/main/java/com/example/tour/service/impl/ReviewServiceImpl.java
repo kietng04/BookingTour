@@ -1,5 +1,6 @@
 package com.example.tour.service.impl;
 
+import com.example.tour.client.UserServiceClient;
 import com.example.tour.dto.*;
 import com.example.tour.model.Tour;
 import com.example.tour.model.TourReview;
@@ -25,6 +26,9 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Autowired
     private TourRepository tourRepository;
+
+    @Autowired
+    private UserServiceClient userServiceClient;
 
     @Override
     @Transactional
@@ -56,10 +60,16 @@ public class ReviewServiceImpl implements ReviewService {
         review.setBadges(request.getBadges());
         review.setStatus("PENDING"); // Default to pending for moderation
 
-        // TODO: Fetch user info from User Service to populate guestName and guestAvatar
-        // For now, use placeholder
-        review.setGuestName("User " + userId);
-        review.setGuestAvatar(null);
+        // Fetch user info from User Service to populate guestName and guestAvatar
+        UserDTO userInfo = userServiceClient.getUserById(userId);
+        if (userInfo != null) {
+            review.setGuestName(userInfo.getFullName() != null ? userInfo.getFullName() : userInfo.getUsername());
+            review.setGuestAvatar(userInfo.getAvatar());
+        } else {
+            // Fallback if user-service is unavailable or user not found
+            review.setGuestName("User " + userId);
+            review.setGuestAvatar(null);
+        }
 
         TourReview saved = reviewRepository.save(review);
         return new ReviewResponse(saved);

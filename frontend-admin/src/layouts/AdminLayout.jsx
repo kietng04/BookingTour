@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { BarChart2, BookOpen, CalendarClock, LayoutDashboard, LogOut, Users, Calendar } from 'lucide-react';
+import { BarChart2, BookOpen, CalendarClock, LayoutDashboard, LogOut, Users, Calendar, MessageCircle } from 'lucide-react';
 import clsx from 'clsx';
 import { useAdminAuth } from '../context/AdminAuthContext.jsx';
 import Button from '../components/common/Button.jsx';
@@ -10,6 +10,7 @@ const navigation = [
   { icon: BookOpen, label: 'Tours', to: '/tours' },
   { icon: Calendar, label: 'Departures', to: '/departures' },
   { icon: CalendarClock, label: 'Bookings', to: '/bookings' },
+  { icon: MessageCircle, label: 'Reviews', to: '/reviews' },
   { icon: Users, label: 'Users', to: '/users' }
 ];
 

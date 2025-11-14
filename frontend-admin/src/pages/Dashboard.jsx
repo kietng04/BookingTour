@@ -1,4 +1,4 @@
-import { DollarSign, TicketPercent, Users as UsersIcon, TrendingUp, Download } from 'lucide-react';
+import { DollarSign, TicketPercent, Users as UsersIcon, TrendingUp, Download, MessageCircle, Star } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard.jsx';
 import RevenueChart from '../components/dashboard/RevenueChart.jsx';
 import RecentBookings from '../components/dashboard/RecentBookings.jsx';
@@ -9,13 +9,14 @@ import DepartureOccupancyChart from '../components/dashboard/DepartureOccupancyC
 import Card from '../components/common/Card.jsx';
 import Button from '../components/common/Button.jsx';
 import { useEffect, useState } from 'react';
-import { dashboardAPI, bookingsAPI, exportAPI } from '../services/api.js';
+import { dashboardAPI, bookingsAPI, exportAPI, reviewsAPI } from '../services/api.js';
 
 const iconMap = {
   revenue: DollarSign,
   bookings: TicketPercent,
   users: UsersIcon,
-  conversion: TrendingUp
+  conversion: TrendingUp,
+  reviews: MessageCircle
 };
 
 const Dashboard = () => {
@@ -24,6 +25,7 @@ const Dashboard = () => {
     { id: 'bookings', title: 'Total bookings', value: '—', change: 0, subtitle: 'All statuses' },
     { id: 'users', title: 'Active users', value: '—', change: 0, subtitle: 'Made bookings' },
     { id: 'conversion', title: 'Conversion rate', value: '—', change: 0, subtitle: 'Confirmed %' },
+    { id: 'reviews', title: 'Reviews', value: '—', change: 0, subtitle: 'Pending review' },
   ]);
   const [recentBookings, setRecentBookings] = useState([]);
   const [revenueTrends, setRevenueTrends] = useState([]);
@@ -64,14 +66,16 @@ const Dashboard = () => {
         toursData,
         statusData,
         occupancyData,
-        recentData
+        recentData,
+        reviewStatsData
       ] = await Promise.all([
         dashboardAPI.getStats(dateRange),
         dashboardAPI.getRevenueTrends(dateRange),
         dashboardAPI.getTopTours({ limit: 5 }),
         dashboardAPI.getBookingStatus(),
         dashboardAPI.getDepartureOccupancy(),
-        bookingsAPI.getAll({ page: 0, size: 10 })
+        bookingsAPI.getAll({ page: 0, size: 10 }),
+        reviewsAPI.getOverallStats()
       ]);
 
       if (statsData) {
@@ -103,6 +107,13 @@ const Dashboard = () => {
             value: `${(statsData.bookings?.conversionRate || 0).toFixed(1)}%`,
             change: 0,
             subtitle: 'Confirmed %'
+          },
+          {
+            id: 'reviews',
+            title: 'Reviews',
+            value: String(reviewStatsData?.total || 0),
+            change: 0,
+            subtitle: `${reviewStatsData?.pending || 0} pending`
           }
         ];
         setStats(updatedStats);
@@ -212,7 +223,7 @@ const Dashboard = () => {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {stats.map((stat) => (
           <StatCard
             key={stat.id}
