@@ -1,14 +1,25 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 import Button from '../components/common/Button.jsx';
 import Input from '../components/common/Input.jsx';
+import { useAdminAuth } from '../context/AdminAuthContext.jsx';
 
 const Login = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, refresh } = useAdminAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = useCallback(
     async (event) => {
@@ -72,16 +83,22 @@ const Login = () => {
           sessionStorage.removeItem('bt-admin-session-token');
         }
 
-        // Force page reload to ensure fresh context initialization from localStorage
-        // This prevents timing issues with async setState in AdminAuthContext
-        window.location.href = '/';
+        // Trigger AdminAuthContext to refresh from localStorage
+        // This ensures the context picks up the new auth state immediately
+        refresh();
+
+        // Dispatch event to notify all listeners
+        window.dispatchEvent(new Event('admin-auth-changed'));
+
+        // Navigate to dashboard (replace history to prevent back to login)
+        navigate('/', { replace: true });
       } catch (err) {
         setError(err.message || 'Đã xảy ra lỗi. Vui lòng thử lại.');
       } finally {
         setSubmitting(false);
       }
     },
-    [email, password, rememberMe]
+    [email, password, rememberMe, refresh, navigate]
   );
 
   const checkboxId = useMemo(() => `remember-${Math.random().toString(36).slice(2)}`, []);
