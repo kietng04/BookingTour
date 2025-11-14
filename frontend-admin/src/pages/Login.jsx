@@ -1,26 +1,14 @@
-import { useNavigate } from 'react-router-dom';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
-import { useAdminAuth } from '../context/AdminAuthContext.jsx';
 import Button from '../components/common/Button.jsx';
 import Input from '../components/common/Input.jsx';
 
-const API_BASE_URL = '';
-
 const Login = () => {
-  const navigate = useNavigate();
-  const { login, isAuthenticated, refresh } = useAdminAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/', { replace: true });
-    }
-  }, [isAuthenticated, navigate]);
 
   const handleSubmit = useCallback(
     async (event) => {
@@ -84,17 +72,16 @@ const Login = () => {
           sessionStorage.removeItem('bt-admin-session-token');
         }
 
-        // Dispatch auth changed event - AdminAuthContext will auto-refresh
-        window.dispatchEvent(new Event('admin-auth-changed'));
-
-        // Let useEffect handle navigation after context updates
+        // Force page reload to ensure fresh context initialization from localStorage
+        // This prevents timing issues with async setState in AdminAuthContext
+        window.location.href = '/';
       } catch (err) {
         setError(err.message || 'Đã xảy ra lỗi. Vui lòng thử lại.');
       } finally {
         setSubmitting(false);
       }
     },
-    [email, password, rememberMe, navigate]
+    [email, password, rememberMe]
   );
 
   const checkboxId = useMemo(() => `remember-${Math.random().toString(36).slice(2)}`, []);
