@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const getAdminToken = () => {
   return localStorage.getItem('bt-admin-token');
@@ -25,8 +25,24 @@ async function fetchAdminAPI(endpoint, options = {}) {
     const response = await fetch(url, config);
 
     if (response.status === 401) {
-      console.warn('Unauthorized access, redirecting to login...');
-      localStorage.removeItem('bt-admin-token');
+      console.warn('Unauthorized access, clearing session and redirecting to login...');
+      // Clear all admin storage keys
+      const ADMIN_STORAGE_KEYS = [
+        'bt-admin-token',
+        'bt-admin-username',
+        'bt-admin-email',
+        'bt-admin-fullName',
+        'bt-admin-avatar',
+        'bt-admin-role',
+        'bt-admin-userId',
+        'bt-admin-permissions',
+        'bt-admin-lastActivity'
+      ];
+      ADMIN_STORAGE_KEYS.forEach(key => localStorage.removeItem(key));
+
+      // Trigger auth context refresh
+      window.dispatchEvent(new Event('admin-auth-changed'));
+
       window.location.href = '/auth/login';
       return;
     }
