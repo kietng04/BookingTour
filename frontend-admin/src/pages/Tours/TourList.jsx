@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Plus, RotateCcw } from 'lucide-react';
 import TourTable from '../../components/tours/TourTable.jsx';
 import Button from '../../components/common/Button.jsx';
@@ -90,13 +89,14 @@ const TourList = () => {
         </>
       )}
 
-      <Card className="space-y-3 bg-slate-900 text-slate-100">
-        <h3 className="text-lg font-semibold">Draft workflow tip</h3>
-        <p className="text-sm text-slate-300">
-          Promote tours by switching status to <span className="rounded-full bg-success/20 px-2 py-0.5 text-xs text-success">live</span>.
-          Keep limited campaigns hidden as <span className="rounded-full bg-warning/20 px-2 py-0.5 text-xs text-warning">draft</span>.
-        </p>
-        <Link to="/settings" className="text-xs font-semibold text-primary-200">Configure publishing policies →</Link>
+      <Card className="space-y-3 bg-slate-50 border border-slate-200">
+        <h3 className="text-sm font-semibold text-slate-700">Lưu ý về trạng thái tour</h3>
+        <ul className="space-y-1 text-sm text-slate-600">
+          <li>• <strong>Active:</strong> Tour đang hoạt động và có thể đặt</li>
+          <li>• <strong>Inactive:</strong> Tour tạm ngưng hoạt động</li>
+          <li>• <strong>Full:</strong> Tour đã đầy chỗ</li>
+          <li>• <strong>Ended:</strong> Tour đã kết thúc</li>
+        </ul>
       </Card>
     </div>
   );
