@@ -80,8 +80,74 @@ export const regionsAPI = {
   getProvinces: (regionId) => fetchAPI(`/tours/regions/${regionId}/provinces`),
 };
 
+export const reviewsAPI = {
+  // Get approved reviews for a tour (public)
+  getByTourId: (tourId, params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchAPI(`/reviews/tours/${tourId}${query ? `?${query}` : ''}`);
+  },
+
+  // Get review summary/statistics for a tour (public)
+  getSummary: (tourId) => fetchAPI(`/reviews/tours/${tourId}/summary`),
+
+  // Create a new review (authenticated)
+  create: (tourId, reviewData, token) => {
+    return fetchAPI(`/reviews/tours/${tourId}`, {
+      method: 'POST',
+      body: JSON.stringify(reviewData),
+      authToken: token,
+    });
+  },
+
+  // Update own review (authenticated)
+  update: (reviewId, reviewData, token) => {
+    return fetchAPI(`/reviews/${reviewId}`, {
+      method: 'PUT',
+      body: JSON.stringify(reviewData),
+      authToken: token,
+    });
+  },
+
+  // Delete own review (authenticated)
+  delete: (reviewId, token) => {
+    return fetchAPI(`/reviews/${reviewId}`, {
+      method: 'DELETE',
+      authToken: token,
+    });
+  },
+
+  // Get current user's reviews (authenticated)
+  getMyReviews: (token) => {
+    return fetchAPI('/reviews/my-reviews', {
+      authToken: token,
+    });
+  },
+
+  // Admin: Get all reviews with filters
+  getAllAdmin: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchAPI(`/reviews/admin${query ? `?${query}` : ''}`);
+  },
+
+  // Admin: Update review status
+  updateStatus: (reviewId, status) => {
+    return fetchAPI(`/reviews/admin/${reviewId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+  },
+
+  // Admin: Delete any review
+  deleteAdmin: (reviewId) => {
+    return fetchAPI(`/reviews/admin/${reviewId}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
 export default {
   tours: toursAPI,
   bookings: bookingsAPI,
   regions: regionsAPI,
+  reviews: reviewsAPI,
 };
