@@ -54,6 +54,7 @@ const TourEdit = () => {
       adultPrice: t.adultPrice || '',
       childPrice: t.childPrice || '',
       heroImageUrl: t.heroImageUrl || '',
+      schedules: t.schedules || [],
     };
   };
 
@@ -72,6 +73,7 @@ const TourEdit = () => {
       adultPrice: Number(form.adultPrice) || 0,
       childPrice: Number(form.childPrice) || 0,
       heroImageUrl: form.heroImageUrl || '',
+      schedules: form.schedules || [],
     };
   };
 
