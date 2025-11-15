@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Trash2, Eye } from 'lucide-react';
 import api from '../../services/api';
 import Table from '../../components/common/Table';
@@ -13,35 +13,39 @@ const ReviewList = () => {
   const [filters, setFilters] = useState({ status: '', tourId: '', minRating: '' });
   const [selectedReview, setSelectedReview] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const toast = useToast();
 
-  const fetchReviews = useCallback(async () => {
-    try {
-      setLoading(true);
-      const params = {};
-      if (filters.status) params.status = filters.status;
-      if (filters.tourId) params.tourId = filters.tourId;
-      if (filters.minRating) params.minRating = filters.minRating;
-
-      const data = await api.reviews.getAll(params);
-      setReviews(Array.isArray(data) ? data : []);
-    } catch (error) {
-      toast?.showToast?.('Không thể tải danh sách đánh giá', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, [filters, toast]);
-
   useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setLoading(true);
+        const params = {};
+        if (filters.status) params.status = filters.status;
+        if (filters.tourId) params.tourId = filters.tourId;
+        if (filters.minRating) params.minRating = filters.minRating;
+
+        console.log('[ReviewList] Fetching reviews with params:', params);
+        const data = await api.reviews.getAll(params);
+        console.log('[ReviewList] Received reviews:', data?.length || 0, 'reviews');
+        setReviews(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('[ReviewList] Error fetching reviews:', error);
+        toast?.showToast?.('Không thể tải danh sách đánh giá', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchReviews();
-  }, [fetchReviews]);
+  }, [filters.status, filters.tourId, filters.minRating, refreshTrigger, toast]);
 
   const handleApprove = async (reviewId) => {
     if (!window.confirm('Phê duyệt đánh giá này?')) return;
     try {
       await api.reviews.updateStatus(reviewId, 'APPROVED');
       toast?.showToast?.('Đã phê duyệt đánh giá', 'success');
-      fetchReviews();
+      setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       toast?.showToast?.('Không thể phê duyệt', 'error');
     }
@@ -52,7 +56,7 @@ const ReviewList = () => {
     try {
       await api.reviews.updateStatus(reviewId, 'REJECTED');
       toast?.showToast?.('Đã từ chối đánh giá', 'success');
-      fetchReviews();
+      setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       toast?.showToast?.('Không thể từ chối', 'error');
     }
@@ -63,7 +67,7 @@ const ReviewList = () => {
     try {
       await api.reviews.delete(reviewId);
       toast?.showToast?.('Đã xóa đánh giá', 'success');
-      fetchReviews();
+      setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       toast?.showToast?.('Không thể xóa', 'error');
     }
