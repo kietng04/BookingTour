@@ -14,16 +14,21 @@ const BookingTable = ({ bookings, onRefresh }) => {
   useEffect(() => {
     // Fetch payment status for all bookings
     const fetchPaymentStatuses = async () => {
+      console.log('[BookingTable] Fetching payment statuses for', bookings.length, 'bookings');
       const statuses = {};
       for (const booking of bookings) {
         try {
+          console.log(`[BookingTable] Fetching payment for booking ID: ${booking.id}`);
           const payment = await paymentsAPI.getByBookingId(booking.id);
+          console.log(`[BookingTable] Payment response for booking ${booking.id}:`, payment);
           statuses[booking.id] = payment?.status || 'UNKNOWN';
         } catch (err) {
-          console.error(`Failed to fetch payment for booking ${booking.id}:`, err);
+          console.error(`[BookingTable] Failed to fetch payment for booking ${booking.id}:`, err);
+          console.error(`[BookingTable] Error details:`, err.response || err.message);
           statuses[booking.id] = 'UNKNOWN';
         }
       }
+      console.log('[BookingTable] Final payment statuses:', statuses);
       setPaymentStatuses(statuses);
     };
 
@@ -129,6 +134,11 @@ const BookingTable = ({ bookings, onRefresh }) => {
         const isPaymentCompleted = paymentStatuses[row.id] === 'COMPLETED';
         const showConfirmButton = isPending && isPaymentCompleted;
         const isConfirming = confirmingIds.has(row.id);
+
+        // Debug log for button visibility
+        if (isPending) {
+          console.log(`[BookingTable] Row ${row.id} - Status: ${row.status}, Payment: ${paymentStatuses[row.id]}, Show button: ${showConfirmButton}`);
+        }
 
         return (
           <div className="flex items-center gap-2">
