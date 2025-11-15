@@ -13,10 +13,14 @@ const TourCreate = () => {
 
   const adaptPayload = (form) => {
     const days = Number(form.days) || 1;
-    const schedules = Array.from({ length: days }, (_, idx) => ({
-      dayNumber: idx + 1,
-      scheduleDescription: `Lịch trình ngày ${idx + 1}: trải nghiệm và tham quan`,
-    }));
+    // Use schedules from form, or create default ones if none provided
+    let schedules = form.schedules || [];
+    if (schedules.length === 0) {
+      schedules = Array.from({ length: days }, (_, idx) => ({
+        dayNumber: idx + 1,
+        scheduleDescription: `Lịch trình ngày ${idx + 1}: trải nghiệm và tham quan`,
+      }));
+    }
 
     return {
       tourName: form.tourName,
