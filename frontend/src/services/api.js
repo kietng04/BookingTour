@@ -90,17 +90,17 @@ export const reviewsAPI = {
   // Get approved reviews for a tour (public)
   getByTourId: (tourId, params = {}) => {
     const query = new URLSearchParams(params).toString();
-    return fetchAPI(`/reviews/tours/${tourId}${query ? `?${query}` : ''}`);
+    return fetchAPI(`/reviews/approved/tour/${tourId}${query ? `?${query}` : ''}`);
   },
 
   // Get review summary/statistics for a tour (public)
-  getSummary: (tourId) => fetchAPI(`/reviews/tours/${tourId}/summary`),
+  getSummary: (tourId) => fetchAPI(`/reviews/summary/${tourId}`),
 
   // Create a new review (authenticated)
   create: (tourId, reviewData, token) => {
     // Extract userId from localStorage for X-User-Id header
     const userId = localStorage.getItem('userId');
-    return fetchAPI(`/reviews/tours/${tourId}`, {
+    return fetchAPI(`/reviews/tour/${tourId}`, {
       method: 'POST',
       body: JSON.stringify(reviewData),
       authToken: token,
