@@ -6,6 +6,7 @@ import Input from '../common/Input.jsx';
 import Select from '../common/Select.jsx';
 import Button from '../common/Button.jsx';
 import ImageUpload from '../common/ImageUpload.jsx';
+import TourSchedules from './TourSchedules.jsx';
 import { regionsAPI } from '../../services/api.js';
 
 const statusOptions = [
@@ -38,11 +39,13 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
 
   const heroImageValue = watch('heroImageUrl');
   const selectedRegionId = watch('regionId');
+  const daysValue = watch('days');
 
   const [regions, setRegions] = useState([]);
   const [provinces, setProvinces] = useState([]);
   const [loadingRegions, setLoadingRegions] = useState(true);
   const [loadingProvinces, setLoadingProvinces] = useState(false);
+  const [schedules, setSchedules] = useState(initialValues?.schedules || []);
 
   // Fetch regions on component mount
   useEffect(() => {
@@ -116,8 +119,17 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
     }
   }, [selectedRegionId, initialValues, setValue, loadingRegions]);
 
+  const handleFormSubmit = (formData) => {
+    // Include schedules in the submission
+    const dataWithSchedules = {
+      ...formData,
+      schedules: schedules.filter(s => s.scheduleDescription && s.scheduleDescription.trim() !== '')
+    };
+    onSubmit(dataWithSchedules);
+  };
+
   return (
-    <form className="grid gap-6 lg:grid-cols-[2fr_1fr]" onSubmit={handleSubmit(onSubmit)}>
+    <form className="grid gap-6 lg:grid-cols-[2fr_1fr]" onSubmit={handleSubmit(handleFormSubmit)}>
       <div className="space-y-6">
         {/* Basic Information */}
         <Card className="space-y-4">
@@ -270,6 +282,14 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
             />
           </div>
         </Card>
+
+        {/* Tour Schedules */}
+        <TourSchedules
+          days={daysValue}
+          initialSchedules={initialValues?.schedules || []}
+          onChange={setSchedules}
+          disabled={submitting}
+        />
       </div>
 
       <div className="space-y-6">
