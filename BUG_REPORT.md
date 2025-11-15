@@ -2,110 +2,130 @@
 
 **Ngày test:** 15/11/2025  
 **Tester:** AI Testing Agent  
-**Status:** 🔴 1 Critical Bug Found
+**Status:** 🔴 3 CRITICAL BUGS FOUND
 
 ---
 
-## ❌ BUG #1: Reviews Không Hiển Thị - Empty State Sai
+## 🔴 CRITICAL BUGS
 
-### Thông tin
+### 🔴 BUG #1: Admin Review Filter Không Hoạt Động
+
+#### Thông tin
+- **Severity:** 🔴 HIGH
+- **URL:** http://localhost:5174/reviews
+- **Module:** Admin Frontend - Review Management
+
+#### Mô tả
+Filter "Trạng thái" trên trang quản lý reviews không hoạt động. Khi chọn "Chờ duyệt", vẫn hiển thị tất cả reviews (bao gồm "Đã duyệt" và "Từ chối").
+
+#### Steps to Reproduce
+1. Login admin → http://localhost:5174/reviews
+2. Click dropdown "Tất cả trạng thái"
+3. Chọn "Chờ duyệt"
+4. ❌ Kết quả: Vẫn hiển thị tất cả reviews (11 reviews)
+5. ✅ Mong đợi: Chỉ hiển thị reviews có status "Chờ duyệt" (5 reviews)
+
+#### Evidence
+```
+Trước filter: 11 reviews (Chờ duyệt + Đã duyệt + Từ chối)
+Sau filter "Chờ duyệt": Vẫn 11 reviews ❌
+```
+
+#### Nguyên nhân
+- Filter state không trigger API call
+- Hoặc API không nhận filter params
+- Frontend không filter client-side
+
+#### Impact
+- 🔴 Admin không thể lọc reviews theo trạng thái
+- Khó quản lý khi có nhiều reviews
+- Ảnh hưởng workflow moderation
+
+---
+
+### 🔴 BUG #2: Client Tour List Không Hiển Thị Tours
+
+#### Thông tin
 - **Severity:** 🔴 CRITICAL
-- **URL:** http://localhost:3000/tours/e2e-test-tour---complete-workflow
-- **Module:** Client Frontend - Tour Detail - Reviews Tab
+- **URL:** http://localhost:3000/tours
+- **Module:** Client Frontend - Tour Listing
 
-### Mô tả
-Click tab "Đánh giá" → Hiển thị **"Chưa có đánh giá cho tour này"** nhưng thực tế backend có **3 reviews APPROVED**.
+#### Mô tả
+Trang tour listing không hiển thị tour nào, mặc dù Admin có 10+ tours trong database.
 
-### Steps to reproduce
-1. Vào http://localhost:3000/tours/e2e-test-tour---complete-workflow
-2. Click tab "Đánh giá"
-3. Kết quả: "Chưa có đánh giá cho tour này" ❌
+#### Steps to Reproduce
+1. Vào http://localhost:3000/tours
+2. ❌ Kết quả: Không có tour nào hiển thị
+3. ✅ Mong đợi: Hiển thị danh sách tours
 
-### Evidence
-**Backend có data:**
-- Review #1: User 1, 4.5⭐, APPROVED
-- Review #34: User 3, 5.0⭐, APPROVED
-- Review #43: User 999, 4.5⭐, APPROVED
-
-**Frontend hiển thị:**
+#### Evidence
 ```
-Nhận xét xác thực từ du khách đã trải nghiệm cùng BookingTour.
-
-Chưa có đánh giá cho tour này
-Hãy là người đầu tiên đánh giá!
+Page: http://localhost:3000/tours
+Content: 
+- Bộ lọc: ✅ Hiển thị
+- Tour cards: ❌ Không có
+- Pagination: ✅ Hiển thị (Page 1)
 ```
 
-### Nguyên nhân có thể
-1. ❌ API call failed (404, 500, CORS)
-2. ❌ API endpoint sai
-3. ❌ Response data format không match
-4. ❌ tourId/slug mapping sai
-5. ❌ Empty array được trả về
+#### Nguyên nhân
+- API call failed
+- Tours không match filter criteria
+- Frontend không render tours
+- Có thể do tours status = INACTIVE
 
-### Debug steps
-```bash
-# 1. Check API call
-curl http://localhost:8080/api/reviews/approved/tour/56
-# hoặc
-curl http://localhost:8080/api/reviews/approved/tour/e2e-test-tour---complete-workflow
-
-# 2. Check browser console
-# Mở DevTools > Console > Xem errors
-
-# 3. Check Network tab
-# DevTools > Network > Filter XHR > Click tab "Đánh giá"
-# Xem request URL và response
-```
-
-### Fix đề xuất
-```javascript
-// File: client/src/pages/TourDetail.jsx
-
-// 1. Đảm bảo dùng đúng tourId (numeric ID, không phải slug)
-const fetchReviews = async () => {
-  try {
-    // Dùng tourId (56) thay vì slug
-    const response = await fetch(
-      `http://localhost:8080/api/reviews/approved/tour/${tour.id}`
-    );
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-    
-    const data = await response.json();
-    console.log('Reviews data:', data); // Debug
-    setReviews(data);
-  } catch (error) {
-    console.error('Error fetching reviews:', error);
-  }
-};
-
-// 2. Gọi khi có tourId
-useEffect(() => {
-  if (activeTab === 'reviews' && tour?.id) {
-    fetchReviews();
-  }
-}, [activeTab, tour?.id]);
-```
-
-### Impact
-- ❌ Users không thấy reviews → Mất social proof
-- ❌ Giảm conversion rate
-- ❌ Review system không hoạt động trên client
+#### Impact
+- 🔴 CRITICAL: Khách hàng không thể xem tours
+- Hệ thống không sử dụng được
+- Blocking toàn bộ booking flow
 
 ---
 
-## ✅ VERIFIED FIXES
+### 🔴 BUG #3: Client Tour Detail Không Load
 
-### ✅ Bug #2: Booking Detail Loading Mãi - FIXED
-- **URL:** http://localhost:5174/bookings/31
-- **Status:** ✅ FIXED
-- **Result:** Booking detail hiển thị đầy đủ thông tin:
-  - Guest profile: kien kien (User ID 1)
-  - Financial summary: 20.000 ₫
-  - Timeline: Booking created, Seat reservation, Payment processing
-  - Không còn stuck ở loading state
+#### Thông tin
+- **Severity:** 🔴 CRITICAL
+- **URL:** http://localhost:3000/tours/56, http://localhost:3000/tours/55
+- **Module:** Client Frontend - Tour Detail
+
+#### Mô tả
+Tất cả tour detail pages đều không load, hiển thị error "Không tìm thấy tour".
+
+#### Steps to Reproduce
+1. Vào http://localhost:3000/tours/56
+2. Wait 4 seconds
+3. ❌ Kết quả: "Không tìm thấy tour - Không thể tải chi tiết tour"
+4. Thử tour khác: http://localhost:3000/tours/55
+5. ❌ Kết quả: Same error
+
+#### Evidence
+```
+URL: http://localhost:3000/tours/56
+Error: "Không tìm thấy tour"
+Message: "Không thể tải chi tiết tour. Vui lòng thử lại."
+
+Tested tours: 56, 55 → All failed
+```
+
+#### Nguyên nhân
+- API endpoint không hoạt động
+- Tour IDs không tồn tại trong client API
+- CORS issue
+- Client API URL sai
+
+#### Impact
+- 🔴 CRITICAL: Không thể xem chi tiết tour
+- Không thể booking
+- Blocking toàn bộ user flow
+
+---
+
+## ⚠️ MINOR BUG (From Previous Report)
+
+### ⚠️ BUG #4: Tên Người Đánh Giá Hiển Thị "undefined"
+
+#### Thông tin
+- **Severity:** ⚠️ MINOR (UI Issue)
+- **Status:** Still present (if tour detail worked)
 
 ---
 
@@ -113,28 +133,83 @@ useEffect(() => {
 
 | Status | Count | Details |
 |--------|-------|---------|
-| ❌ Critical Bugs | 1 | Reviews không hiển thị |
-| ✅ Fixed Bugs | 1 | Booking detail loading |
-| ✅ Working Features | 10+ | Admin panel, Tours, Departures, etc. |
+| 🔴 Critical | 3 | Review filter, Tour list, Tour detail |
+| ⚠️ Minor | 1 | Guest name "undefined" |
+| ✅ Working | 10+ | Admin modules (except review filter) |
 
-### Test Coverage
-- ✅ Admin Login & Dashboard
-- ✅ Admin Booking Detail (Fixed)
-- ✅ Client Tour Detail Page
-- ❌ Client Reviews (Bug found)
+### Admin Panel Test Results
+| Module | Status | Notes |
+|--------|--------|-------|
+| Dashboard | ✅ PASS | Stats, charts OK |
+| Tours | ✅ PASS | List, filters, pagination OK |
+| Departures | ✅ PASS | List, filters OK |
+| Bookings | ✅ PASS | List, detail, filters OK |
+| Reviews | ⚠️ PARTIAL | List OK, **filter broken** |
+| Users | ✅ PASS | List, activate/deactivate OK |
+
+### Client Frontend Test Results
+| Module | Status | Notes |
+|--------|--------|-------|
+| Homepage | ✅ PASS | Hero, features OK |
+| Tour List | 🔴 FAIL | **No tours displayed** |
+| Tour Detail | 🔴 FAIL | **All tours fail to load** |
+| Reviews | ⚠️ N/A | Can't test (tour detail broken) |
+| Booking | ⚠️ N/A | Can't test (tour detail broken) |
 
 ---
 
-## 🎯 ACTION REQUIRED
+## 🎯 PRIORITY FIXES
 
-**Priority P0 - Fix ngay:**
-1. Fix Reviews API call trên client
-2. Verify tourId vs slug mapping
-3. Test lại reviews hiển thị
+### P0 - CRITICAL (Must Fix)
+1. **Fix Tour List API** - Tours không hiển thị
+2. **Fix Tour Detail API** - Tour detail không load
+3. **Fix Review Filter** - Filter không hoạt động
 
-**Estimated fix time:** 2-3 giờ
+### P1 - Minor
+4. Fix guest name "undefined" display
 
 ---
 
-*Report generated: 15/11/2025*
+## 🔍 DEBUG RECOMMENDATIONS
 
+### For Bug #2 & #3 (Tour Issues)
+```bash
+# Check API Gateway
+curl http://localhost:8080/api/tours
+
+# Check Tour Service directly
+curl http://localhost:8082/api/tours
+
+# Check tour status in database
+# Có thể tours đều INACTIVE → Client không hiển thị
+```
+
+### For Bug #1 (Review Filter)
+```javascript
+// Check if filter params sent to API
+// Frontend: admin/src/pages/ReviewsPage.jsx
+// Backend: tour-service ReviewController
+```
+
+---
+
+## 📝 SYSTEM STATUS
+
+**Overall Status:** 🔴 **NOT READY FOR PRODUCTION**
+
+**Blocking Issues:**
+- Client frontend hoàn toàn không sử dụng được
+- Không thể xem tours
+- Không thể booking
+- Admin review filter broken
+
+**Working Features:**
+- ✅ Admin dashboard
+- ✅ Admin tour management
+- ✅ Admin booking management
+- ✅ Admin user management
+- ⚠️ Admin review management (partial)
+
+---
+
+*Report created: 15/11/2025 - Comprehensive testing completed*
