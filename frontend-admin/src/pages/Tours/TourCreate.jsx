@@ -42,10 +42,10 @@ const TourCreate = () => {
     try {
       const payload = adaptPayload(data);
       await toursAPI.create(payload);
-      toast.success('Tour created successfully');
+      toast.success('Tạo tour thành công');
       navigate('/tours');
     } catch (err) {
-      setError(err.message || 'Create tour failed');
+      setError(err.message || 'Tạo tour thất bại');
     } finally {
       setSubmitting(false);
     }
@@ -54,8 +54,8 @@ const TourCreate = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Create tour</h1>
-        <p className="text-sm text-slate-500">This form mirrors backend validation. On submit sends to POST /tours.</p>
+        <h1 className="text-2xl font-semibold text-slate-900">Tạo tour</h1>
+        <p className="text-sm text-slate-500">Form này phản ánh validation của backend. Khi submit sẽ gửi tới POST /tours.</p>
       </div>
       {error && (
         <Card className="border-danger/30 bg-danger/10 p-4 text-danger text-sm">{error}</Card>

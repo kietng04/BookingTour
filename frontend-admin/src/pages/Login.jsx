@@ -115,7 +115,7 @@ const Login = () => {
         </div>
         <form className="space-y-5" onSubmit={handleSubmit}>
           <Input
-            label="Email / Username"
+            label="Email / Tên đăng nhập"
             type="text"
             placeholder="admin@gmail.com"
             autoComplete="username"
@@ -124,7 +124,7 @@ const Login = () => {
             disabled={submitting}
           />
           <Input
-            label="Password"
+            label="Mật khẩu"
             type="password"
             placeholder="••••••••"
             autoComplete="current-password"

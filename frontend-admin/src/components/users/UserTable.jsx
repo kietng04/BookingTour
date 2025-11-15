@@ -30,11 +30,11 @@ const UserTable = ({ users, onToggleActive, onDelete }) => {
     },
     {
       key: "username",
-      label: "Username",
+      label: "Tên đăng nhập",
     },
     {
       key: "provider",
-      label: "Provider",
+      label: "Nhà cung cấp",
       render: (_, row) => (
         <Badge variant="secondary">
           {providerLabel(row.provider, row.isOAuthUser)}
@@ -43,7 +43,7 @@ const UserTable = ({ users, onToggleActive, onDelete }) => {
     },
     {
       key: "role",
-      label: "Role",
+      label: "Vai trò",
       render: (value) => (
         <Badge variant={value === "ADMIN" ? "primary" : "secondary"}>
           {value || "CUSTOMER"}
@@ -55,7 +55,7 @@ const UserTable = ({ users, onToggleActive, onDelete }) => {
       label: "Trạng thái",
       render: (value) => (
         <Badge variant={value ? "success" : "danger"}>
-          {value ? "Active" : "Inactive"}
+          {value ? "Hoạt động" : "Không hoạt động"}
         </Badge>
       ),
     },

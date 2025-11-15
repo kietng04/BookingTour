@@ -40,22 +40,22 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
   };
 
   const statusOptions = [
-    { value: '', label: 'All Statuses' },
-    { value: 'CONCHO', label: 'Available' },
-    { value: 'SAPFULL', label: 'Almost Full' },
-    { value: 'FULL', label: 'Full' },
-    { value: 'DAKHOIHANH', label: 'Departed' }
+    { value: '', label: 'Tất cả trạng thái' },
+    { value: 'CONCHO', label: 'Còn chỗ' },
+    { value: 'SAPFULL', label: 'Sắp đầy' },
+    { value: 'FULL', label: 'Đã đầy' },
+    { value: 'DAKHOIHANH', label: 'Đã khởi hành' }
   ];
 
   return (
     <Card className="mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-slate-900">Filters</h3>
+        <h3 className="text-lg font-semibold text-slate-900">Bộ lọc</h3>
         <button
           onClick={handleReset}
           className="text-sm text-slate-600 hover:text-slate-900"
         >
-          Clear all
+          Xóa tất cả
         </button>
       </div>
 
@@ -68,7 +68,7 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
             onChange={(e) => handleInputChange('tourId', e.target.value)}
             disabled={loadingTours}
           >
-            <option value="">All Tours</option>
+            <option value="">Tất cả tour</option>
             {tours.map((tour) => (
               <option key={tour.tourId} value={tour.tourId}>
                 {tour.tourName}
@@ -80,7 +80,7 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
         {/* From Date */}
         <div>
           <Input
-            label="From Date"
+            label="Từ ngày"
             type="date"
             value={filters.fromDate || ''}
             onChange={(e) => handleInputChange('fromDate', e.target.value)}
@@ -90,7 +90,7 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
         {/* To Date */}
         <div>
           <Input
-            label="To Date"
+            label="Đến ngày"
             type="date"
             value={filters.toDate || ''}
             onChange={(e) => handleInputChange('toDate', e.target.value)}
@@ -101,7 +101,7 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
         {/* Status Filter */}
         <div>
           <Select
-            label="Status"
+            label="Trạng thái"
             value={filters.status || ''}
             onChange={(e) => handleInputChange('status', e.target.value)}
           >
@@ -117,14 +117,14 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
       {/* Apply Button */}
       <div className="mt-4 flex justify-end">
         <Button onClick={onApply}>
-          Apply Filters
+          Áp dụng bộ lọc
         </Button>
       </div>
 
       {/* Active Filters Summary */}
       {(filters.tourId || filters.fromDate || filters.toDate || filters.status) && (
         <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
-          <span className="text-sm text-slate-600">Active filters:</span>
+          <span className="text-sm text-slate-600">Bộ lọc đang áp dụng:</span>
           {filters.tourId && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
               Tour: {tours.find(t => t.tourId === parseInt(filters.tourId))?.tourName || filters.tourId}
@@ -138,7 +138,7 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
           )}
           {filters.fromDate && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
-              From: {filters.fromDate}
+              Từ: {filters.fromDate}
               <button
                 onClick={() => handleInputChange('fromDate', '')}
                 className="ml-1 hover:text-blue-900"
@@ -149,7 +149,7 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
           )}
           {filters.toDate && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
-              To: {filters.toDate}
+              Đến: {filters.toDate}
               <button
                 onClick={() => handleInputChange('toDate', '')}
                 className="ml-1 hover:text-blue-900"
@@ -160,7 +160,7 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
           )}
           {filters.status && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
-              Status: {statusOptions.find(s => s.value === filters.status)?.label}
+              Trạng thái: {statusOptions.find(s => s.value === filters.status)?.label}
               <button
                 onClick={() => handleInputChange('status', '')}
                 className="ml-1 hover:text-blue-900"

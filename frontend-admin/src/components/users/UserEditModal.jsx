@@ -40,14 +40,14 @@ export default function UserEditModal({ open, user, onClose, onSubmit }) {
             name="fullName"
             value={form.fullName || ""}
             onChange={handleChange}
-            placeholder="Full name"
+            placeholder="Họ và tên"
             className="w-full border p-2 rounded"
           />
           <input
             name="username"
             value={form.username || ""}
             onChange={handleChange}
-            placeholder="Username"
+            placeholder="Tên đăng nhập"
             className="w-full border p-2 rounded"
           />
           <input

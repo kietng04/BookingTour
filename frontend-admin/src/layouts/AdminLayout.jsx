@@ -6,12 +6,12 @@ import { useAdminAuth } from '../context/AdminAuthContext.jsx';
 import Button from '../components/common/Button.jsx';
 
 const navigation = [
-  { icon: LayoutDashboard, label: 'Dashboard', to: '/' },
-  { icon: BookOpen, label: 'Tours', to: '/tours' },
-  { icon: Calendar, label: 'Departures', to: '/departures' },
-  { icon: CalendarClock, label: 'Bookings', to: '/bookings' },
-  { icon: MessageCircle, label: 'Reviews', to: '/reviews' },
-  { icon: Users, label: 'Users', to: '/users' }
+  { icon: LayoutDashboard, label: 'Bảng điều khiển', to: '/' },
+  { icon: BookOpen, label: 'Tour du lịch', to: '/tours' },
+  { icon: Calendar, label: 'Chuyến đi', to: '/departures' },
+  { icon: CalendarClock, label: 'Đặt chỗ', to: '/bookings' },
+  { icon: MessageCircle, label: 'Đánh giá', to: '/reviews' },
+  { icon: Users, label: 'Người dùng', to: '/users' }
 ];
 
 const AdminLayout = () => {
@@ -38,7 +38,7 @@ const AdminLayout = () => {
             {!collapsed && (
               <div>
                 <p className="text-lg font-semibold text-slate-900">BookingTour</p>
-                <p className="text-xs text-slate-400">Admin dashboard</p>
+                <p className="text-xs text-slate-400">Quản trị viên</p>
               </div>
             )}
           </div>
@@ -66,7 +66,7 @@ const AdminLayout = () => {
 
         <Button variant="ghost" className="justify-start" onClick={handleLogout}>
           <LogOut className="h-4 w-4" />
-          <span className="sidebar-label">Log out</span>
+          <span className="sidebar-label">Đăng xuất</span>
         </Button>
       </aside>
 
@@ -83,8 +83,8 @@ const AdminLayout = () => {
                 <BarChart2 className="h-5 w-5" />
               </button>
               <div>
-                <p className="text-sm font-semibold text-slate-800">Today&apos;s pulse</p>
-                <p className="text-xs text-slate-400">Monitor bookings, revenue, and reviews at a glance.</p>
+                <p className="text-sm font-semibold text-slate-800">Tổng quan hôm nay</p>
+                <p className="text-xs text-slate-400">Theo dõi đặt chỗ, doanh thu và đánh giá một cách nhanh chóng.</p>
               </div>
             </div>
             <div className="flex items-center gap-2">

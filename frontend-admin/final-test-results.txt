@@ -1,0 +1,86 @@
+
+Running 14 tests using 3 workers
+
+[1A[2K[1/14] [chromium-no-cors] › tests\login-real-api.spec.ts:24:3 › Admin Login Flow - Real API › should successfully login with real backend API
+[1A[2K[2/14] [chromium-no-cors] › tests\login.spec.ts:13:3 › Admin Login Flow › should display login form correctly
+[1A[2K[3/14] [chromium-no-cors] › tests\tours.spec.ts:25:3 › Admin Tours › create tour real API returns 201 (workaround token)
+[1A[2K[4/14] [chromium-no-cors] › tests\login.spec.ts:27:3 › Admin Login Flow › should validate empty form submission
+[1A[2K[chromium-no-cors] › tests\login-real-api.spec.ts:24:3 › Admin Login Flow - Real API › should successfully login with real backend API
+✅ Login successful with real API!
+
+[1A[2KToken: eyJhbGciOiJIUzM4NCJ9.eyJlbWFpbCI6ImFkbWluQGdtYWlsL...
+
+[1A[2KUsername: admin
+
+[1A[2KEmail: admin@gmail.com
+
+[1A[2KRole: ADMIN
+
+[1A[2K[5/14] [chromium-no-cors] › tests\login-real-api.spec.ts:64:3 › Admin Login Flow - Real API › should handle invalid credentials correctly
+[1A[2K[chromium-no-cors] › tests\login-real-api.spec.ts:64:3 › Admin Login Flow - Real API › should handle invalid credentials correctly
+✅ Invalid credentials handled correctly!
+
+[1A[2K[6/14] [chromium-no-cors] › tests\login-real-api.spec.ts:87:3 › Admin Login Flow - Real API › should persist session after page reload
+[1A[2K[7/14] [chromium-no-cors] › tests\login.spec.ts:37:3 › Admin Login Flow › should successfully login with valid credentials (mocked)
+[1A[2K[8/14] [chromium-no-cors] › tests\login.spec.ts:83:3 › Admin Login Flow › should handle login failure with error message (mocked)
+[1A[2K[chromium-no-cors] › tests\login-real-api.spec.ts:87:3 › Admin Login Flow - Real API › should persist session after page reload
+✅ Session persisted after page reload!
+
+[1A[2K[9/14] [chromium-no-cors] › tests\login-real-api.spec.ts:112:3 › Admin Login Flow - Real API › should auto-redirect to dashboard if already authenticated
+[1A[2K[chromium-no-cors] › tests\login-real-api.spec.ts:112:3 › Admin Login Flow - Real API › should auto-redirect to dashboard if already authenticated
+✅ Auto-redirect working correctly!
+
+[1A[2K[10/14] [chromium-no-cors] › tests\login-real-api.spec.ts:134:3 › Admin Login Flow - Real API › should set lastActivity timestamp on login
+[1A[2K[11/14] [chromium-no-cors] › tests\login.spec.ts:115:3 › Admin Login Flow › should redirect to dashboard if already authenticated
+[1A[2K[12/14] [chromium-no-cors] › tests\login.spec.ts:135:3 › Admin Login Flow › should clear all localStorage keys on 401 response
+[1A[2K[chromium-no-cors] › tests\login-real-api.spec.ts:134:3 › Admin Login Flow - Real API › should set lastActivity timestamp on login
+✅ LastActivity timestamp set on login!
+
+[1A[2K[13/14] [chromium-no-cors] › tests\login.spec.ts:181:3 › Admin Login Flow › should check "Remember Me" functionality
+[1A[2K  1) [chromium-no-cors] › tests\tours.spec.ts:25:3 › Admin Tours › create tour real API returns 201 (workaround token) 
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+    [2m  - waiting for getByRole('textbox', { name: 'Tour name' })[22m
+
+
+      25 |   test('create tour real API returns 201 (workaround token)', async ({ page }) => {
+      26 |     await page.goto('/tours/new');
+    > 27 |     await page.getByRole('textbox', { name: 'Tour name' }).fill('E2E Tour');
+         |                                                            ^
+      28 |     await page.getByRole('textbox', { name: 'Slug' }).fill('e2e-tour');
+      29 |     await page.getByRole('spinbutton', { name: 'Base price' }).fill('1999');
+      30 |     await page.getByRole('spinbutton', { name: 'Duration (days)' }).fill('5');
+        at C:\Users\Kiet\Desktop\BookingTour\frontend-admin\tests\tours.spec.ts:27:60
+
+    Error Context: test-results\tours-Admin-Tours-create-t-9fd47-turns-201-workaround-token--chromium-no-cors\error-context.md
+
+
+[1A[2K[14/14] [chromium-no-cors] › tests\tours.spec.ts:40:3 › Admin Tours › edit tour shows success toast and navigates to list (stubbed)
+[1A[2K  2) [chromium-no-cors] › tests\tours.spec.ts:40:3 › Admin Tours › edit tour shows success toast and navigates to list (stubbed) 
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+    [2m  - waiting for getByRole('spinbutton', { name: 'Base price' })[22m
+
+
+      58 |     await page.goto('/tours/1');
+      59 |     await expect(page.getByText('Đang tải dữ liệu tour...')).toBeHidden({ timeout: 5000 });
+    > 60 |     await page.getByRole('spinbutton', { name: 'Base price' }).fill('2500');
+         |                                                                ^
+      61 |     await page.getByRole('button', { name: 'Update tour' }).click();
+      62 |     await expect(page.getByRole('alert')).toContainText('Tour updated successfully');
+      63 |   });
+        at C:\Users\Kiet\Desktop\BookingTour\frontend-admin\tests\tours.spec.ts:60:64
+
+    Error Context: test-results\tours-Admin-Tours-edit-tou-e9228--navigates-to-list-stubbed--chromium-no-cors\error-context.md
+
+
+[1A[2K  2 failed
+    [chromium-no-cors] › tests\tours.spec.ts:25:3 › Admin Tours › create tour real API returns 201 (workaround token) 
+    [chromium-no-cors] › tests\tours.spec.ts:40:3 › Admin Tours › edit tour shows success toast and navigates to list (stubbed) 
+  12 passed (2.1m)

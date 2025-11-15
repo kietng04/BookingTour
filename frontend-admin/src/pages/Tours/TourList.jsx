@@ -43,31 +43,31 @@ const TourList = () => {
       <div className="space-y-3">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Tours</h1>
-            <p className="text-sm text-slate-500">Manage catalog, inventory, and pricing đồng bộ cùng API backend.</p>
+            <h1 className="text-2xl font-semibold text-slate-900">Tour du lịch</h1>
+            <p className="text-sm text-slate-500">Quản lý danh mục, tồn kho và giá cả đồng bộ cùng API backend.</p>
           </div>
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => { setKeyword(''); setStatus(''); setPage(0); }}>
               <RotateCcw className="h-4 w-4" />
-              Reset
+              Đặt lại
             </Button>
             <Button to="/tours/new" className="w-full md:w-auto">
               <Plus className="h-4 w-4" />
-              New tour
+              Tour mới
             </Button>
           </div>
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
-          <Input label="Keyword" placeholder="Search by name/slug" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
-          <Select label="Status" value={status} onChange={(e) => setStatus(e.target.value)} options={[
-            { value: '', label: 'All' },
-            { value: 'ACTIVE', label: 'Active' },
-            { value: 'UNACTIVE', label: 'Inactive' },
-            { value: 'FULL', label: 'Full' },
-            { value: 'END', label: 'Ended' }
+          <Input label="Từ khóa" placeholder="Tìm theo tên/slug" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
+          <Select label="Trạng thái" value={status} onChange={(e) => setStatus(e.target.value)} options={[
+            { value: '', label: 'Tất cả' },
+            { value: 'ACTIVE', label: 'Hoạt động' },
+            { value: 'UNACTIVE', label: 'Không hoạt động' },
+            { value: 'FULL', label: 'Đã đầy' },
+            { value: 'END', label: 'Đã kết thúc' }
           ]} />
-          <Select label="Page size" value={String(size)} onChange={(e) => setSize(Number(e.target.value))} options={[
+          <Select label="Kích thước trang" value={String(size)} onChange={(e) => setSize(Number(e.target.value))} options={[
             { value: '10', label: '10' },
             { value: '25', label: '25' },
             { value: '50', label: '50' }
@@ -83,8 +83,8 @@ const TourList = () => {
         <>
           <TourTable tours={tours} />
           <div className="flex items-center justify-end gap-2">
-            <Button variant="secondary" disabled={page === 0} onClick={() => setPage(Math.max(page - 1, 0))}>Prev</Button>
-            <Button variant="secondary" onClick={() => setPage(page + 1)}>Next</Button>
+            <Button variant="secondary" disabled={page === 0} onClick={() => setPage(Math.max(page - 1, 0))}>Trước</Button>
+            <Button variant="secondary" onClick={() => setPage(page + 1)}>Sau</Button>
           </div>
         </>
       )}
@@ -92,10 +92,10 @@ const TourList = () => {
       <Card className="space-y-3 bg-slate-50 border border-slate-200">
         <h3 className="text-sm font-semibold text-slate-700">Lưu ý về trạng thái tour</h3>
         <ul className="space-y-1 text-sm text-slate-600">
-          <li>• <strong>Active:</strong> Tour đang hoạt động và có thể đặt</li>
-          <li>• <strong>Inactive:</strong> Tour tạm ngưng hoạt động</li>
-          <li>• <strong>Full:</strong> Tour đã đầy chỗ</li>
-          <li>• <strong>Ended:</strong> Tour đã kết thúc</li>
+          <li>• <strong>Hoạt động:</strong> Tour đang hoạt động và có thể đặt</li>
+          <li>• <strong>Không hoạt động:</strong> Tour tạm ngưng hoạt động</li>
+          <li>• <strong>Đã đầy:</strong> Tour đã đầy chỗ</li>
+          <li>• <strong>Đã kết thúc:</strong> Tour đã kết thúc</li>
         </ul>
       </Card>
     </div>

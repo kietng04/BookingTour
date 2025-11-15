@@ -259,6 +259,11 @@ export const discountsAPI = {
   }),
 };
 
+export const regionsAPI = {
+  getAll: () => fetchAPI('/tours/regions'),
+  getProvinces: (regionId) => fetchAPI(`/tours/regions/${regionId}/provinces`),
+};
+
 export const dashboardAPI = {
   getStats: (params = {}) => {
     const query = new URLSearchParams(params).toString();
@@ -444,6 +449,8 @@ const reviewsAPI = {
   },
 };
 
+export { reviewsAPI };
+
 export default {
   tours: toursAPI,
   departures: departuresAPI,
@@ -452,6 +459,7 @@ export default {
   schedules: schedulesAPI,
   images: imagesAPI,
   discounts: discountsAPI,
+  regions: regionsAPI,
   dashboard: dashboardAPI,
   export: exportAPI,
   reviews: reviewsAPI,

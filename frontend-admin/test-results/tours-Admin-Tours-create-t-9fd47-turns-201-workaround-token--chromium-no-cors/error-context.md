@@ -7,130 +7,124 @@
       - generic [ref=e7]: BT
       - generic [ref=e8]:
         - paragraph [ref=e9]: BookingTour
-        - paragraph [ref=e10]: Admin dashboard
+        - paragraph [ref=e10]: Quản trị viên
     - navigation [ref=e11]:
-      - link "Dashboard" [ref=e12] [cursor=pointer]:
+      - link "Bảng điều khiển" [ref=e12] [cursor=pointer]:
         - /url: /
         - img [ref=e13]
-        - generic [ref=e18]: Dashboard
-      - link "Tours" [ref=e19] [cursor=pointer]:
+        - generic [ref=e18]: Bảng điều khiển
+      - link "Tour du lịch" [ref=e19] [cursor=pointer]:
         - /url: /tours
         - img [ref=e20]
-        - generic [ref=e23]: Tours
-      - link "Departures" [ref=e24] [cursor=pointer]:
+        - generic [ref=e23]: Tour du lịch
+      - link "Chuyến đi" [ref=e24] [cursor=pointer]:
         - /url: /departures
         - img [ref=e25]
-        - generic [ref=e27]: Departures
-      - link "Bookings" [ref=e28] [cursor=pointer]:
+        - generic [ref=e27]: Chuyến đi
+      - link "Đặt chỗ" [ref=e28] [cursor=pointer]:
         - /url: /bookings
         - img [ref=e29]
-        - generic [ref=e33]: Bookings
-      - link "Users" [ref=e34] [cursor=pointer]:
-        - /url: /users
-        - img [ref=e35]
-        - generic [ref=e40]: Users
-      - link "Reviews" [ref=e41] [cursor=pointer]:
+        - generic [ref=e33]: Đặt chỗ
+      - link "Đánh giá" [ref=e34] [cursor=pointer]:
         - /url: /reviews
-        - img [ref=e42]
-        - generic [ref=e44]: Reviews
-      - link "Settings" [ref=e45] [cursor=pointer]:
-        - /url: /settings
-        - img [ref=e46]
-        - generic [ref=e49]: Settings
-    - button "Log out" [ref=e50] [cursor=pointer]:
-      - img [ref=e51]
-      - generic [ref=e54]: Log out
-  - generic [ref=e55]:
-    - banner [ref=e56]:
-      - generic [ref=e57]:
-        - generic [ref=e58]:
-          - button "Toggle sidebar" [ref=e59] [cursor=pointer]:
-            - img [ref=e60]
-          - generic [ref=e61]:
-            - paragraph [ref=e62]: Today's pulse
-            - paragraph [ref=e63]: Monitor bookings, revenue, and reviews at a glance.
-        - generic [ref=e64]:
-          - generic [ref=e65]: Live sync
-          - generic [ref=e67]:
-            - generic [ref=e68]:
-              - paragraph [ref=e69]: Admin
-              - paragraph [ref=e70]: ADMIN
-            - generic [ref=e72]: A
-          - link "Switch account" [ref=e73] [cursor=pointer]:
-            - /url: /auth/login
-    - main [ref=e74]:
-      - generic [ref=e75]:
-        - generic [ref=e76]:
-          - heading "Create tour" [level=1] [ref=e77]
-          - paragraph [ref=e78]: This form mirrors backend validation. On submit sends to POST /tours.
-        - generic [ref=e79]:
-          - generic [ref=e80]:
-            - generic [ref=e81]:
-              - heading "Core details" [level=3] [ref=e82]
-              - generic [ref=e83]:
-                - generic [ref=e84]: Tour name
-                - textbox "Tour name" [ref=e85]:
-                  - /placeholder: "Ex: Aurora Escape in Iceland"
+        - img [ref=e35]
+        - generic [ref=e37]: Đánh giá
+      - link "Người dùng" [ref=e38] [cursor=pointer]:
+        - /url: /users
+        - img [ref=e39]
+        - generic [ref=e44]: Người dùng
+    - button "Đăng xuất" [ref=e45] [cursor=pointer]:
+      - img [ref=e46]
+      - generic [ref=e49]: Đăng xuất
+  - generic [ref=e50]:
+    - banner [ref=e51]:
+      - generic [ref=e52]:
+        - generic [ref=e53]:
+          - button "Toggle sidebar" [ref=e54] [cursor=pointer]:
+            - img [ref=e55]
+          - generic [ref=e56]:
+            - paragraph [ref=e57]: Tổng quan hôm nay
+            - paragraph [ref=e58]: Theo dõi đặt chỗ, doanh thu và đánh giá một cách nhanh chóng.
+        - generic [ref=e59]:
+          - generic [ref=e60]:
+            - paragraph [ref=e61]: Admin
+            - paragraph [ref=e62]: ADMIN
+          - generic [ref=e64]: A
+    - main [ref=e65]:
+      - generic [ref=e66]:
+        - generic [ref=e67]:
+          - heading "Tạo tour" [level=1] [ref=e68]
+          - paragraph [ref=e69]: Form này phản ánh validation của backend. Khi submit sẽ gửi tới POST /tours.
+        - generic [ref=e70]:
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - heading "Thông tin cơ bản" [level=3] [ref=e73]
+              - generic [ref=e74]:
+                - generic [ref=e75]: Tên tour
+                - textbox "Tên tour" [ref=e76]:
+                  - /placeholder: "Ví dụ: Du lịch Đà Lạt 3 ngày 2 đêm"
                   - text: E2E Tour
-              - generic [ref=e86]:
-                - generic [ref=e87]: Slug
-                - textbox "Slug" [ref=e88]:
-                  - /placeholder: aurora-escape
+              - generic [ref=e77]:
+                - generic [ref=e78]: Slug (URL thân thiện)
+                - textbox "Slug (URL thân thiện)" [ref=e79]:
+                  - /placeholder: du-lich-da-lat-3-ngay-2-dem
                   - text: e2e-tour
-              - generic [ref=e89]:
-                - generic [ref=e90]: Status
-                - combobox "Status" [ref=e91]:
-                  - option "Draft" [selected]
-                  - option "Live"
-                  - option "Archived"
+              - generic [ref=e80]:
+                - generic [ref=e81]:
+                  - generic [ref=e82]: Vùng miền
+                  - combobox "Vùng miền" [ref=e83]:
+                    - option "Chọn vùng miền" [selected]
+                    - option "Region 1"
+                    - option "Region 2"
+                    - option "Region 3"
+                - generic [ref=e84]:
+                  - generic [ref=e85]: Tỉnh/Thành phố
+                  - combobox "Tỉnh/Thành phố" [disabled] [ref=e86]:
+                    - option "Chọn vùng miền trước" [selected]
+              - generic [ref=e87]:
+                - generic [ref=e88]: Mô tả tour
+                - textbox "Mô tả chi tiết về tour..." [ref=e89]
+            - generic [ref=e90]:
+              - heading "Địa điểm & Thời gian" [level=3] [ref=e91]
               - generic [ref=e92]:
                 - generic [ref=e93]:
-                  - generic [ref=e94]: Base price
-                  - spinbutton "Base price" [ref=e95]: "1999"
+                  - generic [ref=e94]: Điểm khởi hành
+                  - textbox "Điểm khởi hành" [ref=e95]:
+                    - /placeholder: TP. Hồ Chí Minh
                 - generic [ref=e96]:
-                  - generic [ref=e97]: Duration (days)
-                  - spinbutton "Duration (days)" [ref=e98]: "5"
+                  - generic [ref=e97]: Điểm đến chính
+                  - textbox "Điểm đến chính" [ref=e98]:
+                    - /placeholder: Đà Lạt
               - generic [ref=e99]:
                 - generic [ref=e100]:
-                  - generic [ref=e101]: Capacity
-                  - spinbutton "Capacity" [ref=e102]
+                  - generic [ref=e101]: Số ngày
+                  - spinbutton "Số ngày" [ref=e102]: "5"
                 - generic [ref=e103]:
-                  - generic [ref=e104]: Difficulty
-                  - combobox "Difficulty" [ref=e105]:
-                    - option "Easy"
-                    - option "Moderate" [selected]
-                    - option "Challenging"
-              - generic [ref=e106]:
-                - generic [ref=e107]: Hero image URL
-                - textbox "Hero image URL" [ref=e108]:
-                  - /placeholder: https://...
-            - generic [ref=e109]:
-              - heading "Highlights" [level=3] [ref=e110]
-              - paragraph [ref=e111]: "Maps to backend array `highlights[]`. Displayed on customer tour detail page."
-              - generic [ref=e112]:
-                - generic [ref=e113]:
-                  - textbox [active] [ref=e115]:
-                    - /placeholder: Describe premium experience
-                  - button [ref=e116] [cursor=pointer]:
-                    - img [ref=e117]
-                - button "Add highlight" [ref=e120] [cursor=pointer]:
+                  - generic [ref=e104]: Số đêm
+                  - spinbutton "Số đêm" [ref=e105]
+            - generic [ref=e106]:
+              - heading "Giá tour" [level=3] [ref=e107]
+              - generic [ref=e108]:
+                - generic [ref=e109]:
+                  - generic [ref=e110]: Giá người lớn (VND)
+                  - spinbutton "Giá người lớn (VND)" [active] [ref=e111]: "1999"
+                - generic [ref=e112]:
+                  - generic [ref=e113]: Giá trẻ em (VND)
+                  - spinbutton "Giá trẻ em (VND)" [ref=e114]
+          - generic [ref=e115]:
+            - generic [ref=e116]:
+              - heading "Ảnh đại diện" [level=3] [ref=e117]
+              - paragraph [ref=e118]: Tải ảnh lên Cloudinary. Ảnh sẽ được tối ưu tự động.
+              - generic [ref=e119]:
+                - generic [ref=e120] [cursor=pointer]:
                   - img [ref=e121]
-                  - text: Add highlight
-          - generic [ref=e122]:
-            - generic [ref=e123]:
-              - heading "Metadata" [level=3] [ref=e124]
-              - paragraph [ref=e125]: Control discoverability, search filters, and marketing tags.
-              - generic [ref=e126]:
-                - generic [ref=e127]:
-                  - textbox [ref=e129]:
-                    - /placeholder: Luxury
-                  - button [ref=e130] [cursor=pointer]:
-                    - img [ref=e131]
-                - button "Add tag" [ref=e134] [cursor=pointer]:
-                  - img [ref=e135]
-                  - text: Add tag
-            - generic [ref=e136]:
-              - heading "Save tour" [level=3] [ref=e137]
-              - paragraph [ref=e138]: "Submit triggers backend `POST/PUT /tours`. Draft status keeps it hidden from customers."
-              - button "Create tour" [ref=e139] [cursor=pointer]
+                  - paragraph [ref=e123]: Click để chọn ảnh hoặc kéo thả vào đây
+                  - paragraph [ref=e124]: PNG, JPG, JPEG, WEBP (tối đa 5MB)
+                - paragraph [ref=e126]:
+                  - strong [ref=e127]: "Lưu ý:"
+                  - text: Ảnh sẽ được tự động tối ưu kích thước và chất lượng khi upload. Chỉ chấp nhận file ảnh định dạng PNG, JPG, JPEG, WEBP với dung lượng tối đa 5MB.
+            - generic [ref=e128]:
+              - heading "Tạo tour mới" [level=3] [ref=e129]
+              - paragraph [ref=e130]: Tạo tour mới. Tour sẽ được lưu với trạng thái đã chọn.
+              - button "Tạo mới" [ref=e131] [cursor=pointer]
 ```

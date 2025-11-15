@@ -1,0 +1,134 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: BT
+      - generic [ref=e8]:
+        - paragraph [ref=e9]: BookingTour
+        - paragraph [ref=e10]: Quản trị viên
+    - navigation [ref=e11]:
+      - link "Bảng điều khiển" [ref=e12] [cursor=pointer]:
+        - /url: /
+        - img [ref=e13]
+        - generic [ref=e18]: Bảng điều khiển
+      - link "Tour du lịch" [ref=e19] [cursor=pointer]:
+        - /url: /tours
+        - img [ref=e20]
+        - generic [ref=e23]: Tour du lịch
+      - link "Chuyến đi" [ref=e24] [cursor=pointer]:
+        - /url: /departures
+        - img [ref=e25]
+        - generic [ref=e27]: Chuyến đi
+      - link "Đặt chỗ" [ref=e28] [cursor=pointer]:
+        - /url: /bookings
+        - img [ref=e29]
+        - generic [ref=e33]: Đặt chỗ
+      - link "Đánh giá" [ref=e34] [cursor=pointer]:
+        - /url: /reviews
+        - img [ref=e35]
+        - generic [ref=e37]: Đánh giá
+      - link "Người dùng" [ref=e38] [cursor=pointer]:
+        - /url: /users
+        - img [ref=e39]
+        - generic [ref=e44]: Người dùng
+    - button "Đăng xuất" [ref=e45] [cursor=pointer]:
+      - img [ref=e46]
+      - generic [ref=e49]: Đăng xuất
+  - generic [ref=e50]:
+    - banner [ref=e51]:
+      - generic [ref=e52]:
+        - generic [ref=e53]:
+          - button "Toggle sidebar" [ref=e54] [cursor=pointer]:
+            - img [ref=e55]
+          - generic [ref=e56]:
+            - paragraph [ref=e57]: Tổng quan hôm nay
+            - paragraph [ref=e58]: Theo dõi đặt chỗ, doanh thu và đánh giá một cách nhanh chóng.
+        - generic [ref=e59]:
+          - generic [ref=e60]:
+            - paragraph [ref=e61]: Admin
+            - paragraph [ref=e62]: ADMIN
+          - generic [ref=e64]: A
+    - main [ref=e65]:
+      - generic [ref=e66]:
+        - generic [ref=e67]:
+          - generic [ref=e68]:
+            - button "Quay lại" [ref=e69] [cursor=pointer]:
+              - img [ref=e70]
+              - text: Quay lại
+            - generic [ref=e72]:
+              - heading "Loaded Tour" [level=1] [ref=e73]
+              - paragraph [ref=e74]: "Tour ID:"
+          - generic [ref=e75]:
+            - link "Chỉnh sửa" [ref=e76] [cursor=pointer]:
+              - /url: /tours/1/edit
+            - link "Thêm Departure" [ref=e77] [cursor=pointer]:
+              - /url: /departures/new?tourId=1
+        - generic [ref=e78]:
+          - generic [ref=e79]:
+            - heading "Thông tin cơ bản" [level=3] [ref=e80]
+            - generic [ref=e81]:
+              - generic [ref=e83]: ACTIVE
+              - generic [ref=e84]:
+                - img [ref=e85]
+                - generic [ref=e88]:
+                  - paragraph [ref=e89]: Tuyến đường
+                  - paragraph [ref=e90]: →
+              - generic [ref=e91]:
+                - img [ref=e92]
+                - generic [ref=e95]:
+                  - paragraph [ref=e96]: Thời lượng
+                  - paragraph [ref=e97]: 3 ngày đêm
+              - generic [ref=e98]:
+                - img [ref=e99]
+                - generic [ref=e101]:
+                  - paragraph [ref=e102]: Giá
+                  - paragraph [ref=e103]:
+                    - text: "Người lớn: 1.000 ₫"
+                    - text: "Trẻ em: 0 ₫"
+          - generic [ref=e104]:
+            - heading "Ảnh đại diện" [level=3] [ref=e105]
+            - generic [ref=e106]: Chưa có ảnh
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - heading "Departures (2)" [level=3] [ref=e109]
+            - link "Thêm Departure" [ref=e110] [cursor=pointer]:
+              - /url: /departures/new?tourId=1
+          - table [ref=e112]:
+            - rowgroup [ref=e113]:
+              - row "ID Ngày khởi hành Ngày kết thúc Chỗ ngồi Trạng thái Hành động" [ref=e114]:
+                - cell "ID" [ref=e115]
+                - cell "Ngày khởi hành" [ref=e116]:
+                  - img [ref=e117]
+                  - text: Ngày khởi hành
+                - cell "Ngày kết thúc" [ref=e119]:
+                  - img [ref=e120]
+                  - text: Ngày kết thúc
+                - cell "Chỗ ngồi" [ref=e122]:
+                  - img [ref=e123]
+                  - text: Chỗ ngồi
+                - cell "Trạng thái" [ref=e128]
+                - cell "Hành động" [ref=e129]
+            - rowgroup [ref=e130]:
+              - row "#21 16/11/2025 18/11/2025 30/32 Còn chỗ Chi tiết" [ref=e131]:
+                - cell "#21" [ref=e132]
+                - cell "16/11/2025" [ref=e133]
+                - cell "18/11/2025" [ref=e134]
+                - cell "30/32" [ref=e135]
+                - cell "Còn chỗ" [ref=e136]:
+                  - generic [ref=e137]: Còn chỗ
+                - cell "Chi tiết" [ref=e138]:
+                  - link "Chi tiết" [ref=e139] [cursor=pointer]:
+                    - /url: /departures/21/edit?tourId=1
+              - row "#20 2/11/2025 4/11/2025 14/28 Còn chỗ Chi tiết" [ref=e140]:
+                - cell "#20" [ref=e141]
+                - cell "2/11/2025" [ref=e142]
+                - cell "4/11/2025" [ref=e143]
+                - cell "14/28" [ref=e144]
+                - cell "Còn chỗ" [ref=e145]:
+                  - generic [ref=e146]: Còn chỗ
+                - cell "Chi tiết" [ref=e147]:
+                  - link "Chi tiết" [ref=e148] [cursor=pointer]:
+                    - /url: /departures/20/edit?tourId=1
+```

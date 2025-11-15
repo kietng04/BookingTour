@@ -19,6 +19,11 @@ spring:
         format_sql: false
         jdbc:
           time_zone: Asia/Ho_Chi_Minh
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
   security:
     oauth2:
       client:
