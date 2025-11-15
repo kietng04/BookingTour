@@ -24,6 +24,8 @@ const DepartureForm = ({
     watch,
     setValue
   } = useForm({
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
     defaultValues: initialValues || {
       tourId: '',
       startDate: '',
@@ -64,13 +66,15 @@ const DepartureForm = ({
     : 0;
 
   const validateEndDate = (value) => {
-    if (!value) return 'Ngày kết thúc là bắt buộc';
+    console.log('[DepartureForm] validateEndDate called with value:', value, 'typeof:', typeof value);
+    if (!value || value === '') return 'Ngày kết thúc là bắt buộc';
     if (!startDate) return true;
     return new Date(value) >= new Date(startDate) || 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu';
   };
 
   const validateTotalSlots = (value) => {
-    if (!value) return 'Tổng số chỗ là bắt buộc';
+    console.log('[DepartureForm] validateTotalSlots called with value:', value, 'typeof:', typeof value);
+    if (!value || value === '') return 'Tổng số chỗ là bắt buộc';
     const numValue = parseInt(value);
     if (numValue < 1) return 'Phải có ít nhất 1 chỗ';
     if (!Number.isInteger(Number(value))) return 'Phải là số nguyên';
@@ -81,7 +85,8 @@ const DepartureForm = ({
   };
 
   const validateStartDate = (value) => {
-    if (!value) return 'Ngày bắt đầu là bắt buộc';
+    console.log('[DepartureForm] validateStartDate called with value:', value, 'typeof:', typeof value);
+    if (!value || value === '') return 'Ngày bắt đầu là bắt buộc';
     if (mode === 'create') {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -94,6 +99,8 @@ const DepartureForm = ({
   };
 
   const handleFormSubmit = (data) => {
+    console.log('[DepartureForm] handleFormSubmit called with data:', data);
+    console.log('[DepartureForm] Form errors:', errors);
     onSubmit({
       ...data,
       tourId: parseInt(data.tourId),

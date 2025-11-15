@@ -114,13 +114,6 @@ const DepartureFilters = ({ filters, onFiltersChange, onApply, onReset }) => {
         </div>
       </div>
 
-      {/* Apply Button */}
-      <div className="mt-4 flex justify-end">
-        <Button onClick={onApply}>
-          Áp dụng bộ lọc
-        </Button>
-      </div>
-
       {/* Active Filters Summary */}
       {(filters.tourId || filters.fromDate || filters.toDate || filters.status) && (
         <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
