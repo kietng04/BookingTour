@@ -50,6 +50,12 @@ const DepartureForm = ({
           tourName: tour.tourName || tour.tour_name
         }));
         setTours(normalizedTours);
+        
+        // If tourId is provided in initialValues and tours are loaded, set it in the form
+        if (initialValues?.tourId && normalizedTours.length > 0) {
+          const tourIdStr = String(initialValues.tourId);
+          setValue('tourId', tourIdStr);
+        }
       } catch (error) {
         console.error('Failed to fetch tours:', error);
         setTours([]);
@@ -58,7 +64,7 @@ const DepartureForm = ({
       }
     };
     fetchTours();
-  }, []);
+  }, [initialValues, setValue]);
 
   // Calculate reserved slots for edit mode
   const reservedSlots = mode === 'edit' && initialValues
