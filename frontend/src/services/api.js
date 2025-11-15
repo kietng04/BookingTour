@@ -89,8 +89,9 @@ export const reviewsAPI = {
 
   // Get approved reviews for a tour (public)
   getByTourId: (tourId, params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return fetchAPI(`/reviews/approved/tour/${tourId}${query ? `?${query}` : ''}`);
+    const queryParams = { ...params, tourId };
+    const query = new URLSearchParams(queryParams).toString();
+    return fetchAPI(`/reviews/approved?${query}`);
   },
 
   // Get review summary/statistics for a tour (public)
