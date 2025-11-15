@@ -135,7 +135,7 @@ const BookingList = () => {
             <option value="PENDING">Pending</option>
             <option value="CONFIRMED">Confirmed</option>
             <option value="CANCELLED">Cancelled</option>
-            <option value="COMPLETED">Completed</option>
+            <option value="FAILED">Failed</option>
           </Select>
         </div>
       </Card>
@@ -145,7 +145,7 @@ const BookingList = () => {
           <p className="text-sm text-slate-500">Loading bookings...</p>
         </Card>
       ) : (
-        <BookingTable bookings={bookings} />
+        <BookingTable bookings={bookings} onRefresh={fetchBookings} />
       )}
 
       <Card className="space-y-3 bg-slate-900 text-slate-100">
