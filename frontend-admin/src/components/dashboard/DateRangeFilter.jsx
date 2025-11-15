@@ -66,10 +66,10 @@ const DateRangeFilter = ({ onDateRangeChange }) => {
   };
 
   const presets = [
-    { id: 'today', label: 'Today' },
-    { id: 'last7days', label: 'Last 7 Days' },
-    { id: 'last30days', label: 'Last 30 Days' },
-    { id: 'thismonth', label: 'This Month' },
+    { id: 'today', label: 'Hôm nay' },
+    { id: 'last7days', label: '7 ngày qua' },
+    { id: 'last30days', label: '30 ngày qua' },
+    { id: 'thismonth', label: 'Tháng này' },
   ];
 
   return (
@@ -77,8 +77,8 @@ const DateRangeFilter = ({ onDateRangeChange }) => {
       <div className="space-y-4">
         {/* Header */}
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">Date Range</h3>
-          <p className="text-xs text-slate-500 mt-1">Filter dashboard data by time period</p>
+          <h3 className="text-sm font-semibold text-slate-900">Khoảng thời gian</h3>
+          <p className="text-xs text-slate-500 mt-1">Lọc dữ liệu bảng điều khiển theo khoảng thời gian</p>
         </div>
 
         {/* Preset Buttons */}
@@ -98,7 +98,7 @@ const DateRangeFilter = ({ onDateRangeChange }) => {
             variant={selectedPreset === 'custom' ? 'primary' : 'secondary'}
             onClick={handleCustomClick}
           >
-            Custom Range
+            Tùy chỉnh
           </Button>
         </div>
 
@@ -108,7 +108,7 @@ const DateRangeFilter = ({ onDateRangeChange }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1">
-                  Start Date
+                  Ngày bắt đầu
                 </label>
                 <input
                   type="date"
@@ -119,7 +119,7 @@ const DateRangeFilter = ({ onDateRangeChange }) => {
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1">
-                  End Date
+                  Ngày kết thúc
                 </label>
                 <input
                   type="date"
@@ -136,14 +136,14 @@ const DateRangeFilter = ({ onDateRangeChange }) => {
                 onClick={handleCustomApply}
                 disabled={!customStart || !customEnd}
               >
-                Apply Range
+                Áp dụng
               </Button>
               <Button
                 size="sm"
                 variant="secondary"
                 onClick={handleCustomReset}
               >
-                Reset
+                Đặt lại
               </Button>
             </div>
           </div>

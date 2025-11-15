@@ -64,30 +64,30 @@ const DepartureForm = ({
     : 0;
 
   const validateEndDate = (value) => {
-    if (!value) return 'End date is required';
+    if (!value) return 'Ngày kết thúc là bắt buộc';
     if (!startDate) return true;
-    return new Date(value) >= new Date(startDate) || 'End date must be after or equal to start date';
+    return new Date(value) >= new Date(startDate) || 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu';
   };
 
   const validateTotalSlots = (value) => {
-    if (!value) return 'Total slots is required';
+    if (!value) return 'Tổng số chỗ là bắt buộc';
     const numValue = parseInt(value);
-    if (numValue < 1) return 'Must have at least 1 slot';
-    if (!Number.isInteger(Number(value))) return 'Must be a whole number';
+    if (numValue < 1) return 'Phải có ít nhất 1 chỗ';
+    if (!Number.isInteger(Number(value))) return 'Phải là số nguyên';
     if (mode === 'edit' && numValue < reservedSlots) {
-      return `Cannot be less than reserved slots (${reservedSlots})`;
+      return `Không thể nhỏ hơn số chỗ đã đặt (${reservedSlots})`;
     }
     return true;
   };
 
   const validateStartDate = (value) => {
-    if (!value) return 'Start date is required';
+    if (!value) return 'Ngày bắt đầu là bắt buộc';
     if (mode === 'create') {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const selectedDate = new Date(value);
       if (selectedDate < today) {
-        return 'Cannot create departure in the past';
+        return 'Không thể tạo chuyến đi trong quá khứ';
       }
     }
     return true;
@@ -109,12 +109,12 @@ const DepartureForm = ({
           <Select
             label="Tour"
             {...register('tourId', {
-              required: mode === 'edit' ? false : 'Tour is required'
+              required: mode === 'edit' ? false : 'Tour là bắt buộc'
             })}
             error={errors.tourId?.message}
             disabled={disableTourSelection || loadingTours || mode === 'edit'}
           >
-            <option value="">Select a tour</option>
+            <option value="">Chọn một tour</option>
             {tours.map((tour) => (
               <option key={tour.tourId} value={String(tour.tourId)}>
                 {tour.tourName}
@@ -123,7 +123,7 @@ const DepartureForm = ({
           </Select>
           {mode === 'edit' && (
             <p className="mt-1 text-sm text-slate-500">
-              Cannot change tour for existing departure
+              Không thể thay đổi tour cho chuyến đi đã tồn tại
             </p>
           )}
         </div>
@@ -132,7 +132,7 @@ const DepartureForm = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Input
-              label="Start Date"
+              label="Ngày bắt đầu"
               type="date"
               {...register('startDate', { validate: validateStartDate })}
               error={errors.startDate?.message}
@@ -142,7 +142,7 @@ const DepartureForm = ({
 
           <div>
             <Input
-              label="End Date"
+              label="Ngày kết thúc"
               type="date"
               {...register('endDate', { validate: validateEndDate })}
               error={errors.endDate?.message}
@@ -155,7 +155,7 @@ const DepartureForm = ({
         {/* Total Slots */}
         <div>
           <Input
-            label="Total Slots"
+            label="Tổng số chỗ"
             type="number"
             min="1"
             step="1"
@@ -165,7 +165,7 @@ const DepartureForm = ({
           />
           {mode === 'edit' && reservedSlots > 0 && (
             <p className="mt-1 text-sm text-amber-600">
-              ⚠️ {reservedSlots} slot(s) already reserved. Cannot set below this number.
+              ⚠️ {reservedSlots} chỗ đã được đặt. Không thể đặt thấp hơn số này.
             </p>
           )}
         </div>
@@ -173,18 +173,18 @@ const DepartureForm = ({
         {/* Remaining Slots Info (Edit Mode) */}
         {mode === 'edit' && initialValues && (
           <div className="bg-slate-50 p-4 rounded-lg">
-            <h4 className="font-medium text-slate-900 mb-2">Current Status</h4>
+            <h4 className="font-medium text-slate-900 mb-2">Trạng thái hiện tại</h4>
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div>
-                <p className="text-slate-600">Total Slots</p>
+                <p className="text-slate-600">Tổng số chỗ</p>
                 <p className="font-semibold text-slate-900">{initialValues.totalSlots}</p>
               </div>
               <div>
-                <p className="text-slate-600">Reserved</p>
+                <p className="text-slate-600">Đã đặt</p>
                 <p className="font-semibold text-amber-600">{reservedSlots}</p>
               </div>
               <div>
-                <p className="text-slate-600">Available</p>
+                <p className="text-slate-600">Còn trống</p>
                 <p className="font-semibold text-green-600">{initialValues.remainingSlots}</p>
               </div>
             </div>
@@ -198,7 +198,7 @@ const DepartureForm = ({
             disabled={isLoading}
             className="flex-1 md:flex-initial"
           >
-            {isLoading ? 'Saving...' : mode === 'edit' ? 'Update Departure' : 'Create Departure'}
+            {isLoading ? 'Đang lưu...' : mode === 'edit' ? 'Cập nhật chuyến đi' : 'Tạo chuyến đi'}
           </Button>
           <Button
             type="button"
@@ -206,7 +206,7 @@ const DepartureForm = ({
             onClick={onCancel}
             disabled={isLoading}
           >
-            Cancel
+            Hủy
           </Button>
         </div>
       </form>
