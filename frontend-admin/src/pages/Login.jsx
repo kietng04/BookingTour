@@ -5,6 +5,8 @@ import Button from '../components/common/Button.jsx';
 import Input from '../components/common/Input.jsx';
 import { useAdminAuth } from '../context/AdminAuthContext.jsx';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 const Login = () => {
   const navigate = useNavigate();
   const { isAuthenticated, refresh } = useAdminAuth();
@@ -33,7 +35,7 @@ const Login = () => {
 
       setSubmitting(true);
       try {
-        const response = await fetch(`/api/users/auth/login`, {
+        const response = await fetch(`${API_BASE_URL}/users/auth/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -87,10 +89,8 @@ const Login = () => {
         // This ensures the context picks up the new auth state immediately
         refresh();
 
-        // Dispatch event to notify all listeners
-        window.dispatchEvent(new Event('admin-auth-changed'));
-
-        // Navigate to dashboard (replace history to prevent back to login)
+        // Navigate to dashboard immediately without dispatching the event
+        // The useEffect in Login component will handle the redirect after isAuthenticated updates
         navigate('/', { replace: true });
       } catch (err) {
         setError(err.message || 'Đã xảy ra lỗi. Vui lòng thử lại.');
