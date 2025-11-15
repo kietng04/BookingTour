@@ -52,8 +52,63 @@ async function fetchAdminAPI(endpoint, options = {}) {
     }
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Request failed' }));
-      const error = new Error(errorData.message || `HTTP ${response.status}`);
+      // Clone response to read body multiple times if needed
+      const responseClone = response.clone();
+      
+      // Try to parse as JSON first, fallback to text if it fails
+      let errorData;
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      
+      const contentType = response.headers.get('content-type') || '';
+      
+      try {
+        if (contentType.includes('application/json')) {
+          // Try JSON first
+          errorData = await response.json();
+          // Extract message from JSON
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
+          } else if (errorData.details) {
+            errorMessage = errorData.details;
+          } else if (typeof errorData === 'string') {
+            errorMessage = errorData;
+          }
+        } else {
+          // Spring Boot ResponseStatusException returns plain text
+          const text = await response.text();
+          if (text && text.trim()) {
+            // Try to parse as JSON if it looks like JSON
+            try {
+              errorData = JSON.parse(text);
+              if (errorData.message) {
+                errorMessage = errorData.message;
+              } else if (errorData.error) {
+                errorMessage = errorData.error;
+              } else {
+                errorMessage = text;
+              }
+            } catch {
+              // Not JSON, use as plain text
+              errorData = { message: text };
+              errorMessage = text;
+            }
+          }
+        }
+      } catch (parseError) {
+        // If all parsing fails, try to get text from cloned response
+        try {
+          const text = await responseClone.text();
+          errorData = { message: text || 'Request failed' };
+          errorMessage = text || `HTTP ${response.status}: ${response.statusText}`;
+        } catch {
+          errorData = { message: 'Request failed' };
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+      }
+      
+      const error = new Error(errorMessage);
       // Attach response information for better error handling
       error.response = {
         status: response.status,

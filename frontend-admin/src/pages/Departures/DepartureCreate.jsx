@@ -35,16 +35,14 @@ const DepartureCreate = () => {
     } catch (error) {
       console.error('Failed to create departure:', error);
 
-      // Handle specific error cases
-      let errorMessage = 'Failed to create departure';
-      if (error.response?.status === 400) {
-        errorMessage = error.response.data?.message || 'Invalid departure data';
-      } else if (error.response?.status === 404) {
+      // Error message is already extracted in api.js, use it directly
+      let errorMessage = error.message || 'Failed to create departure';
+      
+      // Fallback to specific messages for certain status codes if message is generic
+      if (error.response?.status === 404 && errorMessage.includes('HTTP')) {
         errorMessage = 'Tour not found';
-      } else if (error.response?.status === 409) {
+      } else if (error.response?.status === 409 && errorMessage.includes('HTTP')) {
         errorMessage = 'A departure already exists for this date range';
-      } else if (error.message) {
-        errorMessage = error.message;
       }
 
       toast.error(errorMessage);
@@ -104,7 +102,7 @@ const DepartureCreate = () => {
 
       {/* Form */}
       <DepartureForm
-        initialValues={tourIdFromQuery ? { tourId: tourIdFromQuery } : undefined}
+        initialValues={tourIdFromQuery ? { tourId: String(tourIdFromQuery) } : undefined}
         mode="create"
         onSubmit={handleSubmit}
         onCancel={handleCancel}
