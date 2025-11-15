@@ -83,15 +83,14 @@ const DepartureEdit = () => {
     } catch (error) {
       console.error('Failed to update departure:', error);
 
-      let errorMessage = 'Failed to update departure';
-      if (error.response?.status === 400) {
-        errorMessage = error.response.data?.message || 'Invalid departure data. Check that total slots is not less than reserved slots.';
-      } else if (error.response?.status === 404) {
+      // Error message is already extracted in api.js, use it directly
+      let errorMessage = error.message || 'Failed to update departure';
+      
+      // Fallback to specific messages for certain status codes if message is generic
+      if (error.response?.status === 404 && errorMessage.includes('HTTP')) {
         errorMessage = 'Departure not found';
-      } else if (error.response?.status === 409) {
+      } else if (error.response?.status === 409 && errorMessage.includes('HTTP')) {
         errorMessage = 'Cannot update: conflicts with existing departure or bookings';
-      } else if (error.message) {
-        errorMessage = error.message;
       }
 
       toast.error(errorMessage);
