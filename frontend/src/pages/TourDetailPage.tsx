@@ -6,7 +6,7 @@ import TourInfoTabs from '../components/tours/TourInfoTabs';
 import BookingSidebar from '../components/tours/BookingSidebar';
 import ReviewList from '../components/tours/ReviewList';
 import { Tour } from '../data/tours';
-import { toursAPI } from '../services/api';
+import { toursAPI, reviewsAPI } from '../services/api';
 import { enrichTourFromApi, ApiTour } from '../services/tourAdapter';
 import Skeleton from '../components/ui/Skeleton';
 
@@ -17,6 +17,17 @@ interface DepartureSummary {
   remainingSlots: number;
   totalSlots: number;
   status: string;
+}
+
+interface Review {
+  id: string;
+  guest: string;
+  avatar: string;
+  rating: number;
+  title: string;
+  comment: string;
+  createdAt: string;
+  badges?: string[];
 }
 
 const mapDepartures = (items: any[]): DepartureSummary[] =>
@@ -36,6 +47,8 @@ const TourDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const [tour, setTour] = useState<Tour | null>(null);
   const [departures, setDepartures] = useState<DepartureSummary[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -97,6 +110,54 @@ const TourDetailPage: React.FC = () => {
       cancelled = true;
     };
   }, [slug]);
+
+  // Fetch reviews from API
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchReviews = async () => {
+      if (!tour?.id) {
+        return;
+      }
+
+      setIsLoadingReviews(true);
+      try {
+        const data = await reviewsAPI.getByTourId(tour.id);
+
+        if (!cancelled) {
+          // Transform API response to match Review interface
+          const transformedReviews: Review[] = (Array.isArray(data) ? data : []).map((review: any) => ({
+            id: `rv-${review.reviewId}`,
+            guest: review.guestName,
+            avatar: review.guestAvatar || `https://i.pravatar.cc/100?u=${review.userId}`,
+            rating: parseFloat(review.rating),
+            title: review.title,
+            comment: review.comment,
+            createdAt: review.createdAt,
+            badges: review.badges || []
+          }));
+
+          setReviews(transformedReviews);
+        }
+      } catch (err) {
+        console.error('Failed to fetch reviews:', err);
+        // Don't set error state, just show empty reviews
+        if (!cancelled) {
+          setReviews([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingReviews(false);
+        }
+      }
+    };
+
+    fetchReviews();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [tour?.id]);
 
   if (isLoading) {
     return (
@@ -270,7 +331,18 @@ const TourDetailPage: React.FC = () => {
                 {
                   id: 'reviews',
                   label: 'Đánh giá',
-                  content: <ReviewList reviews={tour.reviews} />,
+                  content: isLoadingReviews ? (
+                    <div className="text-center py-12">
+                      <p className="text-sm text-gray-500">Đang tải đánh giá...</p>
+                    </div>
+                  ) : reviews.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-sm text-gray-500">Chưa có đánh giá cho tour này</p>
+                      <p className="text-xs text-gray-400 mt-2">Hãy là người đầu tiên đánh giá!</p>
+                    </div>
+                  ) : (
+                    <ReviewList reviews={reviews} />
+                  ),
                   description: 'Nhận xét xác thực từ du khách đã trải nghiệm cùng BookingTour.',
                 },
               ]}

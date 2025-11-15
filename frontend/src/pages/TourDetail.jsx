@@ -110,6 +110,7 @@ const TourDetail = () => {
   const [reviewsError, setReviewsError] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     let isMounted = true;
@@ -423,58 +424,98 @@ const TourDetail = () => {
         )}
       </section>
 
-      <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="space-y-6">
-          <Card className="space-y-4">
-            <h2 className="text-lg font-semibold text-slate-900">Trải nghiệm nổi bật</h2>
-            <p className="text-sm text-slate-600 leading-relaxed">{tour.description}</p>
-            <div className="rounded-2xl bg-slate-100/70 p-4 text-sm text-slate-600">
-              <p>
-                {`Dữ liệu được lấy trực tiếp từ backend qua endpoint \`/tours/by-slug/${tour.slug}\` thông qua API Gateway. Các khối nội dung (điểm nhấn, lịch trình, chính sách) phản ánh đúng response.`}
-              </p>
-            </div>
-          </Card>
-
-          <TourHighlights highlights={tour.highlights} />
-          <TourItinerary itinerary={tour.itinerary} />
+      {/* Tabs Navigation */}
+      <section className="border-b border-slate-200">
+        <div className="flex gap-8">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`pb-4 text-sm font-medium transition-colors border-b-2 ${
+              activeTab === 'overview'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Tổng quan
+          </button>
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`pb-4 text-sm font-medium transition-colors border-b-2 ${
+              activeTab === 'reviews'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Đánh giá ({reviews.length})
+          </button>
         </div>
+      </section>
 
-        <div className="space-y-6">
-          <Card className="space-y-4">
-            <h3 className="text-lg font-semibold text-slate-900">Bao gồm trong giá</h3>
-            <ul className="space-y-2 text-sm text-slate-600">
-              {tour.includes.map((item) => (
-                <li key={item} className="flex items-start gap-2">
-                  <Shield className="mt-1 h-4 w-4 text-primary-500" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <div className="border-t border-slate-200 pt-4">
-              <h4 className="text-sm font-semibold text-slate-700">Không bao gồm</h4>
-              <ul className="mt-2 space-y-2 text-sm text-slate-500">
-                {tour.excludes.map((item) => (
-                  <li key={item}>• {item}</li>
+      {/* Tab Content */}
+      {activeTab === 'overview' && (
+        <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-6">
+            <Card className="space-y-4">
+              <h2 className="text-lg font-semibold text-slate-900">Trải nghiệm nổi bật</h2>
+              <p className="text-sm text-slate-600 leading-relaxed">{tour.description}</p>
+              <div className="rounded-2xl bg-slate-100/70 p-4 text-sm text-slate-600">
+                <p>
+                  {`Dữ liệu được lấy trực tiếp từ backend qua endpoint \`/tours/by-slug/${tour.slug}\` thông qua API Gateway. Các khối nội dung (điểm nhấn, lịch trình, chính sách) phản ánh đúng response.`}
+                </p>
+              </div>
+            </Card>
+
+            <TourHighlights highlights={tour.highlights} />
+            <TourItinerary itinerary={tour.itinerary} />
+          </div>
+
+          <div className="space-y-6">
+            <Card className="space-y-4">
+              <h3 className="text-lg font-semibold text-slate-900">Bao gồm trong giá</h3>
+              <ul className="space-y-2 text-sm text-slate-600">
+                {tour.includes.map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <Shield className="mt-1 h-4 w-4 text-primary-500" />
+                    {item}
+                  </li>
                 ))}
               </ul>
-            </div>
-          </Card>
+              <div className="border-t border-slate-200 pt-4">
+                <h4 className="text-sm font-semibold text-slate-700">Không bao gồm</h4>
+                <ul className="mt-2 space-y-2 text-sm text-slate-500">
+                  {tour.excludes.map((item) => (
+                    <li key={item}>• {item}</li>
+                  ))}
+                </ul>
+              </div>
+            </Card>
 
-          <Card className="space-y-3">
-            <h3 className="text-lg font-semibold text-slate-900">Chính sách</h3>
-            <div>
-              <h4 className="text-sm font-semibold text-slate-700">Chính sách huỷ linh hoạt</h4>
-              <p className="text-sm text-slate-500">{tour.policies.cancellation}</p>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-slate-700">Yêu cầu dành cho khách</h4>
-              <p className="text-sm text-slate-500">{tour.policies.requirements}</p>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-slate-700">Điều kiện thanh toán</h4>
-              <p className="text-sm text-slate-500">{tour.policies.payment}</p>
-            </div>
-          </Card>
+            <Card className="space-y-3">
+              <h3 className="text-lg font-semibold text-slate-900">Chính sách</h3>
+              <div>
+                <h4 className="text-sm font-semibold text-slate-700">Chính sách huỷ linh hoạt</h4>
+                <p className="text-sm text-slate-500">{tour.policies.cancellation}</p>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-slate-700">Yêu cầu dành cho khách</h4>
+                <p className="text-sm text-slate-500">{tour.policies.requirements}</p>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-slate-700">Điều kiện thanh toán</h4>
+                <p className="text-sm text-slate-500">{tour.policies.payment}</p>
+              </div>
+            </Card>
+          </div>
+        </section>
+      )}
+
+      {activeTab === 'reviews' && (
+        <section className="space-y-6">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-semibold text-slate-900">Nhận xét xác thực từ du khách</h2>
+            <p className="text-sm text-slate-600">
+              Tất cả đánh giá đều được kiểm duyệt bởi đội ngũ của chúng tôi
+            </p>
+          </div>
 
           {loadingReviews ? (
             <Card className="text-center py-12">
@@ -491,10 +532,12 @@ const TourDetail = () => {
               <p className="text-xs text-slate-400 mt-2">Hãy là người đầu tiên đánh giá!</p>
             </Card>
           ) : (
-            <ReviewsPanel reviews={reviews} />
+            <div className="max-w-4xl mx-auto">
+              <ReviewsPanel reviews={reviews} />
+            </div>
           )}
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Review Form Section */}
       <section className="space-y-6">
