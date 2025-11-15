@@ -48,7 +48,7 @@ const Reviews = () => {
         const transformedReviews = (Array.isArray(data) ? data : []).map((review) => ({
           id: `rv-${review.reviewId}`,
           tourId: review.tourId,
-          guest: review.guestName,
+          guest: review.guestName || 'Khách hàng',
           avatar: review.guestAvatar || `https://i.pravatar.cc/100?u=${review.userId}`,
           rating: parseFloat(review.rating),
           title: review.title,
