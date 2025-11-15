@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Trash2, Eye } from 'lucide-react';
 import api from '../../services/api';
 import Table from '../../components/common/Table';
@@ -15,11 +15,7 @@ const ReviewList = () => {
   const [showModal, setShowModal] = useState(false);
   const toast = useToast();
 
-  useEffect(() => {
-    fetchReviews();
-  }, [filters]);
-
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       setLoading(true);
       const params = {};
@@ -34,7 +30,11 @@ const ReviewList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, toast]);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
 
   const handleApprove = async (reviewId) => {
     if (!window.confirm('Phê duyệt đánh giá này?')) return;
