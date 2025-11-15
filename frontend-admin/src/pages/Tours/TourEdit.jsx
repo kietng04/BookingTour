@@ -80,7 +80,7 @@ const TourEdit = () => {
     try {
       const payload = adaptPayload(data);
       await toursAPI.update(tourId, payload);
-      toast.success('Tour updated successfully');
+      toast.success('Cập nhật tour thành công');
       navigate('/tours');
     } catch (err) {
       setError(err.message || 'Cập nhật tour thất bại');
@@ -93,11 +93,11 @@ const TourEdit = () => {
     setDeleting(true);
     try {
       await toursAPI.delete(tourId);
-      toast.success('Tour deleted successfully');
+      toast.success('Xóa tour thành công');
       setShowDeleteDialog(false);
       navigate('/tours');
     } catch (err) {
-      toast.error(err.message || 'Failed to delete tour');
+      toast.error(err.message || 'Xóa tour thất bại');
       setShowDeleteDialog(false);
     } finally {
       setDeleting(false);
@@ -117,8 +117,8 @@ const TourEdit = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Edit tour</h1>
-        <p className="text-sm text-slate-500">Update details, pricing, or availability. Reflects PUT /tours/:id behavior.</p>
+        <h1 className="text-2xl font-semibold text-slate-900">Chỉnh sửa tour</h1>
+        <p className="text-sm text-slate-500">Cập nhật chi tiết, giá cả hoặc trạng thái. Phản ánh hành vi PUT /tours/:id.</p>
       </div>
       <div className="flex justify-between items-center">
         <Button
@@ -127,10 +127,10 @@ const TourEdit = () => {
           onClick={() => setShowDeleteDialog(true)}
           disabled={submitting || deleting}
         >
-          Delete tour
+          Xóa tour
         </Button>
         <Button to={`/departures?tourId=${tourId}`} variant="secondary" size="sm">
-          Manage departures
+          Quản lý chuyến đi
         </Button>
       </div>
       <TourForm
@@ -144,10 +144,10 @@ const TourEdit = () => {
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
         onConfirm={handleDelete}
-        title="Delete Tour"
-        message={`Are you sure you want to delete "${tour?.tourName || tour?.tour_name || 'this tour'}"? This action will mark it as inactive.`}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title="Xóa tour"
+        message={`Bạn có chắc muốn xóa "${tour?.tourName || tour?.tour_name || 'tour này'}"? Hành động này sẽ đánh dấu nó là không hoạt động.`}
+        confirmText="Xóa"
+        cancelText="Hủy"
         variant="danger"
         isLoading={deleting}
       />

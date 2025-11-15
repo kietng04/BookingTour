@@ -41,7 +41,7 @@ const TourTable = ({ tours }) => {
     },
     {
       key: 'status',
-      label: 'Status',
+      label: 'Trạng thái',
       render: (value) => <StatusPill status={value?.toString() ?? ''} />
     },
     {
@@ -56,12 +56,12 @@ const TourTable = ({ tours }) => {
     },
     {
       key: 'provinceId',
-      label: 'Province',
+      label: 'Tỉnh/TP',
       render: (_, row) => row.provinceId ?? '—'
     },
     {
       key: 'createdAt',
-      label: 'Created',
+      label: 'Ngày tạo',
       render: (value) => (value ? formatDate(value) : '—')
     }
   ];

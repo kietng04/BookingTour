@@ -4,7 +4,7 @@ async function getAdminToken() {
   const res = await fetch('http://localhost:8080/api/users/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'admin', password: 'letmein' })
+    body: JSON.stringify({ username: 'admin', password: 'admin' })
   });
   if (!res.ok) throw new Error(`Login failed: ${res.status}`);
   const json = await res.json();
@@ -23,15 +23,15 @@ test.describe('Admin Tours', () => {
   });
 
   test('create tour real API returns 201 (workaround token)', async ({ page }) => {
-    await page.goto('http://localhost:5176/tours/new');
-    await page.getByRole('textbox', { name: 'Tour name' }).fill('E2E Tour');
-    await page.getByRole('textbox', { name: 'Slug' }).fill('e2e-tour');
-    await page.getByRole('spinbutton', { name: 'Base price' }).fill('1999');
-    await page.getByRole('spinbutton', { name: 'Duration (days)' }).fill('5');
+    await page.goto('/tours/new');
+    await page.getByRole('textbox', { name: 'Tên tour' }).fill('E2E Tour');
+    await page.getByRole('textbox', { name: 'Slug (URL thân thiện)' }).fill('e2e-tour');
+    await page.getByRole('spinbutton', { name: 'Giá người lớn (VND)' }).fill('1999');
+    await page.getByRole('spinbutton', { name: 'Số ngày' }).fill('5');
 
     const [resp] = await Promise.all([
       page.waitForResponse((r) => r.url().includes('/api/tours') && r.request().method() === 'POST'),
-      page.getByRole('button', { name: 'Create tour' }).click(),
+      page.getByRole('button', { name: 'Tạo mới' }).click(),
     ]);
 
     expect(resp.status()).toBe(201);
@@ -55,10 +55,10 @@ test.describe('Admin Tours', () => {
       return route.continue();
     });
 
-    await page.goto('http://localhost:5176/tours/1');
+    await page.goto('/tours/1');
     await expect(page.getByText('Đang tải dữ liệu tour...')).toBeHidden({ timeout: 5000 });
-    await page.getByRole('spinbutton', { name: 'Base price' }).fill('2500');
-    await page.getByRole('button', { name: 'Update tour' }).click();
-    await expect(page.getByRole('alert')).toContainText('Tour updated successfully');
+    await page.getByRole('spinbutton', { name: 'Giá người lớn (VND)' }).fill('2500');
+    await page.getByRole('button', { name: 'Cập nhật' }).click();
+    await expect(page.getByRole('alert')).toContainText('Cập nhật tour thành công');
   });
 });

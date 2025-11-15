@@ -14,14 +14,14 @@ test.describe('Admin Login Flow', () => {
     await page.goto('http://localhost:5174/auth/login');
 
     // Check that all form elements are visible
-    await expect(page.getByRole('textbox', { name: 'Email / Username' })).toBeVisible();
-    await expect(page.getByRole('textbox', { name: 'Password' })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: 'Email / Tên đăng nhập' })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: 'Mật khẩu' })).toBeVisible();
     await expect(page.getByRole('checkbox', { name: 'Ghi nhớ đăng nhập' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Đăng nhập' })).toBeVisible();
 
-    // Check default credentials hint
-    await expect(page.getByText('admin@gmail.com')).toBeVisible();
-    await expect(page.getByText('Password:', { exact: false })).toBeVisible();
+    // Check default credentials hint - use locator that can find partial text
+    await expect(page.locator('text=admin@gmail.com')).toBeVisible();
+    await expect(page.locator('text=/Thông tin đăng nhập/i')).toBeVisible();
   });
 
   test('should validate empty form submission', async ({ page }) => {
@@ -55,8 +55,8 @@ test.describe('Admin Login Flow', () => {
     await page.goto('http://localhost:5174/auth/login');
 
     // Fill in login form
-    await page.getByRole('textbox', { name: 'Email / Username' }).fill('admin@gmail.com');
-    await page.getByRole('textbox', { name: 'Password' }).fill('admin');
+    await page.getByRole('textbox', { name: 'Email / Tên đăng nhập' }).fill('admin@gmail.com');
+    await page.getByRole('textbox', { name: 'Mật khẩu' }).fill('admin');
 
     // Submit form
     await page.getByRole('button', { name: 'Đăng nhập' }).click();
@@ -66,6 +66,9 @@ test.describe('Admin Login Flow', () => {
 
     // Verify we're on dashboard
     expect(page.url()).toBe('http://localhost:5174/');
+
+    // Wait a bit for localStorage to be fully set
+    await page.waitForTimeout(500);
 
     // Verify localStorage was set correctly
     const token = await page.evaluate(() => localStorage.getItem('bt-admin-token'));
@@ -92,8 +95,8 @@ test.describe('Admin Login Flow', () => {
     await page.goto('http://localhost:5174/auth/login');
 
     // Fill in login form with wrong credentials
-    await page.getByRole('textbox', { name: 'Email / Username' }).fill('wrong@email.com');
-    await page.getByRole('textbox', { name: 'Password' }).fill('wrongpass');
+    await page.getByRole('textbox', { name: 'Email / Tên đăng nhập' }).fill('wrong@email.com');
+    await page.getByRole('textbox', { name: 'Mật khẩu' }).fill('wrongpass');
 
     // Submit form
     await page.getByRole('button', { name: 'Đăng nhập' }).click();
@@ -143,22 +146,25 @@ test.describe('Admin Login Flow', () => {
 
     // Mock 401 response for any API call
     await page.route('**/api/**', async (route) => {
-      if (route.request().url().includes('tours')) {
-        await route.fulfill({
-          status: 401,
-          contentType: 'application/json',
-          body: JSON.stringify({ message: 'Unauthorized' })
-        });
-      } else {
-        await route.continue();
-      }
+      await route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Unauthorized' })
+      });
     });
 
-    // Navigate to a protected route that will trigger API call
-    await page.goto('http://localhost:5174/');
+    // Navigate to tours page which will definitely trigger API call
+    await page.goto('http://localhost:5174/tours');
 
-    // Wait a bit for potential API calls
-    await page.waitForTimeout(2000);
+    // Wait for either redirect to login or timeout (either is fine)
+    try {
+      await page.waitForURL('http://localhost:5174/auth/login', { timeout: 3000 });
+    } catch (e) {
+      // Timeout is OK - might still be on tours page but localStorage should be cleared
+    }
+
+    // Wait a bit for localStorage to be cleared
+    await page.waitForTimeout(500);
 
     // Verify all localStorage keys are cleared
     const token = await page.evaluate(() => localStorage.getItem('bt-admin-token'));
@@ -191,8 +197,8 @@ test.describe('Admin Login Flow', () => {
     await page.goto('http://localhost:5174/auth/login');
 
     // Fill form and check "Remember Me"
-    await page.getByRole('textbox', { name: 'Email / Username' }).fill('admin@gmail.com');
-    await page.getByRole('textbox', { name: 'Password' }).fill('admin');
+    await page.getByRole('textbox', { name: 'Email / Tên đăng nhập' }).fill('admin@gmail.com');
+    await page.getByRole('textbox', { name: 'Mật khẩu' }).fill('admin');
     await page.getByRole('checkbox', { name: 'Ghi nhớ đăng nhập' }).check();
 
     // Submit

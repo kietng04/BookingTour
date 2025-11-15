@@ -80,7 +80,7 @@ const ReviewList = () => {
   };
 
   const columns = [
-    { key: 'reviewId', label: 'ID', render: (val) => `#${val}` },
+    { key: 'id', label: 'ID', render: (val) => `#${val}` },
     { key: 'tourName', label: 'Tour', render: (val, row) => val || `Tour #${row.tourId}` },
     { key: 'guestName', label: 'Người đánh giá' },
     { key: 'rating', label: 'Rating', render: (val) => `${parseFloat(val).toFixed(1)}⭐` },
@@ -104,7 +104,7 @@ const ReviewList = () => {
           </button>
           {row.status !== 'APPROVED' && (
             <button
-              onClick={() => handleApprove(row.reviewId)}
+              onClick={() => handleApprove(row.id)}
               className="p-1.5 text-green-600 hover:bg-green-50 rounded"
               title="Phê duyệt"
             >
@@ -113,7 +113,7 @@ const ReviewList = () => {
           )}
           {row.status !== 'REJECTED' && (
             <button
-              onClick={() => handleReject(row.reviewId)}
+              onClick={() => handleReject(row.id)}
               className="p-1.5 text-red-600 hover:bg-red-50 rounded"
               title="Từ chối"
             >
@@ -121,7 +121,7 @@ const ReviewList = () => {
             </button>
           )}
           <button
-            onClick={() => handleDelete(row.reviewId)}
+            onClick={() => handleDelete(row.id)}
             className="p-1.5 text-gray-600 hover:bg-gray-50 rounded"
             title="Xóa"
           >
@@ -182,7 +182,7 @@ const ReviewList = () => {
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Chi tiết đánh giá #{selectedReview.reviewId}</h3>
+                <h3 className="text-lg font-semibold">Chi tiết đánh giá #{selectedReview.id}</h3>
                 <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
               </div>
 
@@ -232,12 +232,12 @@ const ReviewList = () => {
 
               <div className="flex gap-3 pt-4 border-t border-slate-200">
                 {selectedReview.status !== 'APPROVED' && (
-                  <Button onClick={() => { handleApprove(selectedReview.reviewId); setShowModal(false); }} className="flex-1">
+                  <Button onClick={() => { handleApprove(selectedReview.id); setShowModal(false); }} className="flex-1">
                     Phê duyệt
                   </Button>
                 )}
                 {selectedReview.status !== 'REJECTED' && (
-                  <Button onClick={() => { handleReject(selectedReview.reviewId); setShowModal(false); }} variant="ghost" className="flex-1">
+                  <Button onClick={() => { handleReject(selectedReview.id); setShowModal(false); }} variant="ghost" className="flex-1">
                     Từ chối
                   </Button>
                 )}

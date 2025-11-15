@@ -6,12 +6,13 @@ import Input from '../common/Input.jsx';
 import Select from '../common/Select.jsx';
 import Button from '../common/Button.jsx';
 import ImageUpload from '../common/ImageUpload.jsx';
+import { regionsAPI } from '../../services/api.js';
 
 const statusOptions = [
-  { value: 'ACTIVE', label: 'Active' },
-  { value: 'UNACTIVE', label: 'Inactive' },
-  { value: 'FULL', label: 'Full' },
-  { value: 'END', label: 'Ended' }
+  { value: 'ACTIVE', label: 'Hoạt động' },
+  { value: 'UNACTIVE', label: 'Không hoạt động' },
+  { value: 'FULL', label: 'Đã đầy' },
+  { value: 'END', label: 'Đã kết thúc' }
 ];
 
 const defaultValues = {
@@ -48,8 +49,7 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
     const fetchRegions = async () => {
       try {
         setLoadingRegions(true);
-        const response = await fetch('/api/tours/regions');
-        const data = await response.json();
+        const data = await regionsAPI.getAll();
         setRegions(data || []);
       } catch (error) {
         console.error('Failed to fetch regions:', error);
@@ -71,8 +71,7 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
 
       try {
         setLoadingProvinces(true);
-        const response = await fetch(`/api/tours/regions/${selectedRegionId}/provinces`);
-        const data = await response.json();
+        const data = await regionsAPI.getProvinces(selectedRegionId);
         setProvinces(data || []);
       } catch (error) {
         console.error('Failed to fetch provinces:', error);
@@ -128,7 +127,7 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
                 { value: '', label: loadingRegions ? 'Đang tải...' : 'Chọn vùng miền' },
                 ...regions.map(region => ({
                   value: region.id,
-                  label: region.regionName || `Region ${region.id}`
+                  label: region.name || region.regionName || `Region ${region.id}`
                 }))
               ]}
             />
@@ -145,7 +144,7 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
                 { value: '', label: !selectedRegionId ? 'Chọn vùng miền trước' : (loadingProvinces ? 'Đang tải...' : 'Chọn tỉnh/thành phố') },
                 ...provinces.map(province => ({
                   value: province.id,
-                  label: province.provinceName || `Province ${province.id}`
+                  label: province.name || province.provinceName || `Province ${province.id}`
                 }))
               ]}
             />
@@ -249,10 +248,10 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
 
           {heroImageValue && (
             <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-              <p className="text-xs text-slate-500 mb-2 font-medium">Preview:</p>
+              <p className="text-xs text-slate-500 mb-2 font-medium">Xem trước:</p>
               <img
                 src={heroImageValue}
-                alt="Hero preview"
+                alt="Ảnh xem trước"
                 className="w-full h-32 object-cover rounded-lg mb-2"
               />
               <p className="text-xs text-slate-600 font-mono break-all">
