@@ -55,6 +55,7 @@ const BookingDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [downloadingInvoice, setDownloadingInvoice] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (!numericId) {
@@ -114,6 +115,29 @@ const BookingDetail = () => {
     }
   };
 
+  const handleCancelBooking = async () => {
+    if (!numericId) return;
+    if (!window.confirm('Bạn có chắc muốn hủy đặt chỗ này? Hành động này không thể hoàn tác.')) {
+      return;
+    }
+
+    try {
+      setCancelling(true);
+      console.log('[BookingDetail] Cancelling booking:', numericId);
+      await bookingsAPI.cancel(numericId);
+      console.log('[BookingDetail] Booking cancelled successfully');
+      alert('Đã hủy đặt chỗ thành công!');
+      // Refresh booking data
+      const bookingData = await bookingsAPI.getById(numericId);
+      setBooking(bookingData);
+    } catch (err) {
+      console.error('[BookingDetail] Failed to cancel booking:', err);
+      alert('Lỗi khi hủy đặt chỗ: ' + (err.message || 'Unknown error'));
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   if (loading) {
     return <Card className="py-12 text-center text-sm text-slate-500">Đang tải thông tin đặt chỗ...</Card>;
   }
@@ -151,6 +175,16 @@ const BookingDetail = () => {
             <Download className="h-4 w-4" />
             Export itinerary
           </Button>
+          {booking.status === 'PENDING' && (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={handleCancelBooking}
+              disabled={cancelling}
+            >
+              {cancelling ? 'Cancelling...' : 'Hủy đặt chỗ'}
+            </Button>
+          )}
         </div>
       </div>
 
