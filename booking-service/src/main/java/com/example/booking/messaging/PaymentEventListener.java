@@ -52,21 +52,19 @@ public class PaymentEventListener {
         try {
             Long bookingId = Long.parseLong(message.getBookingId());
 
-            if ("COMPLETED".equals(message.getStatus())) {
-                Booking booking = bookingService.confirmBooking(bookingId);
-                log.info("[BOOKING-SERVICE] Booking {} confirmed successfully. Status: PENDING → CONFIRMED",
-                        bookingId);
+            if ("PAYMENT_COMPLETED".equals(message.getStatus())) {
+                // Payment completed - booking remains PENDING awaiting admin confirmation
+                Booking booking = bookingService.getBookingById(bookingId);
+                log.info("[BOOKING-SERVICE] Payment completed for booking {}. " +
+                        "Status remains PENDING - awaiting admin confirmation", bookingId);
 
-                try {
-                    sendBookingInvoiceEmail(booking);
-                } catch (Exception e) {
-                    log.error("[BOOKING-SERVICE] Failed to send booking invoice email for booking {}: {}",
-                            bookingId, e.getMessage(), e);
-                }
+                // Optional: Notify admin about new paid booking awaiting confirmation
+                // Future enhancement: Send notification to admin dashboard
 
             } else if ("FAILED".equals(message.getStatus())) {
+                // Payment failed - mark booking as FAILED and release seats
                 Booking booking = bookingService.getBookingById(bookingId);
-                bookingService.cancelBooking(bookingId);
+                bookingService.failBooking(bookingId);
 
                 bookingEventPublisher.publishReservationCancel(
                         booking.getId(),
@@ -76,7 +74,7 @@ public class PaymentEventListener {
                         booking.getUserId()
                 );
 
-                log.info("[BOOKING-SERVICE] Booking {} cancelled due to payment failure. Seats released. Reason: {}",
+                log.info("[BOOKING-SERVICE] Booking {} marked as FAILED due to payment failure. Seats released. Reason: {}",
                         bookingId, message.getMessage());
             }
         } catch (Exception e) {
