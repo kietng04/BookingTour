@@ -118,6 +118,27 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    public Booking failBooking(Long bookingId) {
+        Booking booking = getBookingById(bookingId);
+
+        if (booking.getStatus() == BookingStatus.CONFIRMED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot fail confirmed booking");
+        }
+
+        if (booking.getStatus() == BookingStatus.FAILED) {
+            log.warn("Booking {} is already marked as FAILED", bookingId);
+            return booking;
+        }
+
+        booking.setStatus(BookingStatus.FAILED);
+        Booking failedBooking = bookingRepository.save(booking);
+
+        log.info("Booking {} marked as FAILED due to payment failure", bookingId);
+        return failedBooking;
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Booking getBookingById(Long bookingId) {
         return bookingRepository.findById(bookingId)

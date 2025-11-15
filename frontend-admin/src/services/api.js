@@ -186,9 +186,17 @@ export const bookingsAPI = {
     return fetchAPI(`/bookings/user/${userId}${query ? `?${query}` : ''}`);
   },
 
+  confirm: (bookingId) => fetchAPI(`/bookings/${bookingId}/confirm`, {
+    method: 'POST',
+  }),
+
   cancel: (bookingId) => fetchAPI(`/bookings/${bookingId}`, {
     method: 'DELETE',
   }),
+};
+
+export const paymentsAPI = {
+  getByBookingId: (bookingId) => fetchAPI(`/payments/booking/${bookingId}`),
 };
 
 export const usersAPI = {
@@ -455,6 +463,7 @@ export default {
   tours: toursAPI,
   departures: departuresAPI,
   bookings: bookingsAPI,
+  payments: paymentsAPI,
   users: usersAPI,
   schedules: schedulesAPI,
   images: imagesAPI,
