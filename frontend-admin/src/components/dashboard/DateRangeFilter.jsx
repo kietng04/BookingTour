@@ -4,7 +4,7 @@ import Card from '../common/Card';
 import Button from '../common/Button';
 
 const DateRangeFilter = ({ onDateRangeChange }) => {
-  const [selectedPreset, setSelectedPreset] = useState('last30days');
+  const [selectedPreset, setSelectedPreset] = useState('thismonth');
   const [showCustom, setShowCustom] = useState(false);
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
@@ -17,16 +17,6 @@ const DateRangeFilter = ({ onDateRangeChange }) => {
     switch (preset) {
       case 'today':
         startDate = endDate;
-        break;
-      case 'last7days':
-        const last7Days = new Date(today);
-        last7Days.setDate(today.getDate() - 7);
-        startDate = last7Days.toISOString().split('T')[0];
-        break;
-      case 'last30days':
-        const last30Days = new Date(today);
-        last30Days.setDate(today.getDate() - 30);
-        startDate = last30Days.toISOString().split('T')[0];
         break;
       case 'thismonth':
         startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
@@ -60,15 +50,13 @@ const DateRangeFilter = ({ onDateRangeChange }) => {
     setCustomStart('');
     setCustomEnd('');
     setShowCustom(false);
-    setSelectedPreset('last30days');
-    const { startDate, endDate } = getDateRange('last30days');
+    setSelectedPreset('thismonth');
+    const { startDate, endDate } = getDateRange('thismonth');
     onDateRangeChange({ startDate, endDate });
   };
 
   const presets = [
     { id: 'today', label: 'Hôm nay' },
-    { id: 'last7days', label: '7 ngày qua' },
-    { id: 'last30days', label: '30 ngày qua' },
     { id: 'thismonth', label: 'Tháng này' },
   ];
 

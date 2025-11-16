@@ -35,14 +35,39 @@ const DepartureCreate = () => {
     } catch (error) {
       console.error('Failed to create departure:', error);
 
-      // Handle specific error cases
-      let errorMessage = 'Failed to create departure';
+      // Handle specific error cases with Vietnamese messages
+      let errorMessage = 'Không thể tạo chuyến đi';
+
       if (error.response?.status === 400) {
-        errorMessage = error.response.data?.message || 'Invalid departure data';
+        const backendMessage = error.response.data?.message || '';
+
+        // Check for specific error patterns and translate
+        if (backendMessage.includes('duration mismatch') || backendMessage.includes('Departure duration mismatch')) {
+          // Extract tour days and actual days from message if possible
+          const tourDaysMatch = backendMessage.match(/Tour is (\d+) days/);
+          const actualDaysMatch = backendMessage.match(/but departure is (\d+) days/);
+          const expectedDateMatch = backendMessage.match(/end date should be (.+)$/);
+
+          if (tourDaysMatch && actualDaysMatch) {
+            errorMessage = `Thời lượng chuyến đi không khớp với tour. Tour yêu cầu ${tourDaysMatch[1]} ngày, nhưng bạn đã chọn ${actualDaysMatch[1]} ngày.`;
+            if (expectedDateMatch) {
+              errorMessage += ` Ngày kết thúc đúng phải là: ${expectedDateMatch[1]}`;
+            }
+          } else {
+            errorMessage = 'Thời lượng chuyến đi không khớp với thời lượng của tour. Vui lòng kiểm tra lại ngày bắt đầu và kết thúc.';
+          }
+        } else if (backendMessage.includes('totalSlots') || backendMessage.includes('slots')) {
+          errorMessage = 'Số lượng chỗ không hợp lệ. Vui lòng kiểm tra lại.';
+        } else if (backendMessage.includes('date') && backendMessage.includes('required')) {
+          errorMessage = 'Vui lòng nhập đầy đủ ngày bắt đầu và ngày kết thúc.';
+        } else {
+          // Use backend message if available, otherwise generic message
+          errorMessage = backendMessage || 'Dữ liệu chuyến đi không hợp lệ. Vui lòng kiểm tra lại thông tin.';
+        }
       } else if (error.response?.status === 404) {
-        errorMessage = 'Tour not found';
+        errorMessage = 'Không tìm thấy tour. Vui lòng chọn tour khác.';
       } else if (error.response?.status === 409) {
-        errorMessage = 'A departure already exists for this date range';
+        errorMessage = 'Đã tồn tại chuyến đi cho khoảng thời gian này. Vui lòng chọn ngày khác.';
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -104,7 +129,7 @@ const DepartureCreate = () => {
 
       {/* Form */}
       <DepartureForm
-        initialValues={tourIdFromQuery ? { tourId: tourIdFromQuery } : undefined}
+        initialValues={tourIdFromQuery ? { tourId: String(tourIdFromQuery) } : undefined}
         mode="create"
         onSubmit={handleSubmit}
         onCancel={handleCancel}

@@ -48,6 +48,7 @@ CREATE TABLE provinces (
 CREATE TABLE tours (
     tour_id SERIAL PRIMARY KEY,
     tour_name VARCHAR(255) NOT NULL,
+    tour_slug VARCHAR(255) UNIQUE NOT NULL,
     region_id INTEGER NOT NULL,
     province_id INTEGER NOT NULL,
     description TEXT,

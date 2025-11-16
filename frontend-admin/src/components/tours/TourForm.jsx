@@ -6,6 +6,7 @@ import Input from '../common/Input.jsx';
 import Select from '../common/Select.jsx';
 import Button from '../common/Button.jsx';
 import ImageUpload from '../common/ImageUpload.jsx';
+import TourSchedules from './TourSchedules.jsx';
 import { regionsAPI } from '../../services/api.js';
 
 const statusOptions = [
@@ -32,17 +33,19 @@ const defaultValues = {
 };
 
 const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
-  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
+  const { register, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm({
     defaultValues: { ...defaultValues, ...initialValues }
   });
 
   const heroImageValue = watch('heroImageUrl');
   const selectedRegionId = watch('regionId');
+  const daysValue = watch('days');
 
   const [regions, setRegions] = useState([]);
   const [provinces, setProvinces] = useState([]);
   const [loadingRegions, setLoadingRegions] = useState(true);
   const [loadingProvinces, setLoadingProvinces] = useState(false);
+  const [schedules, setSchedules] = useState(initialValues?.schedules || []);
 
   // Fetch regions on component mount
   useEffect(() => {
@@ -61,18 +64,47 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
     fetchRegions();
   }, []);
 
-  // Fetch provinces when region changes
+  // Reset form when initialValues change AND regions are loaded (for edit mode)
+  useEffect(() => {
+    if (initialValues && Object.keys(initialValues).length > 0 && !loadingRegions && regions.length > 0) {
+      const formData = { ...defaultValues, ...initialValues };
+      // Ensure regionId and provinceId are numbers (not empty string) for Select with valueAsNumber
+      if (formData.regionId) {
+        const regionIdNum = Number(formData.regionId);
+        formData.regionId = regionIdNum;
+        // Set value explicitly to ensure Select displays correctly
+        setValue('regionId', regionIdNum, { shouldValidate: false });
+      }
+      if (formData.provinceId) {
+        const provinceIdNum = Number(formData.provinceId);
+        formData.provinceId = provinceIdNum;
+      }
+      reset(formData, { keepDefaultValues: false });
+    }
+  }, [initialValues, reset, loadingRegions, regions.length, setValue]);
+
+  // Fetch provinces when region changes (either from user selection or initialValues)
   useEffect(() => {
     const fetchProvinces = async () => {
-      if (!selectedRegionId) {
+      // Use selectedRegionId from watch, or fallback to initialValues.regionId
+      const regionId = selectedRegionId || (initialValues?.regionId ? Number(initialValues.regionId) : null);
+      
+      if (!regionId) {
         setProvinces([]);
         return;
       }
 
       try {
         setLoadingProvinces(true);
-        const data = await regionsAPI.getProvinces(selectedRegionId);
+        const data = await regionsAPI.getProvinces(regionId);
         setProvinces(data || []);
+        
+        // After provinces are loaded, set provinceId from initialValues if available
+        if (initialValues?.provinceId && data && data.length > 0) {
+          const provinceIdNum = Number(initialValues.provinceId);
+          // Set immediately - provinces are already loaded
+          setValue('provinceId', provinceIdNum, { shouldValidate: false });
+        }
       } catch (error) {
         console.error('Failed to fetch provinces:', error);
         setProvinces([]);
@@ -80,11 +112,24 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
         setLoadingProvinces(false);
       }
     };
-    fetchProvinces();
-  }, [selectedRegionId]);
+    
+    // Only fetch if regions are loaded (to avoid race condition)
+    if (!loadingRegions) {
+      fetchProvinces();
+    }
+  }, [selectedRegionId, initialValues, setValue, loadingRegions]);
+
+  const handleFormSubmit = (formData) => {
+    // Include schedules in the submission
+    const dataWithSchedules = {
+      ...formData,
+      schedules: schedules.filter(s => s.scheduleDescription && s.scheduleDescription.trim() !== '')
+    };
+    onSubmit(dataWithSchedules);
+  };
 
   return (
-    <form className="grid gap-6 lg:grid-cols-[2fr_1fr]" onSubmit={handleSubmit(onSubmit)}>
+    <form className="grid gap-6 lg:grid-cols-[2fr_1fr]" onSubmit={handleSubmit(handleFormSubmit)}>
       <div className="space-y-6">
         {/* Basic Information */}
         <Card className="space-y-4">
@@ -123,14 +168,15 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
               })}
               error={errors.regionId?.message}
               disabled={submitting || loadingRegions}
-              options={[
-                { value: '', label: loadingRegions ? 'Đang tải...' : 'Chọn vùng miền' },
-                ...regions.map(region => ({
-                  value: region.id,
-                  label: region.name || region.regionName || `Region ${region.id}`
-                }))
-              ]}
-            />
+              key={`region-select-${selectedRegionId || initialValues?.regionId || 'empty'}`}
+            >
+              <option value="">{loadingRegions ? 'Đang tải...' : 'Chọn vùng miền'}</option>
+              {regions.map(region => (
+                <option key={region.id} value={String(region.id)}>
+                  {region.name || region.regionName || `Region ${region.id}`}
+                </option>
+              ))}
+            </Select>
 
             <Select
               label="Tỉnh/Thành phố"
@@ -139,15 +185,20 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
                 valueAsNumber: true
               })}
               error={errors.provinceId?.message}
-              disabled={submitting || !selectedRegionId || loadingProvinces}
-              options={[
-                { value: '', label: !selectedRegionId ? 'Chọn vùng miền trước' : (loadingProvinces ? 'Đang tải...' : 'Chọn tỉnh/thành phố') },
-                ...provinces.map(province => ({
-                  value: province.id,
-                  label: province.name || province.provinceName || `Province ${province.id}`
-                }))
-              ]}
-            />
+              disabled={submitting || (!selectedRegionId && !initialValues?.regionId) || loadingProvinces}
+              key={`province-select-${watch('provinceId') || initialValues?.provinceId || 'empty'}-${provinces.length}`}
+            >
+              <option value="">
+                {!selectedRegionId && !initialValues?.regionId 
+                  ? 'Chọn vùng miền trước' 
+                  : (loadingProvinces ? 'Đang tải...' : 'Chọn tỉnh/thành phố')}
+              </option>
+              {provinces.map(province => (
+                <option key={province.id} value={String(province.id)}>
+                  {province.name || province.provinceName || `Province ${province.id}`}
+                </option>
+              ))}
+            </Select>
           </div>
 
           <div>
@@ -231,6 +282,14 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
             />
           </div>
         </Card>
+
+        {/* Tour Schedules */}
+        <TourSchedules
+          days={daysValue}
+          initialSchedules={initialValues?.schedules || []}
+          onChange={setSchedules}
+          disabled={submitting}
+        />
       </div>
 
       <div className="space-y-6">

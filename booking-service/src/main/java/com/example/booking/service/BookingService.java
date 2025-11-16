@@ -15,6 +15,8 @@ public interface BookingService {
 
     Booking cancelBooking(Long bookingId);
 
+    Booking failBooking(Long bookingId);
+
     Booking getBookingById(Long bookingId);
 
     List<Booking> getUserBookings(Long userId);

@@ -1,6 +1,3 @@
--- Create paymentdb database
-CREATE DATABASE IF NOT EXISTS paymentdb;
-
 -- Connect to paymentdb
 \c paymentdb;
 

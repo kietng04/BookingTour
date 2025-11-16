@@ -37,6 +37,13 @@ const DepartureList = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  // Auto-apply filters when they change
+  useEffect(() => {
+    console.log('[DepartureList] Filters changed, auto-fetching:', filters);
+    fetchDepartures(filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.tourId, filters.fromDate, filters.toDate, filters.status]);
+
   const fetchDepartures = async (appliedFilters = filters) => {
     try {
       setLoading(true);

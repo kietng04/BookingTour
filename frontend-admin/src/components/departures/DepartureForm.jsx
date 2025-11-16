@@ -16,6 +16,8 @@ const DepartureForm = ({
 }) => {
   const [tours, setTours] = useState([]);
   const [loadingTours, setLoadingTours] = useState(true);
+  const [selectedTour, setSelectedTour] = useState(null);
+  const [loadingTourDetails, setLoadingTourDetails] = useState(false);
 
   const {
     register,
@@ -24,6 +26,8 @@ const DepartureForm = ({
     watch,
     setValue
   } = useForm({
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
     defaultValues: initialValues || {
       tourId: '',
       startDate: '',
@@ -33,7 +37,9 @@ const DepartureForm = ({
   });
 
   const startDate = watch('startDate');
+  const endDate = watch('endDate');
   const totalSlots = watch('totalSlots');
+  const tourId = watch('tourId');
 
   // Fetch tours for selection
   useEffect(() => {
@@ -48,6 +54,12 @@ const DepartureForm = ({
           tourName: tour.tourName || tour.tour_name
         }));
         setTours(normalizedTours);
+        
+        // If tourId is provided in initialValues and tours are loaded, set it in the form
+        if (initialValues?.tourId && normalizedTours.length > 0) {
+          const tourIdStr = String(initialValues.tourId);
+          setValue('tourId', tourIdStr);
+        }
       } catch (error) {
         console.error('Failed to fetch tours:', error);
         setTours([]);
@@ -56,7 +68,42 @@ const DepartureForm = ({
       }
     };
     fetchTours();
-  }, []);
+  }, [initialValues, setValue]);
+
+  // Fetch tour details when tourId changes
+  useEffect(() => {
+    const fetchTourDetails = async () => {
+      if (!tourId) {
+        setSelectedTour(null);
+        return;
+      }
+
+      try {
+        setLoadingTourDetails(true);
+        const tourDetails = await toursAPI.getById(tourId);
+        setSelectedTour(tourDetails);
+      } catch (error) {
+        console.error('Failed to fetch tour details:', error);
+        setSelectedTour(null);
+      } finally {
+        setLoadingTourDetails(false);
+      }
+    };
+
+    fetchTourDetails();
+  }, [tourId]);
+
+  // Auto-calculate endDate when startDate changes (based on tour duration)
+  useEffect(() => {
+    if (startDate && selectedTour?.days && mode === 'create') {
+      const start = new Date(startDate);
+      const expectedEndDate = new Date(start);
+      expectedEndDate.setDate(start.getDate() + selectedTour.days - 1);
+
+      const expectedEndDateStr = expectedEndDate.toISOString().split('T')[0];
+      setValue('endDate', expectedEndDateStr);
+    }
+  }, [startDate, selectedTour, mode, setValue]);
 
   // Calculate reserved slots for edit mode
   const reservedSlots = mode === 'edit' && initialValues
@@ -64,13 +111,27 @@ const DepartureForm = ({
     : 0;
 
   const validateEndDate = (value) => {
-    if (!value) return 'Ngày kết thúc là bắt buộc';
+    console.log('[DepartureForm] validateEndDate called with value:', value, 'typeof:', typeof value);
+    if (!value || value === '') return 'Ngày kết thúc là bắt buộc';
     if (!startDate) return true;
-    return new Date(value) >= new Date(startDate) || 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu';
+
+    const start = new Date(startDate);
+    const end = new Date(value);
+
+    // Check end date is not before start date
+    if (end < start) {
+      return 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu';
+    }
+
+    // Removed strict validation - allow flexible departure dates
+    // This enables creating custom duration departures for business flexibility
+
+    return true;
   };
 
   const validateTotalSlots = (value) => {
-    if (!value) return 'Tổng số chỗ là bắt buộc';
+    console.log('[DepartureForm] validateTotalSlots called with value:', value, 'typeof:', typeof value);
+    if (!value || value === '') return 'Tổng số chỗ là bắt buộc';
     const numValue = parseInt(value);
     if (numValue < 1) return 'Phải có ít nhất 1 chỗ';
     if (!Number.isInteger(Number(value))) return 'Phải là số nguyên';
@@ -81,7 +142,8 @@ const DepartureForm = ({
   };
 
   const validateStartDate = (value) => {
-    if (!value) return 'Ngày bắt đầu là bắt buộc';
+    console.log('[DepartureForm] validateStartDate called with value:', value, 'typeof:', typeof value);
+    if (!value || value === '') return 'Ngày bắt đầu là bắt buộc';
     if (mode === 'create') {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -94,6 +156,8 @@ const DepartureForm = ({
   };
 
   const handleFormSubmit = (data) => {
+    console.log('[DepartureForm] handleFormSubmit called with data:', data);
+    console.log('[DepartureForm] Form errors:', errors);
     onSubmit({
       ...data,
       tourId: parseInt(data.tourId),
@@ -125,6 +189,18 @@ const DepartureForm = ({
             <p className="mt-1 text-sm text-slate-500">
               Không thể thay đổi tour cho chuyến đi đã tồn tại
             </p>
+          )}
+          {selectedTour && (
+            <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-sm text-blue-900">
+                <span className="font-medium">Thời lượng tour gốc:</span> {selectedTour.days} ngày {selectedTour.nights} đêm
+              </p>
+              {mode === 'create' && (
+                <p className="text-xs text-blue-700 mt-1">
+                  Ngày kết thúc sẽ được tự động điền (có thể chỉnh sửa để tạo lịch linh hoạt)
+                </p>
+              )}
+            </div>
           )}
         </div>
 

@@ -256,10 +256,33 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private Long getTotalUsersFromUserService() {
-        return 0L;
+        try {
+            String url = "http://user-service:8081/users/count";
+            ResponseEntity<Long> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Long>() {});
+            return response.getBody() != null ? response.getBody() : 0L;
+        } catch (Exception e) {
+            log.warn("Failed to fetch total users from user-service", e);
+            return 0L;
+        }
     }
 
     private Long getNewUsersByDateRange(LocalDate startDate, LocalDate endDate) {
-        return 0L;
+        try {
+            String url = String.format("http://user-service:8081/users/count/new?startDate=%s&endDate=%s",
+                    startDate.format(DATE_FORMATTER), endDate.format(DATE_FORMATTER));
+            ResponseEntity<Long> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Long>() {});
+            return response.getBody() != null ? response.getBody() : 0L;
+        } catch (Exception e) {
+            log.warn("Failed to fetch new users count from user-service", e);
+            return 0L;
+        }
     }
 }

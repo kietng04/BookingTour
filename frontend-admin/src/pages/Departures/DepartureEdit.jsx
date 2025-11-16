@@ -83,13 +83,47 @@ const DepartureEdit = () => {
     } catch (error) {
       console.error('Failed to update departure:', error);
 
-      let errorMessage = 'Failed to update departure';
+      // Handle specific error cases with Vietnamese messages
+      let errorMessage = 'Không thể cập nhật chuyến đi';
+
       if (error.response?.status === 400) {
-        errorMessage = error.response.data?.message || 'Invalid departure data. Check that total slots is not less than reserved slots.';
+        const backendMessage = error.response.data?.message || '';
+
+        // Check for specific error patterns and translate
+        if (backendMessage.includes('duration mismatch') || backendMessage.includes('Departure duration mismatch')) {
+          // Extract tour days and actual days from message if possible
+          const tourDaysMatch = backendMessage.match(/Tour is (\d+) days/);
+          const actualDaysMatch = backendMessage.match(/but departure is (\d+) days/);
+          const expectedDateMatch = backendMessage.match(/end date should be (.+)$/);
+
+          if (tourDaysMatch && actualDaysMatch) {
+            errorMessage = `Thời lượng chuyến đi không khớp với tour. Tour yêu cầu ${tourDaysMatch[1]} ngày, nhưng bạn đã chọn ${actualDaysMatch[1]} ngày.`;
+            if (expectedDateMatch) {
+              errorMessage += ` Ngày kết thúc đúng phải là: ${expectedDateMatch[1]}`;
+            }
+          } else {
+            errorMessage = 'Thời lượng chuyến đi không khớp với thời lượng của tour. Vui lòng kiểm tra lại ngày bắt đầu và kết thúc.';
+          }
+        } else if (backendMessage.includes('reserved seats') || backendMessage.includes('already reserved')) {
+          // Extract reserved seats number if available
+          const reservedMatch = backendMessage.match(/\((\d+)\)/);
+          if (reservedMatch) {
+            errorMessage = `Không thể giảm số chỗ xuống dưới số chỗ đã được đặt (${reservedMatch[1]} chỗ). Vui lòng nhập số lớn hơn hoặc bằng ${reservedMatch[1]}.`;
+          } else {
+            errorMessage = 'Tổng số chỗ không được nhỏ hơn số chỗ đã được đặt. Vui lòng kiểm tra lại.';
+          }
+        } else if (backendMessage.includes('totalSlots') || backendMessage.includes('slots')) {
+          errorMessage = 'Số lượng chỗ không hợp lệ. Vui lòng kiểm tra lại.';
+        } else if (backendMessage.includes('date') && backendMessage.includes('required')) {
+          errorMessage = 'Vui lòng nhập đầy đủ ngày bắt đầu và ngày kết thúc.';
+        } else {
+          // Use backend message if available, otherwise generic message
+          errorMessage = backendMessage || 'Dữ liệu chuyến đi không hợp lệ. Vui lòng kiểm tra lại thông tin.';
+        }
       } else if (error.response?.status === 404) {
-        errorMessage = 'Departure not found';
+        errorMessage = 'Không tìm thấy chuyến đi. Chuyến đi có thể đã bị xóa.';
       } else if (error.response?.status === 409) {
-        errorMessage = 'Cannot update: conflicts with existing departure or bookings';
+        errorMessage = 'Không thể cập nhật: xung đột với chuyến đi hoặc booking khác.';
       } else if (error.message) {
         errorMessage = error.message;
       }
