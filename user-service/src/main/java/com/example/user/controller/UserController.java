@@ -166,6 +166,22 @@ public class UserController {
         }
     }
 
+    @GetMapping("/count")
+    public ResponseEntity<Long> getUserCount() {
+        long count = userRepository.count();
+        return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/count/new")
+    public ResponseEntity<Long> getNewUsersCount(
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate) {
+        java.time.LocalDateTime startDateTime = startDate.atStartOfDay();
+        java.time.LocalDateTime endDateTime = endDate.atTime(java.time.LocalTime.MAX);
+        long count = userRepository.countByCreatedAtBetween(startDateTime, endDateTime);
+        return ResponseEntity.ok(count);
+    }
+
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("User Service is healthy!");
