@@ -113,6 +113,17 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.CANCELLED);
         Booking cancelledBooking = bookingRepository.save(booking);
 
+        // Cancel payment in payment-service
+        try {
+            String paymentServiceUrl = "http://localhost:8084"; // payment-service direct URL
+            String cancelUrl = paymentServiceUrl + "/payments/booking/" + bookingId + "/cancel";
+            restTemplate.postForEntity(cancelUrl, null, Void.class);
+            log.info("Payment for booking {} cancelled successfully", bookingId);
+        } catch (Exception e) {
+            log.error("Failed to cancel payment for booking {}: {}", bookingId, e.getMessage());
+            // Don't fail the booking cancellation if payment cancellation fails
+        }
+
         log.info("Booking {} cancelled successfully", bookingId);
         return cancelledBooking;
     }
