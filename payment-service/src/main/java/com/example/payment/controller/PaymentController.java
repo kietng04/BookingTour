@@ -92,6 +92,13 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/booking/{bookingId}/cancel")
+    public ResponseEntity<Void> cancelPayment(@PathVariable Long bookingId) {
+        log.info("[PAYMENT-SERVICE] Received cancel payment request for booking {}", bookingId);
+        paymentService.cancelPayment(bookingId);
+        return ResponseEntity.ok().build();
+    }
+
     private void populatePaymentUrls(PaymentDetailsResponse response, String responseData) {
         try {
             JsonNode root = objectMapper.readTree(responseData);

@@ -159,6 +159,28 @@ public class PaymentService {
         return paymentRepository.findByBookingId(bookingId);
     }
 
+    @Transactional
+    public void cancelPayment(Long bookingId) {
+        log.info("[PAYMENT-SERVICE] Cancelling payment for booking {}", bookingId);
+
+        Payment payment = paymentRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Payment not found for booking " + bookingId));
+
+        // Only cancel if not already completed
+        if (payment.getStatus() == PaymentStatus.COMPLETED) {
+            log.warn("[PAYMENT-SERVICE] Cannot cancel completed payment for booking {}", bookingId);
+            payment.setStatus(PaymentStatus.REFUNDED);
+            payment.setNotes("Booking cancelled - payment refunded");
+        } else {
+            payment.setStatus(PaymentStatus.CANCELLED);
+            payment.setNotes("Booking cancelled - payment cancelled");
+        }
+
+        paymentRepository.save(payment);
+        log.info("[PAYMENT-SERVICE] Payment for booking {} updated to status: {}",
+                bookingId, payment.getStatus());
+    }
+
     private Payment newPayment(Long bookingId, BigDecimal amount) {
         Payment existing = paymentRepository.findByBookingId(bookingId).orElse(null);
         if (existing != null) {
