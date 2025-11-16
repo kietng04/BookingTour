@@ -1,6 +1,3 @@
--- Create bookingdb database
-CREATE DATABASE IF NOT EXISTS bookingdb;
-
 -- Connect to bookingdb
 \c bookingdb;
 
