@@ -123,18 +123,8 @@ const DepartureForm = ({
       return 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu';
     }
 
-    // Check duration matches tour days
-    if (selectedTour?.days) {
-      const daysBetween = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
-      const expectedDays = selectedTour.days;
-
-      if (daysBetween !== expectedDays) {
-        const expectedEnd = new Date(start);
-        expectedEnd.setDate(start.getDate() + expectedDays - 1);
-        const expectedEndStr = expectedEnd.toLocaleDateString('vi-VN');
-        return `Tour này là ${expectedDays} ngày ${selectedTour.nights} đêm. Với ngày bắt đầu ${start.toLocaleDateString('vi-VN')}, ngày kết thúc phải là ${expectedEndStr}`;
-      }
-    }
+    // Removed strict validation - allow flexible departure dates
+    // This enables creating custom duration departures for business flexibility
 
     return true;
   };
@@ -203,11 +193,11 @@ const DepartureForm = ({
           {selectedTour && (
             <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
               <p className="text-sm text-blue-900">
-                <span className="font-medium">Thời lượng tour:</span> {selectedTour.days} ngày {selectedTour.nights} đêm
+                <span className="font-medium">Thời lượng tour gốc:</span> {selectedTour.days} ngày {selectedTour.nights} đêm
               </p>
               {mode === 'create' && (
                 <p className="text-xs text-blue-700 mt-1">
-                  Ngày kết thúc sẽ được tự động tính khi bạn chọn ngày bắt đầu
+                  Ngày kết thúc sẽ được tự động điền (có thể chỉnh sửa để tạo lịch linh hoạt)
                 </p>
               )}
             </div>
