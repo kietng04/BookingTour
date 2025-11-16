@@ -88,35 +88,35 @@ const DepartureDetail = () => {
 
   const columns = [
     {
-      key: 'bookingId',
+      key: 'id',
       label: 'Booking ID',
-      render: (row) => (
-        <span className="font-mono text-sm text-slate-700">#{row.bookingId ?? row.id}</span>
+      render: (value, row) => (
+        <span className="font-mono text-sm text-slate-700">#{row.id}</span>
       ),
     },
     {
-      key: 'user',
+      key: 'userId',
       label: 'Customer',
-      render: (row) => (
+      render: (value, row) => (
         <div>
           <p className="font-medium text-slate-900">User ID: {row.userId}</p>
-          <p className="text-xs text-slate-500">Booked {new Date(row.bookingDate).toLocaleDateString()}</p>
+          <p className="text-xs text-slate-500">Booked {new Date(row.createdAt).toLocaleDateString()}</p>
         </div>
       ),
     },
     {
-      key: 'seats',
+      key: 'numSeats',
       label: 'Seats',
-      render: (row) => (
+      render: (value, row) => (
         <Badge variant="secondary">
-          {row.seats} {row.seats > 1 ? 'seats' : 'seat'}
+          {row.numSeats} {row.numSeats > 1 ? 'seats' : 'seat'}
         </Badge>
       ),
     },
     {
       key: 'totalAmount',
       label: 'Amount',
-      render: (row) => (
+      render: (value, row) => (
         <span className="font-semibold text-slate-900">
           ${row.totalAmount.toLocaleString()}
         </span>
@@ -125,7 +125,7 @@ const DepartureDetail = () => {
     {
       key: 'status',
       label: 'Status',
-      render: (row) => <StatusPill status={row.status} />,
+      render: (value, row) => <StatusPill status={row.status} />,
     },
   ];
 

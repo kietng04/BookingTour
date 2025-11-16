@@ -145,8 +145,8 @@ public class PaymentService {
         if (callbackRequest.getResultCode() == MoMoConstants.RESULT_SUCCESS) {
             payment.setStatus(PaymentStatus.COMPLETED);
             paymentRepository.save(payment);
-            publishSuccess(payment, "Payment successful");
-            log.info("[PAYMENT-SERVICE] Booking {} payment completed successfully", payment.getBookingId());
+            publishPaymentCompleted(payment);
+            log.info("[PAYMENT-SERVICE] Booking {} payment completed. Awaiting admin confirmation", payment.getBookingId());
         } else {
             payment.setStatus(PaymentStatus.FAILED);
             paymentRepository.save(payment);
@@ -157,6 +157,28 @@ public class PaymentService {
 
     public Optional<Payment> getByBookingId(Long bookingId) {
         return paymentRepository.findByBookingId(bookingId);
+    }
+
+    @Transactional
+    public void cancelPayment(Long bookingId) {
+        log.info("[PAYMENT-SERVICE] Cancelling payment for booking {}", bookingId);
+
+        Payment payment = paymentRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Payment not found for booking " + bookingId));
+
+        // Only cancel if not already completed
+        if (payment.getStatus() == PaymentStatus.COMPLETED) {
+            log.warn("[PAYMENT-SERVICE] Cannot cancel completed payment for booking {}", bookingId);
+            payment.setStatus(PaymentStatus.REFUNDED);
+            payment.setNotes("Booking cancelled - payment refunded");
+        } else {
+            payment.setStatus(PaymentStatus.CANCELLED);
+            payment.setNotes("Booking cancelled - payment cancelled");
+        }
+
+        paymentRepository.save(payment);
+        log.info("[PAYMENT-SERVICE] Payment for booking {} updated to status: {}",
+                bookingId, payment.getStatus());
     }
 
     private Payment newPayment(Long bookingId, BigDecimal amount) {
@@ -284,6 +306,16 @@ public class PaymentService {
                 message
         );
         eventPublisher.publishResult(result, com.example.payment.config.RabbitMQConfig.ROUTING_KEY_COMPLETED);
+    }
+
+    private void publishPaymentCompleted(Payment payment) {
+        PaymentResultMessage result = new PaymentResultMessage(
+                String.valueOf(payment.getBookingId()),
+                "PAYMENT_COMPLETED",
+                "Payment successful - awaiting admin confirmation"
+        );
+        eventPublisher.publishResult(result, com.example.payment.config.RabbitMQConfig.ROUTING_KEY_COMPLETED);
+        log.info("[PAYMENT-SERVICE] Published PAYMENT_COMPLETED event for booking {}", payment.getBookingId());
     }
 
     private void publishFailure(Payment payment, String message) {

@@ -3,8 +3,6 @@ import StatCard from '../components/dashboard/StatCard.jsx';
 import RevenueChart from '../components/dashboard/RevenueChart.jsx';
 import DateRangeFilter from '../components/dashboard/DateRangeFilter.jsx';
 import TopToursChart from '../components/dashboard/TopToursChart.jsx';
-import BookingStatusChart from '../components/dashboard/BookingStatusChart.jsx';
-import DepartureOccupancyChart from '../components/dashboard/DepartureOccupancyChart.jsx';
 import Card from '../components/common/Card.jsx';
 import Button from '../components/common/Button.jsx';
 import { useEffect, useState } from 'react';
@@ -26,8 +24,6 @@ const Dashboard = () => {
   ]);
   const [revenueTrends, setRevenueTrends] = useState([]);
   const [topTours, setTopTours] = useState([]);
-  const [bookingStatusStats, setBookingStatusStats] = useState([]);
-  const [departureOccupancy, setDepartureOccupancy] = useState([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [dateRange, setDateRange] = useState({
@@ -37,11 +33,8 @@ const Dashboard = () => {
 
   useEffect(() => {
     const today = new Date();
-    const last30Days = new Date(today);
-    last30Days.setDate(today.getDate() - 30);
-
     const endDate = today.toISOString().split('T')[0];
-    const startDate = last30Days.toISOString().split('T')[0];
+    const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
 
     setDateRange({ startDate, endDate });
   }, []);
@@ -60,15 +53,11 @@ const Dashboard = () => {
         statsData,
         trendsData,
         toursData,
-        statusData,
-        occupancyData,
         reviewStatsData
       ] = await Promise.all([
         dashboardAPI.getStats(dateRange),
         dashboardAPI.getRevenueTrends(dateRange),
         dashboardAPI.getTopTours({ limit: 5 }),
-        dashboardAPI.getBookingStatus(),
-        dashboardAPI.getDepartureOccupancy(),
         reviewsAPI.getOverallStats()
       ]);
 
@@ -123,14 +112,6 @@ const Dashboard = () => {
           occupancyRate: tour.occupancyRate || 0
         }));
         setTopTours(formattedTours);
-      }
-
-      if (statusData && Array.isArray(statusData)) {
-        setBookingStatusStats(statusData);
-      }
-
-      if (occupancyData && Array.isArray(occupancyData)) {
-        setDepartureOccupancy(occupancyData);
       }
 
     } catch (error) {
@@ -217,12 +198,7 @@ const Dashboard = () => {
 
       <RevenueChart data={revenueTrends} />
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <TopToursChart data={topTours} />
-        <BookingStatusChart data={bookingStatusStats} />
-      </div>
-
-      <DepartureOccupancyChart data={departureOccupancy} />
+      <TopToursChart data={topTours} />
 
       {loading && (
         <Card className="text-center py-8">

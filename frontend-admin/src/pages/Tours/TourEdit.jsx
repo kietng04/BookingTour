@@ -43,8 +43,9 @@ const TourEdit = () => {
       tourName: t.tourName || '',
       slug: t.slug || '',
       status: t.status || 'ACTIVE',
-      regionId: t.regionId || '',
-      provinceId: t.provinceId || '',
+      // Convert to number for Select component with valueAsNumber: true
+      regionId: t.regionId ? Number(t.regionId) : '',
+      provinceId: t.provinceId ? Number(t.provinceId) : '',
       description: t.description || '',
       days: t.days || '',
       nights: t.nights || '',
@@ -53,6 +54,7 @@ const TourEdit = () => {
       adultPrice: t.adultPrice || '',
       childPrice: t.childPrice || '',
       heroImageUrl: t.heroImageUrl || '',
+      schedules: t.schedules || [],
     };
   };
 
@@ -71,6 +73,7 @@ const TourEdit = () => {
       adultPrice: Number(form.adultPrice) || 0,
       childPrice: Number(form.childPrice) || 0,
       heroImageUrl: form.heroImageUrl || '',
+      schedules: form.schedules || [],
     };
   };
 
@@ -120,7 +123,7 @@ const TourEdit = () => {
         <h1 className="text-2xl font-semibold text-slate-900">Chỉnh sửa tour</h1>
         <p className="text-sm text-slate-500">Cập nhật chi tiết, giá cả hoặc trạng thái. Phản ánh hành vi PUT /tours/:id.</p>
       </div>
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center gap-2">
         <Button
           variant="danger"
           size="sm"
@@ -129,9 +132,14 @@ const TourEdit = () => {
         >
           Xóa tour
         </Button>
-        <Button to={`/departures?tourId=${tourId}`} variant="secondary" size="sm">
-          Quản lý chuyến đi
-        </Button>
+        <div className="flex gap-2">
+          <Button to={`/departures/new?tourId=${tourId}`} variant="primary" size="sm">
+            Thêm Departure
+          </Button>
+          <Button to={`/departures?tourId=${tourId}`} variant="secondary" size="sm">
+            Quản lý chuyến đi
+          </Button>
+        </div>
       </div>
       <TourForm
         mode="edit"
