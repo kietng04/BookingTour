@@ -107,7 +107,7 @@ const DepartureForm = ({
 
   // Auto-calculate endDate when startDate changes (based on tour duration)
   useEffect(() => {
-    if (startDate && selectedTour?.days && mode === 'create') {
+    if (startDate && selectedTour?.days) {
       const start = new Date(startDate);
       const expectedEndDate = new Date(start);
       expectedEndDate.setDate(start.getDate() + selectedTour.days - 1);
@@ -115,7 +115,7 @@ const DepartureForm = ({
       const expectedEndDateStr = expectedEndDate.toISOString().split('T')[0];
       setValue('endDate', expectedEndDateStr);
     }
-  }, [startDate, selectedTour, mode, setValue]);
+  }, [startDate, selectedTour, setValue]);
 
   // Calculate reserved slots for edit mode
   const reservedSlots = mode === 'edit' && initialValues
@@ -226,11 +226,9 @@ const DepartureForm = ({
               <p className="text-sm text-blue-900">
                 <span className="font-medium">Thời lượng tour gốc:</span> {selectedTour.days} ngày {selectedTour.nights} đêm
               </p>
-              {mode === 'create' && (
-                <p className="text-xs text-blue-700 mt-1">
-                  Ngày kết thúc sẽ được tự động điền (có thể chỉnh sửa để tạo lịch linh hoạt)
-                </p>
-              )}
+              <p className="text-xs text-blue-700 mt-1">
+                Ngày kết thúc sẽ được tự động tính dựa trên thời lượng tour
+              </p>
             </div>
           )}
         </div>
@@ -253,13 +251,13 @@ const DepartureForm = ({
               type="date"
               {...register('endDate', { validate: validateEndDate })}
               error={errors.endDate?.message}
-              disabled={isLoading || mode === 'create'}
+              disabled={isLoading || (selectedTour && selectedTour.days > 0)}
               min={startDate}
-              className={mode === 'create' ? 'bg-slate-50' : ''}
+              className={(selectedTour && selectedTour.days > 0) ? 'bg-slate-50' : ''}
             />
-            {mode === 'create' && (
+            {selectedTour && selectedTour.days > 0 && (
               <p className="mt-1 text-xs text-slate-500">
-                Ngày kết thúc được tự động tính dựa trên thời lượng tour
+                Ngày kết thúc được tự động tính dựa trên thời lượng tour ({selectedTour.days} ngày)
               </p>
             )}
           </div>
