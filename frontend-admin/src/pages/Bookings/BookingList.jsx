@@ -102,15 +102,6 @@ const BookingList = () => {
       <Card className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-slate-900">Bộ lọc</h3>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleExportToExcel}
-            disabled={exporting || loading || bookings.length === 0}
-          >
-            <Download className="h-4 w-4" />
-            {exporting ? 'Đang xuất...' : 'Xuất Excel'}
-          </Button>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           <Select
