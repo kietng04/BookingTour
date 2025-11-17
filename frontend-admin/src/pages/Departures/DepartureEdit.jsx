@@ -72,14 +72,26 @@ const DepartureEdit = () => {
   const handleSubmit = async (data) => {
     setIsLoading(true);
     try {
-      await departuresAPI.update(departure.tourId, departureId, {
+      const updatedDeparture = await departuresAPI.update(departure.tourId, departureId, {
         startDate: data.startDate,
         endDate: data.endDate,
         totalSlots: data.totalSlots
       });
 
       toast.success('Departure updated successfully!');
-      navigate(`/departures/${departureId}`);
+
+      // Navigate with updated departure data to avoid "Departure not found" issue
+      navigate(`/departures/${departureId}`, {
+        state: {
+          departure: {
+            ...departure,
+            ...updatedDeparture,
+            // Ensure we preserve tourId and tourName
+            tourId: departure.tourId,
+            tourName: departure.tourName
+          }
+        }
+      });
     } catch (error) {
       console.error('Failed to update departure:', error);
 
