@@ -126,18 +126,25 @@ public class ExportServiceImpl implements ExportService {
             PdfWriter.getInstance(document, out);
             document.open();
 
+            // Use Times Roman with CP1258 encoding for Vietnamese support
+            // This is a built-in font that supports Vietnamese characters
+            BaseFont baseFont = BaseFont.createFont(BaseFont.TIMES_ROMAN, "Cp1258", BaseFont.EMBEDDED);
+            com.itextpdf.text.Font titleFont = new com.itextpdf.text.Font(baseFont, 18, com.itextpdf.text.Font.BOLD, BaseColor.BLACK);
+            com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(baseFont, 12, com.itextpdf.text.Font.BOLD, BaseColor.BLACK);
+            com.itextpdf.text.Font normalFont = new com.itextpdf.text.Font(baseFont, 11, com.itextpdf.text.Font.NORMAL, BaseColor.BLACK);
+            com.itextpdf.text.Font invoiceFont = new com.itextpdf.text.Font(baseFont, 16, com.itextpdf.text.Font.BOLD, BaseColor.BLUE);
+            com.itextpdf.text.Font footerFont = new com.itextpdf.text.Font(baseFont, 12, com.itextpdf.text.Font.ITALIC, BaseColor.GRAY);
+
             // Company Header
-            com.itextpdf.text.Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.BLACK);
             Paragraph title = new Paragraph("BOOKING TOUR VIETNAM", titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
             document.add(title);
 
-            document.add(new Paragraph("Địa chỉ: 123 Lê Lợi, Quận 1, TP.HCM"));
-            document.add(new Paragraph("Điện thoại: 1900-xxxx | Email: support@bookingtour.com"));
+            document.add(new Paragraph("Địa chỉ: 123 Lê Lợi, Quận 1, TP.HCM", normalFont));
+            document.add(new Paragraph("Điện thoại: 1900-xxxx | Email: support@bookingtour.com", normalFont));
             document.add(Chunk.NEWLINE);
 
             // Invoice Title
-            com.itextpdf.text.Font invoiceFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16, BaseColor.BLUE);
             Paragraph invoiceTitle = new Paragraph("HÓA ĐƠN ĐẶT TOUR", invoiceFont);
             invoiceTitle.setAlignment(Element.ALIGN_CENTER);
             document.add(invoiceTitle);
@@ -149,20 +156,20 @@ public class ExportServiceImpl implements ExportService {
             String userName = getUserName(booking.getUserId());
 
             // Booking Details
-            document.add(new Paragraph("Mã đơn: #" + booking.getId()));
-            document.add(new Paragraph("Ngày đặt: " + booking.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
+            document.add(new Paragraph("Mã đơn: #" + booking.getId(), normalFont));
+            document.add(new Paragraph("Ngày đặt: " + booking.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), normalFont));
             document.add(Chunk.NEWLINE);
 
-            document.add(new Paragraph("THÔNG TIN KHÁCH HÀNG", FontFactory.getFont(FontFactory.HELVETICA_BOLD)));
-            document.add(new Paragraph("Họ tên: " + userName));
-            document.add(new Paragraph("Email: " + userEmail));
+            document.add(new Paragraph("THÔNG TIN KHÁCH HÀNG", boldFont));
+            document.add(new Paragraph("Họ tên: " + userName, normalFont));
+            document.add(new Paragraph("Email: " + userEmail, normalFont));
             document.add(Chunk.NEWLINE);
 
-            document.add(new Paragraph("THÔNG TIN TOUR", FontFactory.getFont(FontFactory.HELVETICA_BOLD)));
-            document.add(new Paragraph("Tên tour: " + tourName));
+            document.add(new Paragraph("THÔNG TIN TOUR", boldFont));
+            document.add(new Paragraph("Tên tour: " + tourName, normalFont));
             document.add(new Paragraph("Mã khởi hành: " + (booking.getDepartureId() != null ?
-                booking.getDepartureId().toString() : "N/A")));
-            document.add(new Paragraph("Số người: " + booking.getNumSeats()));
+                booking.getDepartureId().toString() : "N/A"), normalFont));
+            document.add(new Paragraph("Số người: " + booking.getNumSeats(), normalFont));
             document.add(Chunk.NEWLINE);
 
             // Payment Summary Table
@@ -170,21 +177,21 @@ public class ExportServiceImpl implements ExportService {
             table.setWidthPercentage(100);
             table.setSpacingBefore(10f);
 
-            PdfPCell cell1 = new PdfPCell(new Phrase("Tổng tiền:"));
+            PdfPCell cell1 = new PdfPCell(new Phrase("Tổng tiền:", normalFont));
             cell1.setBorder(Rectangle.NO_BORDER);
             table.addCell(cell1);
 
-            PdfPCell cell2 = new PdfPCell(new Phrase(formatCurrency(booking.getTotalAmount()) + " VNĐ"));
+            PdfPCell cell2 = new PdfPCell(new Phrase(formatCurrency(booking.getTotalAmount()) + " VNĐ", normalFont));
             cell2.setBorder(Rectangle.NO_BORDER);
             cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
             table.addCell(cell2);
 
-            PdfPCell cell3 = new PdfPCell(new Phrase("Trạng thái thanh toán:"));
+            PdfPCell cell3 = new PdfPCell(new Phrase("Trạng thái thanh toán:", normalFont));
             cell3.setBorder(Rectangle.NO_BORDER);
             table.addCell(cell3);
 
             PdfPCell cell4 = new PdfPCell(new Phrase(
-                booking.getStatus() == Booking.BookingStatus.CONFIRMED ? "Đã thanh toán" : "Chưa thanh toán"));
+                booking.getStatus() == Booking.BookingStatus.CONFIRMED ? "Đã thanh toán" : "Chưa thanh toán", normalFont));
             cell4.setBorder(Rectangle.NO_BORDER);
             cell4.setHorizontalAlignment(Element.ALIGN_RIGHT);
             table.addCell(cell4);
@@ -192,7 +199,6 @@ public class ExportServiceImpl implements ExportService {
             document.add(table);
             document.add(Chunk.NEWLINE);
 
-            com.itextpdf.text.Font footerFont = FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 12, BaseColor.GRAY);
             Paragraph footer = new Paragraph("Cảm ơn quý khách đã tin tưởng BookingTour!", footerFont);
             footer.setAlignment(Element.ALIGN_CENTER);
             document.add(footer);
