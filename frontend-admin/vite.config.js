@@ -14,6 +14,15 @@ export default defineConfig({
         ws: false,
         rewrite: (path) => path.replace(/^\/api/, '')
       },
+      // Upload endpoints: route directly to tour-service (bypass API Gateway)
+      '/api/upload': {
+        target: 'http://localhost:8082',
+        changeOrigin: true,
+        secure: false,
+        ws: false,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      },
+      // All other /api requests go through API Gateway
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
