@@ -135,8 +135,20 @@ const DepartureForm = ({
       return 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu';
     }
 
-    // Removed strict validation - allow flexible departure dates
-    // This enables creating custom duration departures for business flexibility
+    // STRICT VALIDATION: Duration must match tour days
+    if (selectedTour && selectedTour.days) {
+      const actualDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+      const expectedDays = selectedTour.days;
+
+      if (actualDays !== expectedDays) {
+        const expectedEnd = new Date(start);
+        expectedEnd.setDate(start.getDate() + expectedDays - 1);
+        const expectedEndStr = expectedEnd.toISOString().split('T')[0];
+
+        return `Thời lượng không khớp với tour. Tour yêu cầu ${expectedDays} ngày. ` +
+               `Vui lòng chọn ngày kết thúc: ${expectedEndStr}`;
+      }
+    }
 
     return true;
   };
@@ -241,65 +253,31 @@ const DepartureForm = ({
               type="date"
               {...register('endDate', { validate: validateEndDate })}
               error={errors.endDate?.message}
-              disabled={isLoading}
+              disabled={isLoading || mode === 'create'}
               min={startDate}
+              className={mode === 'create' ? 'bg-slate-50' : ''}
             />
+            {mode === 'create' && (
+              <p className="mt-1 text-xs text-slate-500">
+                Ngày kết thúc được tự động tính dựa trên thời lượng tour
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Duration Warning/Info */}
-        {startDate && endDate && selectedTour && (() => {
-          const start = new Date(startDate);
-          const end = new Date(endDate);
-          const actualDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-          const expectedDays = selectedTour.days;
-
-          if (actualDays !== expectedDays) {
-            const expectedEnd = new Date(start);
-            expectedEnd.setDate(start.getDate() + expectedDays - 1);
-            const expectedEndStr = expectedEnd.toISOString().split('T')[0];
-
-            return (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0">
-                    <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium text-amber-900">Lịch trình linh hoạt</h3>
-                    <p className="mt-1 text-sm text-amber-700">
-                      Tour gốc có thời lượng <strong>{expectedDays} ngày</strong>, nhưng bạn đang tạo chuyến đi <strong>{actualDays} ngày</strong>.
-                      {actualDays < expectedDays && (
-                        <> Đây là chuyến đi rút ngắn so với tour gốc.</>
-                      )}
-                      {actualDays > expectedDays && (
-                        <> Đây là chuyến đi kéo dài hơn tour gốc.</>
-                      )}
-                    </p>
-                    <p className="mt-2 text-xs text-amber-600">
-                      💡 Ngày kết thúc chuẩn: <strong>{expectedEndStr}</strong> (cho chuyến đi {expectedDays} ngày)
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          }
-
-          return (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="text-sm text-green-700">
-                  Thời lượng chuyến đi khớp với tour gốc ({actualDays} ngày)
-                </p>
-              </div>
+        {/* Duration Info */}
+        {startDate && endDate && selectedTour && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-sm text-green-700">
+                Thời lượng chuyến đi: <strong>{selectedTour.days} ngày {selectedTour.nights} đêm</strong>
+              </p>
             </div>
-          );
-        })()}
+          </div>
+        )}
 
         {/* Total Slots */}
         <div>
