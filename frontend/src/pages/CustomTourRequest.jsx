@@ -1,21 +1,56 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { customTourAPI } from '../services/customTourService';
+import { regionsAPI } from '../services/api';
 
 const CustomTourRequest = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    destination: '',
+    tourName: '',
     startDate: '',
     endDate: '',
-    numberOfPeople: 1,
-    specialRequest: '',
-    contactEmail: '',
-    contactPhone: '',
-    budgetRange: ''
+    numAdult: 1,
+    numChildren: 0,
+    regionId: '',
+    provinceId: '',
+    description: ''
   });
+  const [regions, setRegions] = useState([]);
+  const [provinces, setProvinces] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchRegions();
+  }, []);
+
+  useEffect(() => {
+    if (formData.regionId) {
+      fetchProvinces(formData.regionId);
+    } else {
+      setProvinces([]);
+      setFormData(prev => ({ ...prev, provinceId: '' }));
+    }
+  }, [formData.regionId]);
+
+  const fetchRegions = async () => {
+    try {
+      const data = await regionsAPI.getAll();
+      setRegions(data || []);
+    } catch (err) {
+      console.error('Error fetching regions:', err);
+    }
+  };
+
+  const fetchProvinces = async (regionId) => {
+    try {
+      const data = await regionsAPI.getProvinces(regionId);
+      setProvinces(data || []);
+    } catch (err) {
+      console.error('Error fetching provinces:', err);
+      setProvinces([]);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,7 +75,19 @@ const CustomTourRequest = () => {
         return;
       }
 
-      await customTourAPI.create(userId, formData, token);
+      // Format data to match backend DTO
+      const requestData = {
+        tourName: formData.tourName,
+        numAdult: parseInt(formData.numAdult, 10),
+        numChildren: parseInt(formData.numChildren, 10),
+        regionId: formData.regionId ? parseInt(formData.regionId, 10) : null,
+        provinceId: formData.provinceId ? parseInt(formData.provinceId, 10) : null,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        description: formData.description || null
+      };
+
+      await customTourAPI.create(userId, requestData, token);
 
       alert('Yêu cầu tour tùy chỉnh đã được gửi thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.');
       navigate('/my-custom-tours');
@@ -64,17 +111,17 @@ const CustomTourRequest = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-6">
-        {/* Destination */}
+        {/* Tour Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Điểm đến mong muốn <span className="text-red-500">*</span>
+            Tên tour mong muốn <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
-            name="destination"
+            name="tourName"
             required
-            placeholder="VD: Hà Giang, Phú Quốc, Đà Lạt..."
-            value={formData.destination}
+            placeholder="VD: Khám phá Hà Giang 3N2Đ, Tour Phú Quốc nghỉ dưỡng..."
+            value={formData.tourName}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
@@ -113,83 +160,90 @@ const CustomTourRequest = () => {
         </div>
 
         {/* Number of People */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Số người <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            name="numberOfPeople"
-            min="1"
-            max="50"
-            required
-            value={formData.numberOfPeople}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-500"
-          />
-        </div>
-
-        {/* Budget Range */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Ngân sách dự kiến
-          </label>
-          <select
-            name="budgetRange"
-            value={formData.budgetRange}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-500"
-          >
-            <option value="">Chọn mức ngân sách</option>
-            <option value="Under 10M">Dưới 10 triệu</option>
-            <option value="10M-20M">10-20 triệu</option>
-            <option value="20M-50M">20-50 triệu</option>
-            <option value="50M+">Trên 50 triệu</option>
-          </select>
-        </div>
-
-        {/* Contact Info */}
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email liên hệ <span className="text-red-500">*</span>
+              Số người lớn <span className="text-red-500">*</span>
             </label>
             <input
-              type="email"
-              name="contactEmail"
+              type="number"
+              name="numAdult"
+              min="1"
+              max="50"
               required
-              placeholder="email@example.com"
-              value={formData.contactEmail}
+              value={formData.numAdult}
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Số điện thoại
+              Số trẻ em <span className="text-red-500">*</span>
             </label>
             <input
-              type="tel"
-              name="contactPhone"
-              placeholder="0901234567"
-              pattern="[0-9]{10,11}"
-              value={formData.contactPhone}
+              type="number"
+              name="numChildren"
+              min="0"
+              max="50"
+              required
+              value={formData.numChildren}
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
           </div>
         </div>
 
-        {/* Special Request */}
+        {/* Region and Province */}
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Khu vực
+            </label>
+            <select
+              name="regionId"
+              value={formData.regionId}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            >
+              <option value="">Chọn khu vực</option>
+              {regions.map((region) => (
+                <option key={region.id} value={region.id}>
+                  {region.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tỉnh/Thành phố
+            </label>
+            <select
+              name="provinceId"
+              value={formData.provinceId}
+              onChange={handleChange}
+              disabled={!formData.regionId || provinces.length === 0}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            >
+              <option value="">Chọn tỉnh/thành phố</option>
+              {provinces.map((province) => (
+                <option key={province.id} value={province.id}>
+                  {province.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Description */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Yêu cầu đặc biệt
+            Mô tả chi tiết
           </label>
           <textarea
-            name="specialRequest"
+            name="description"
             rows="4"
             placeholder="VD: Cần hướng dẫn viên tiếng Anh, muốn khám phá ẩm thực địa phương, có trẻ nhỏ đi cùng..."
-            value={formData.specialRequest}
+            value={formData.description}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
