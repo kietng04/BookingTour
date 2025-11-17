@@ -105,9 +105,10 @@ public class BookingServiceImpl implements BookingService {
                     "Booking is already cancelled");
         }
 
-        if (booking.getStatus() == BookingStatus.CONFIRMED) {
+        // Allow canceling both PENDING and CONFIRMED bookings (admin can cancel confirmed bookings)
+        if (booking.getStatus() != BookingStatus.PENDING && booking.getStatus() != BookingStatus.CONFIRMED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Cannot cancel confirmed booking");
+                    "Cannot cancel booking with status: " + booking.getStatus());
         }
 
         booking.setStatus(BookingStatus.CANCELLED);

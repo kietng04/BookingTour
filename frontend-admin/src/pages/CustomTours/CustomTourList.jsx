@@ -1,17 +1,14 @@
 import { useEffect, useState } from 'react';
 import { customTourService } from '../../services/customTourService';
-import CustomTourDetailModal from './CustomTourDetailModal';
 
 const CustomTourList = () => {
   const [customTours, setCustomTours] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTour, setSelectedTour] = useState(null);
   const [statusFilter, setStatusFilter] = useState('');
-  const [stats, setStats] = useState({ pending: 0, completed: 0, rejected: 0 });
+  const [processing, setProcessing] = useState({});
 
   useEffect(() => {
     fetchCustomTours();
-    fetchStats();
   }, [statusFilter]);
 
   const fetchCustomTours = async () => {
@@ -27,37 +24,33 @@ const CustomTourList = () => {
     }
   };
 
-  const fetchStats = async () => {
+  const handleApprove = async (id) => {
+    if (!confirm('Xác nhận duyệt tour tùy chỉnh này?')) return;
+
+    setProcessing(prev => ({ ...prev, [id]: true }));
     try {
-      const data = await customTourService.getStats();
-      setStats(data);
+      await customTourService.updateCustomTourStatus(id, { status: 'COMPLETED' });
+      alert('Đã duyệt tour thành công!');
+      fetchCustomTours();
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      alert('Lỗi khi duyệt tour: ' + error.message);
+    } finally {
+      setProcessing(prev => ({ ...prev, [id]: false }));
     }
   };
 
-  const handleStatusUpdate = async (id, status, adminNotes) => {
-    try {
-      await customTourService.updateCustomTourStatus(id, { status, adminNotes });
-      alert('Cập nhật thành công!');
-      fetchCustomTours();
-      fetchStats();
-      setSelectedTour(null);
-    } catch (error) {
-      alert('Cập nhật thất bại: ' + error.message);
-    }
-  };
+  const handleReject = async (id) => {
+    if (!confirm('Xác nhận từ chối tour tùy chỉnh này?')) return;
 
-  const handleDelete = async (id) => {
-    if (!confirm('Bạn có chắc muốn xóa yêu cầu này?')) return;
-
+    setProcessing(prev => ({ ...prev, [id]: true }));
     try {
-      await customTourService.deleteCustomTour(id);
-      alert('Xóa thành công!');
+      await customTourService.updateCustomTourStatus(id, { status: 'REJECTED' });
+      alert('Đã từ chối tour!');
       fetchCustomTours();
-      fetchStats();
     } catch (error) {
-      alert('Xóa thất bại: ' + error.message);
+      alert('Lỗi khi từ chối tour: ' + error.message);
+    } finally {
+      setProcessing(prev => ({ ...prev, [id]: false }));
     }
   };
 
@@ -66,61 +59,34 @@ const CustomTourList = () => {
     return new Date(dateString).toLocaleDateString('vi-VN');
   };
 
+  const getStatusBadge = (status) => {
+    const classes = {
+      PENDING: 'bg-yellow-100 text-yellow-800',
+      COMPLETED: 'bg-green-100 text-green-800',
+      REJECTED: 'bg-red-100 text-red-800'
+    };
+    const labels = {
+      PENDING: 'Đang chờ',
+      COMPLETED: 'Đã duyệt',
+      REJECTED: 'Từ chối'
+    };
+    return (
+      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${classes[status]}`}>
+        {labels[status]}
+      </span>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Custom Tour Requests</h1>
+        <h1 className="text-2xl font-semibold text-slate-900">Tour Tùy Chỉnh</h1>
         <p className="text-sm text-slate-500">Quản lý yêu cầu tour tùy chỉnh từ khách hàng</p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-yellow-800">Đang chờ</p>
-              <p className="text-2xl font-bold text-yellow-900">{stats.pending}</p>
-            </div>
-            <div className="h-12 w-12 bg-yellow-100 rounded-full flex items-center justify-center">
-              <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-green-800">Hoàn thành</p>
-              <p className="text-2xl font-bold text-green-900">{stats.completed}</p>
-            </div>
-            <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-              <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-red-800">Từ chối</p>
-              <p className="text-2xl font-bold text-red-900">{stats.rejected}</p>
-            </div>
-            <div className="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
-              <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Filter */}
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-4 items-center bg-white rounded-lg shadow p-4">
         <label className="text-sm font-medium text-slate-700">Lọc theo trạng thái:</label>
         <select
           value={statusFilter}
@@ -129,7 +95,7 @@ const CustomTourList = () => {
         >
           <option value="">Tất cả</option>
           <option value="PENDING">Đang chờ</option>
-          <option value="COMPLETED">Hoàn thành</option>
+          <option value="COMPLETED">Đã duyệt</option>
           <option value="REJECTED">Từ chối</option>
         </select>
       </div>
@@ -152,16 +118,13 @@ const CustomTourList = () => {
                   ID
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Điểm đến
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Ngày
+                  Tên Tour
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Số người
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Ngân sách
+                  Ngày đi
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Trạng thái
@@ -178,41 +141,40 @@ const CustomTourList = () => {
                     #{tour.id}
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-900 font-medium">
-                    {tour.destination}
+                    {tour.tourName}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                    {tour.numAdult} người lớn, {tour.numChildren} trẻ em
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                     {formatDate(tour.startDate)} - {formatDate(tour.endDate)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                    {tour.numberOfPeople}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                    {tour.budgetRange || 'N/A'}
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      tour.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                      tour.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {tour.status === 'PENDING' ? 'Đang chờ' :
-                       tour.status === 'COMPLETED' ? 'Hoàn thành' : 'Từ chối'}
-                    </span>
+                    {getStatusBadge(tour.status)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => setSelectedTour(tour)}
-                        className="text-primary-600 hover:text-primary-800 font-medium"
-                      >
-                        Chi tiết
-                      </button>
-                      <button
-                        onClick={() => handleDelete(tour.id)}
-                        className="text-red-600 hover:text-red-800 font-medium"
-                      >
-                        Xóa
-                      </button>
+                      {tour.status === 'PENDING' && (
+                        <>
+                          <button
+                            onClick={() => handleApprove(tour.id)}
+                            disabled={processing[tour.id]}
+                            className="px-3 py-1 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 disabled:opacity-50"
+                          >
+                            {processing[tour.id] ? 'Đang xử lý...' : 'Xác nhận'}
+                          </button>
+                          <button
+                            onClick={() => handleReject(tour.id)}
+                            disabled={processing[tour.id]}
+                            className="px-3 py-1 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 disabled:opacity-50"
+                          >
+                            {processing[tour.id] ? 'Đang xử lý...' : 'Từ chối'}
+                          </button>
+                        </>
+                      )}
+                      {tour.status !== 'PENDING' && (
+                        <span className="text-slate-400 text-xs italic">Đã xử lý</span>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -220,15 +182,6 @@ const CustomTourList = () => {
             </tbody>
           </table>
         </div>
-      )}
-
-      {/* Detail Modal */}
-      {selectedTour && (
-        <CustomTourDetailModal
-          tour={selectedTour}
-          onClose={() => setSelectedTour(null)}
-          onStatusUpdate={handleStatusUpdate}
-        />
       )}
     </div>
   );
