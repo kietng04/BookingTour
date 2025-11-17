@@ -14,7 +14,7 @@ const footerLinks = [
   {
     title: 'Khám phá',
     links: [
-      { label: 'Điểm đến nổi bật', href: '#destinations' },
+      { label: 'Chuyến đi tùy chỉnh', href: '/custom-tour-request' },
       { label: 'Ưu đãi theo mùa', href: '#offers' },
       { label: 'Cẩm nang du lịch', href: '#guides' },
       { label: 'Quà tặng du lịch', href: '#gifts' },
