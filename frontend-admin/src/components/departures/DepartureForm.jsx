@@ -54,12 +54,6 @@ const DepartureForm = ({
           tourName: tour.tourName || tour.tour_name
         }));
         setTours(normalizedTours);
-        
-        // If tourId is provided in initialValues and tours are loaded, set it in the form
-        if (initialValues?.tourId && normalizedTours.length > 0) {
-          const tourIdStr = String(initialValues.tourId);
-          setValue('tourId', tourIdStr);
-        }
       } catch (error) {
         console.error('Failed to fetch tours:', error);
         setTours([]);
@@ -68,7 +62,25 @@ const DepartureForm = ({
       }
     };
     fetchTours();
-  }, [initialValues, setValue]);
+  }, []);
+
+  // Auto-select tour from initialValues AFTER tours are loaded
+  useEffect(() => {
+    // Only run when tours are loaded and we have initialValues with tourId
+    if (!loadingTours && tours.length > 0 && initialValues?.tourId) {
+      const tourIdStr = String(initialValues.tourId);
+
+      // Verify tour exists in the loaded tours list
+      const tourExists = tours.some(t => String(t.tourId) === tourIdStr);
+
+      if (tourExists) {
+        console.log('[DepartureForm] Auto-selecting tour:', tourIdStr);
+        setValue('tourId', tourIdStr, { shouldValidate: true });
+      } else {
+        console.warn('[DepartureForm] Tour not found in list:', tourIdStr);
+      }
+    }
+  }, [loadingTours, tours, initialValues, setValue]);
 
   // Fetch tour details when tourId changes
   useEffect(() => {
@@ -178,7 +190,9 @@ const DepartureForm = ({
             error={errors.tourId?.message}
             disabled={disableTourSelection || loadingTours || mode === 'edit'}
           >
-            <option value="">Chọn một tour</option>
+            <option value="">
+              {loadingTours ? 'Đang tải danh sách tour...' : 'Chọn một tour'}
+            </option>
             {tours.map((tour) => (
               <option key={tour.tourId} value={String(tour.tourId)}>
                 {tour.tourName}
@@ -188,6 +202,11 @@ const DepartureForm = ({
           {mode === 'edit' && (
             <p className="mt-1 text-sm text-slate-500">
               Không thể thay đổi tour cho chuyến đi đã tồn tại
+            </p>
+          )}
+          {disableTourSelection && mode === 'create' && (
+            <p className="mt-1 text-sm text-blue-600">
+              ℹ️ Tour đã được chọn tự động từ trang chi tiết tour
             </p>
           )}
           {selectedTour && (

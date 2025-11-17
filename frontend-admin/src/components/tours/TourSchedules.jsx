@@ -2,21 +2,53 @@ import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import Card from '../common/Card.jsx';
 
+/**
+ * Sync schedules with target days:
+ * - If more days needed: add empty schedules
+ * - If fewer days: keep existing schedules up to target
+ */
+const syncSchedulesWithDays = (existingSchedules, targetDays) => {
+  const currentLength = existingSchedules.length;
+
+  // Already matches
+  if (currentLength === targetDays) {
+    return existingSchedules;
+  }
+
+  // Need to add more schedules
+  if (currentLength < targetDays) {
+    const additional = Array.from(
+      { length: targetDays - currentLength },
+      (_, i) => ({
+        dayNumber: currentLength + i + 1,
+        scheduleDescription: ''
+      })
+    );
+    return [...existingSchedules, ...additional];
+  }
+
+  // Need to remove schedules (keep first N)
+  return existingSchedules.slice(0, targetDays);
+};
+
 const TourSchedules = ({ days, initialSchedules = [], onChange, disabled = false }) => {
   const [schedules, setSchedules] = useState([]);
 
   // Initialize schedules based on number of days
   useEffect(() => {
-    if (initialSchedules && initialSchedules.length > 0) {
-      // Use existing schedules
-      setSchedules(initialSchedules);
-    } else if (days && days > 0) {
-      // Create empty schedules for each day
-      const newSchedules = Array.from({ length: days }, (_, index) => ({
-        dayNumber: index + 1,
-        scheduleDescription: ''
-      }));
-      setSchedules(newSchedules);
+    if (days && days > 0) {
+      if (initialSchedules && initialSchedules.length > 0) {
+        // Sync existing schedules with current days value
+        const synced = syncSchedulesWithDays(initialSchedules, days);
+        setSchedules(synced);
+      } else {
+        // Create empty schedules for each day
+        const newSchedules = Array.from({ length: days }, (_, index) => ({
+          dayNumber: index + 1,
+          scheduleDescription: ''
+        }));
+        setSchedules(newSchedules);
+      }
     } else {
       setSchedules([]);
     }
