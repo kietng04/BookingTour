@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import OAuth2Callback from './pages/OAuth2Callback';
 import LoginPage from './pages/LoginPage';
 import Register from './pages/Register';
@@ -40,7 +40,7 @@ const App: React.FC = () => {
             <Route path="/custom-tour-request" element={<CustomTourRequest />} />
             <Route path="/my-custom-tours" element={<MyCustomTours />} />
             <Route path="/payment-result" element={<PaymentResultPage />} />
-            <Route path="/destinations" element={<PlaceholderPage title="Destinations coming soon" />} />
+            <Route path="/destinations" element={<Navigate to="/custom-tour-request" replace />} />
             <Route path="/auth/callback" element={<OAuth2Callback />} />
             <Route path="/auth/login" element={<LoginPage />} />
             <Route path="/auth/register" element={<Register />} />
