@@ -69,12 +69,14 @@ const ImageUpload = ({ onUploadSuccess, multiple = false, existingImages = [] })
           throw new Error(errorInfo.message);
         }
 
+        // Clone response before consuming it
+        const responseClone = response.clone();
         let data;
         try {
           data = await response.json();
         } catch (jsonError) {
-          // If JSON parsing fails, it means server returned HTML or invalid response
-          const text = await response.clone().text();
+          // If JSON parsing fails, use the clone to read as text
+          const text = await responseClone.text();
           if (text.includes('<!doctype') || text.includes('<!DOCTYPE')) {
             throw new Error(
               'Server trả về HTML thay vì JSON.\n\n' +
@@ -110,12 +112,14 @@ const ImageUpload = ({ onUploadSuccess, multiple = false, existingImages = [] })
           throw new Error(errorInfo.message);
         }
 
+        // Clone response before consuming it
+        const responseClone = response.clone();
         let data;
         try {
           data = await response.json();
         } catch (jsonError) {
-          // If JSON parsing fails, it means server returned HTML or invalid response
-          const text = await response.clone().text();
+          // If JSON parsing fails, use the clone to read as text
+          const text = await responseClone.text();
           if (text.includes('<!doctype') || text.includes('<!DOCTYPE')) {
             throw new Error(
               'Server trả về HTML thay vì JSON.\n\n' +

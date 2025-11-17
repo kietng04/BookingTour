@@ -356,16 +356,7 @@ const BookingHistory = () => {
                       </div>
                     </div>
 
-                    <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                      <div className="flex items-center text-xs text-gray-500">
-                        <Clock className="h-3 w-3 mr-1" />
-                        Đặt ngày {formatDate(booking.bookingDate)}
-                        <span className="mx-2">•</span>
-                        <span className={`font-medium ${booking.paymentStatus === 'PAID' ? 'text-green-600' : booking.paymentStatus === 'FAILED' ? 'text-red-600' : 'text-yellow-600'}`}>
-                          {getPaymentStatusText(booking.paymentStatus)}
-                        </span>
-                      </div>
-                      
+                    <div className="mt-4 flex justify-end gap-3">
                       <div className="flex gap-2">
                         <a
                           href={`/tours/${booking.tourSlug}`}
