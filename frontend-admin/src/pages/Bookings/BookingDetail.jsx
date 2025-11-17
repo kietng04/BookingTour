@@ -193,9 +193,14 @@ const BookingDetail = () => {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <StatusPill status={booking.status} />
-          <Button variant="secondary" size="sm">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleDownloadInvoice}
+            disabled={downloadingInvoice}
+          >
             <Download className="h-4 w-4" />
-            Xuất lịch trình
+            {downloadingInvoice ? 'Đang tải...' : 'Tải hóa đơn PDF'}
           </Button>
           {booking.status === 'PENDING' && (
             <>
@@ -253,15 +258,6 @@ const BookingDetail = () => {
             <span>Tổng tiền</span>
             <span className="text-lg font-semibold text-white">{formatCurrency(totalAmount)}</span>
           </div>
-          <Button
-            variant="secondary"
-            className="w-full text-slate-900"
-            onClick={handleDownloadInvoice}
-            disabled={downloadingInvoice}
-          >
-            <Download className="h-4 w-4" />
-            {downloadingInvoice ? 'Đang tải...' : 'Tải hóa đơn PDF'}
-          </Button>
         </Card>
       </div>
 

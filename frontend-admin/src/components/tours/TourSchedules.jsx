@@ -33,26 +33,45 @@ const syncSchedulesWithDays = (existingSchedules, targetDays) => {
 
 const TourSchedules = ({ days, initialSchedules = [], onChange, disabled = false }) => {
   const [schedules, setSchedules] = useState([]);
+  const [initialized, setInitialized] = useState(false);
 
-  // Initialize schedules based on number of days
+  // Initialize schedules only once when component mounts or when days changes
   useEffect(() => {
     if (days && days > 0) {
-      if (initialSchedules && initialSchedules.length > 0) {
-        // Sync existing schedules with current days value
+      if (!initialized && initialSchedules && initialSchedules.length > 0) {
+        // First time: use initial schedules
         const synced = syncSchedulesWithDays(initialSchedules, days);
         setSchedules(synced);
-      } else {
-        // Create empty schedules for each day
-        const newSchedules = Array.from({ length: days }, (_, index) => ({
-          dayNumber: index + 1,
-          scheduleDescription: ''
-        }));
-        setSchedules(newSchedules);
+        setInitialized(true);
+      } else if (initialized || (initialSchedules.length === 0)) {
+        // Already initialized or no initial data: sync with days count
+        setSchedules(prev => {
+          // If we already have schedules, sync them with new days count
+          if (prev.length > 0) {
+            return syncSchedulesWithDays(prev, days);
+          }
+          // Otherwise create new empty schedules
+          return Array.from({ length: days }, (_, index) => ({
+            dayNumber: index + 1,
+            scheduleDescription: ''
+          }));
+        });
+        setInitialized(true);
       }
     } else {
       setSchedules([]);
+      setInitialized(false);
     }
-  }, [days, initialSchedules]);
+  }, [days]); // Only depend on days, not initialSchedules
+
+  // Handle initial schedules (for edit mode) - run only once
+  useEffect(() => {
+    if (!initialized && initialSchedules && initialSchedules.length > 0 && days > 0) {
+      const synced = syncSchedulesWithDays(initialSchedules, days);
+      setSchedules(synced);
+      setInitialized(true);
+    }
+  }, []); // Run only once on mount
 
   // Notify parent when schedules change
   useEffect(() => {
