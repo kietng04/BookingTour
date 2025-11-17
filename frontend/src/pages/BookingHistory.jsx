@@ -395,7 +395,7 @@ const BookingHistory = () => {
                             timeDiff: departureDate ? `${Math.ceil((departureDate - currentDate) / (1000 * 60 * 60 * 24))} ngày` : 'N/A'
                           });
                           
-                          const isPending = booking.status === 'PENDING' || booking.status === 'CONFIRMED';
+                          const isPending = booking.status === 'PENDING';
                           const isNotCancelled = booking.status !== 'CANCELLED';
                           const canCancelTour = isPending && isBeforeDeparture && isNotCancelled;
                           
