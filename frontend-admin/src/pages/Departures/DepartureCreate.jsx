@@ -24,14 +24,15 @@ const DepartureCreate = () => {
         totalSlots: data.totalSlots
       });
 
-      toast.success('Departure created successfully!');
+      toast.success('Đã tạo chuyến đi thành công!');
 
-      // Redirect back to tour edit if came from there, otherwise to departures list
-      if (tourIdFromQuery) {
-        navigate(`/tours/${tourIdFromQuery}/edit`);
-      } else {
-        navigate('/departures');
-      }
+      // Always redirect to departures list after creating
+      navigate('/departures', {
+        state: {
+          successMessage: 'Đã tạo chuyến đi thành công',
+          highlightId: response.departureId || response.id
+        }
+      });
     } catch (error) {
       console.error('Failed to create departure:', error);
 

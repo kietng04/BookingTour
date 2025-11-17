@@ -92,16 +92,16 @@ const BookingList = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Bookings</h1>
+        <h1 className="text-2xl font-semibold text-slate-900">Danh sách đặt chỗ</h1>
         <p className="text-sm text-slate-500">
-          Track lifecycle states: pending → confirmed → completed. Aligns with backend `/admin/bookings` response.
+          Theo dõi các trạng thái: chờ xử lý → đã xác nhận → hoàn tất. Tương ứng với endpoint `/admin/bookings`.
         </p>
       </div>
 
       {/* Filters */}
       <Card className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-slate-900">Filters</h3>
+          <h3 className="text-sm font-semibold text-slate-900">Bộ lọc</h3>
           <Button
             variant="secondary"
             size="sm"
@@ -109,16 +109,16 @@ const BookingList = () => {
             disabled={exporting || loading || bookings.length === 0}
           >
             <Download className="h-4 w-4" />
-            {exporting ? 'Exporting...' : 'Export to Excel'}
+            {exporting ? 'Đang xuất...' : 'Xuất Excel'}
           </Button>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           <Select
-            label="Filter by Departure"
+            label="Lọc theo chuyến đi"
             value={selectedDeparture}
             onChange={(e) => setSelectedDeparture(e.target.value)}
           >
-            <option value="">All Departures</option>
+            <option value="">Tất cả chuyến đi</option>
             {departures.map((dep) => (
               <option key={dep.departureId} value={dep.departureId}>
                 {dep.tourName} - {new Date(dep.startDate).toLocaleDateString()}
@@ -127,33 +127,33 @@ const BookingList = () => {
           </Select>
 
           <Select
-            label="Filter by Status"
+            label="Lọc theo trạng thái"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
           >
-            <option value="">All Statuses</option>
-            <option value="PENDING">Pending</option>
-            <option value="CONFIRMED">Confirmed</option>
-            <option value="CANCELLED">Cancelled</option>
-            <option value="FAILED">Failed</option>
+            <option value="">Tất cả trạng thái</option>
+            <option value="PENDING">Chờ xử lý</option>
+            <option value="CONFIRMED">Đã xác nhận</option>
+            <option value="CANCELLED">Đã hủy</option>
+            <option value="FAILED">Thất bại</option>
           </Select>
         </div>
       </Card>
 
       {loading ? (
         <Card className="text-center py-12">
-          <p className="text-sm text-slate-500">Loading bookings...</p>
+          <p className="text-sm text-slate-500">Đang tải danh sách đặt chỗ...</p>
         </Card>
       ) : (
         <BookingTable bookings={bookings} onRefresh={fetchBookings} />
       )}
 
       <Card className="space-y-3 bg-slate-900 text-slate-100">
-        <h3 className="text-lg font-semibold">Operations checklist</h3>
+        <h3 className="text-lg font-semibold">Quy trình xử lý</h3>
         <ul className="space-y-2 text-sm text-slate-200">
-          <li>• Confirm inventory with supplier and mark booking as `confirmed`.</li>
-          <li>• Collect payment via secure invoice or on-platform gateway.</li>
-          <li>• Trigger pre-trip email sequence at T-48 hours.</li>
+          <li>• Xác nhận tồn kho với nhà cung cấp và đánh dấu đặt chỗ là "đã xác nhận".</li>
+          <li>• Thu thanh toán qua hóa đơn an toàn hoặc cổng thanh toán trực tuyến.</li>
+          <li>• Gửi email nhắc nhở trước chuyến đi 48 giờ.</li>
         </ul>
       </Card>
     </div>

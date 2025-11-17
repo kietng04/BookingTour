@@ -78,18 +78,13 @@ const DepartureEdit = () => {
         totalSlots: data.totalSlots
       });
 
-      toast.success('Departure updated successfully!');
+      toast.success('Đã cập nhật chuyến đi thành công!');
 
-      // Navigate with updated departure data to avoid "Departure not found" issue
-      navigate(`/departures/${departureId}`, {
+      // Always redirect to departures list after editing
+      navigate('/departures', {
         state: {
-          departure: {
-            ...departure,
-            ...updatedDeparture,
-            // Ensure we preserve tourId and tourName
-            tourId: departure.tourId,
-            tourName: departure.tourName
-          }
+          successMessage: 'Đã cập nhật chuyến đi thành công',
+          highlightId: departureId
         }
       });
     } catch (error) {
