@@ -225,41 +225,32 @@ const BookingDetail = () => {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <Card className="space-y-5">
-          <h3 className="text-lg font-semibold text-slate-900">Thông tin khách hàng</h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-1 text-sm text-slate-600">
-              <p className="text-xs uppercase tracking-widest text-slate-400">Khách hàng chính</p>
-              <p className="font-medium text-slate-800">{user?.fullName || user?.username || 'Chưa cập nhật'}</p>
-            </div>
-            <div className="space-y-1 text-sm text-slate-600">
-              <p className="text-xs uppercase tracking-widest text-slate-400">Mã người dùng</p>
-              <p className="font-medium text-slate-800">{booking.userId}</p>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Mail className="h-4 w-4" />
-              {user?.email || 'Chưa có email'}
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Phone className="h-4 w-4" />
-              {user?.phoneNumber || 'Chưa cập nhật' }
-            </div>
+      <Card className="space-y-5">
+        <h3 className="text-lg font-semibold text-slate-900">Thông tin khách hàng</h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-1 text-sm text-slate-600">
+            <p className="text-xs uppercase tracking-widest text-slate-400">Khách hàng chính</p>
+            <p className="font-medium text-slate-800">{user?.fullName || user?.username || 'Chưa cập nhật'}</p>
           </div>
-          <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
-            <p className="text-xs uppercase tracking-widest text-slate-400">Ghi chú</p>
-            <p>{booking.seats} khách · Trạng thái hiện tại: {booking.status}</p>
+          <div className="space-y-1 text-sm text-slate-600">
+            <p className="text-xs uppercase tracking-widest text-slate-400">Mã người dùng</p>
+            <p className="font-medium text-slate-800">{booking.userId}</p>
           </div>
-        </Card>
-
-        <Card className="space-y-4 bg-slate-900 text-slate-100">
-          <h3 className="text-lg font-semibold text-white">Tổng quan tài chính</h3>
-          <div className="flex items-center justify-between text-sm">
-            <span>Tổng tiền</span>
-            <span className="text-lg font-semibold text-white">{formatCurrency(totalAmount)}</span>
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Mail className="h-4 w-4" />
+            {user?.email || 'Chưa có email'}
           </div>
-        </Card>
-      </div>
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Phone className="h-4 w-4" />
+            {user?.phoneNumber || 'Chưa cập nhật' }
+          </div>
+        </div>
+        <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+          <p className="text-xs uppercase tracking-widest text-slate-400">Ghi chú</p>
+          <p>{booking.seats} khách · Trạng thái hiện tại: {booking.status}</p>
+          <p className="mt-2 font-semibold text-slate-900">Tổng tiền: {formatCurrency(totalAmount)}</p>
+        </div>
+      </Card>
 
       <BookingTimeline
         events={buildTimelineForStatus(booking.status)}

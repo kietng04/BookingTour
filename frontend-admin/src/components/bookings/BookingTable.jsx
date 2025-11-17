@@ -119,8 +119,8 @@ const BookingTable = ({ bookings, onRefresh }) => {
       key: 'userId',
       label: 'Số booking',
       render: (value) => (
-        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-          {userBookingCount[value] || 0} booking
+        <span className="text-sm font-medium text-slate-700">
+          {userBookingCount[value] || 0}
         </span>
       )
     },
@@ -128,11 +128,6 @@ const BookingTable = ({ bookings, onRefresh }) => {
       key: 'amount',
       label: 'Tổng tiền',
       render: (value) => formatCurrency(value)
-    },
-    {
-      key: 'id',
-      label: 'Thanh toán',
-      render: (value) => renderPaymentStatus(value)
     },
     {
       key: 'status',
