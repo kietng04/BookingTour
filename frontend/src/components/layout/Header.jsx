@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext.tsx';
 const navigation = [
   { label: 'Trang chủ', to: '/' },
   { label: 'Tour', to: '/tours' },
+  { label: 'Chuyến đi tùy chỉnh', to: '/custom-tour-request' },
   { label: 'Đánh giá', to: '/reviews' },
   { label: 'Đặt chỗ của tôi', to: '/profile' }
 ];
