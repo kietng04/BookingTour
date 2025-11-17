@@ -6,6 +6,42 @@ const ImageUpload = ({ onUploadSuccess, multiple = false, existingImages = [] })
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
 
+  const parseErrorResponse = async (response) => {
+    const contentType = response.headers.get('content-type') || '';
+
+    try {
+      // Check if response is HTML (service not responding properly)
+      if (contentType.includes('text/html')) {
+        const text = await response.text();
+        if (text.includes('<!doctype') || text.includes('<!DOCTYPE')) {
+          return {
+            message: 'Không thể kết nối đến server upload. Vui lòng kiểm tra:\n' +
+                     '1. Tour-service đang chạy (port 8080)\n' +
+                     '2. API Gateway đang chạy (port 8080)\n' +
+                     '3. Eureka Server đang chạy (port 8761)',
+            isServiceDown: true
+          };
+        }
+        return { message: 'Server trả về HTML thay vì JSON. Service có thể chưa khởi động đúng cách.' };
+      }
+
+      // Try to parse JSON error
+      if (contentType.includes('application/json')) {
+        const data = await response.json();
+        return {
+          message: data.error || data.message || 'Upload thất bại',
+          data
+        };
+      }
+
+      // Plain text error
+      const text = await response.text();
+      return { message: text || `HTTP ${response.status}: ${response.statusText}` };
+    } catch (parseError) {
+      return { message: `HTTP ${response.status}: Không thể đọc error từ server` };
+    }
+  };
+
   const handleFileChange = async (files) => {
     if (!files || files.length === 0) return;
 
@@ -29,7 +65,8 @@ const ImageUpload = ({ onUploadSuccess, multiple = false, existingImages = [] })
         });
 
         if (!response.ok) {
-          throw new Error('Upload failed');
+          const errorInfo = await parseErrorResponse(response);
+          throw new Error(errorInfo.message);
         }
 
         const data = await response.json();
@@ -53,8 +90,8 @@ const ImageUpload = ({ onUploadSuccess, multiple = false, existingImages = [] })
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Upload failed');
+          const errorInfo = await parseErrorResponse(response);
+          throw new Error(errorInfo.message);
         }
 
         const data = await response.json();
@@ -64,7 +101,20 @@ const ImageUpload = ({ onUploadSuccess, multiple = false, existingImages = [] })
       }
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Upload failed: ' + error.message);
+
+      // Enhanced error message
+      let errorMessage = 'Upload failed: ' + error.message;
+
+      // Network error (service not reachable)
+      if (error.message === 'Failed to fetch') {
+        errorMessage = 'Không thể kết nối đến server.\n\n' +
+                       'Vui lòng kiểm tra:\n' +
+                       '• Tour-service đang chạy\n' +
+                       '• API Gateway đang chạy\n' +
+                       '• Network connection';
+      }
+
+      alert(errorMessage);
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
