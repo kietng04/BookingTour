@@ -7,6 +7,7 @@ import com.example.tour.model.Tour;
 import com.example.tour.model.TourSchedule;
 import com.example.tour.repository.TourRepository;
 import com.example.tour.service.TourService;
+import com.example.tour.model.TourImage;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
