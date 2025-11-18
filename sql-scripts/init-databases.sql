@@ -118,12 +118,17 @@ CREATE TABLE payments (
 CREATE TABLE custom_tours (
     custom_tour_id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
-    destination VARCHAR(255) NOT NULL,
+    tour_name VARCHAR(255) NOT NULL,
+    num_adult INTEGER NOT NULL DEFAULT 1,
+    num_children INTEGER NOT NULL DEFAULT 0,
+    region_id BIGINT,
+    province_id BIGINT,
     start_date DATE,
     end_date DATE,
-    number_of_people INTEGER,
-    special_request TEXT,
+    description TEXT,
     status custom_tour_status DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 

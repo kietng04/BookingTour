@@ -236,6 +236,14 @@ const SiteHeader: React.FC = () => {
                       Lịch sử đặt tour
                     </Link>
                     <Link
+                      to="/my-custom-tours"
+                      className="inline-flex items-center gap-2 rounded-xl px-3 py-2 transition hover:bg-brand-50 hover:text-brand-600"
+                      onClick={() => setProfileMenuOpen(false)}
+                    >
+                      <Globe2 className="h-4 w-4" aria-hidden="true" />
+                      Lịch sử tour tùy chỉnh
+                    </Link>
+                    <Link
                       to="/my-reviews"
                       className="inline-flex items-center gap-2 rounded-xl px-3 py-2 transition hover:bg-brand-50 hover:text-brand-600"
                       onClick={() => setProfileMenuOpen(false)}
@@ -377,6 +385,14 @@ const SiteHeader: React.FC = () => {
                 >
                   <Calendar className="h-4 w-4" aria-hidden="true" />
                   Lịch sử đặt tour
+                </Link>
+                <Link
+                  to="/my-custom-tours"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-brand-200 hover:text-gray-900 focus-visible:border-brand-300"
+                >
+                  <Globe2 className="h-4 w-4" aria-hidden="true" />
+                  Lịch sử tour tùy chỉnh
                 </Link>
                 <Link
                   to="/my-reviews"
