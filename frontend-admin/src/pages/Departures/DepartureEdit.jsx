@@ -72,14 +72,21 @@ const DepartureEdit = () => {
   const handleSubmit = async (data) => {
     setIsLoading(true);
     try {
-      await departuresAPI.update(departure.tourId, departureId, {
+      const updatedDeparture = await departuresAPI.update(departure.tourId, departureId, {
         startDate: data.startDate,
         endDate: data.endDate,
         totalSlots: data.totalSlots
       });
 
-      toast.success('Departure updated successfully!');
-      navigate(`/departures/${departureId}`);
+      toast.success('Đã cập nhật chuyến đi thành công!');
+
+      // Always redirect to departures list after editing
+      navigate('/departures', {
+        state: {
+          successMessage: 'Đã cập nhật chuyến đi thành công',
+          highlightId: departureId
+        }
+      });
     } catch (error) {
       console.error('Failed to update departure:', error);
 

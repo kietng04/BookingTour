@@ -15,19 +15,63 @@ const DepartureDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const toast = useToast();
-  const departure = location.state?.departure;
 
+  const [departure, setDeparture] = useState(location.state?.departure || null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingDeparture, setLoadingDeparture] = useState(!location.state?.departure);
+  const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({ page: 0, size: 20 });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Fetch departure if not provided via state
   useEffect(() => {
-    if (departureId) {
+    const fetchDeparture = async () => {
+      // If already have departure from state, skip fetch
+      if (location.state?.departure) {
+        setLoadingDeparture(false);
+        return;
+      }
+
+      // Otherwise, fetch from API
+      if (!departureId) {
+        setError('Invalid departure ID');
+        setLoadingDeparture(false);
+        return;
+      }
+
+      try {
+        setLoadingDeparture(true);
+        setError(null);
+
+        // Fetch all departures and find the matching one
+        const allDepartures = await departuresAPI.getAll();
+        const found = allDepartures.find(d => String(d.departureId) === String(departureId));
+
+        if (found) {
+          setDeparture(found);
+        } else {
+          setError('Departure not found');
+          toast.error('Departure not found');
+        }
+      } catch (err) {
+        console.error('Failed to fetch departure:', err);
+        setError('Failed to load departure details');
+        toast.error('Failed to load departure details');
+      } finally {
+        setLoadingDeparture(false);
+      }
+    };
+
+    fetchDeparture();
+  }, [departureId, location.state, toast]);
+
+  useEffect(() => {
+    if (departureId && departure) {
       fetchBookings();
     }
-  }, [departureId, pagination.page]);
+  }, [departureId, departure, pagination.page]);
 
   const fetchBookings = async () => {
     try {
@@ -129,7 +173,8 @@ const DepartureDetail = () => {
     },
   ];
 
-  if (!departure && !loading) {
+  // Loading state
+  if (loadingDeparture) {
     return (
       <div className="space-y-8">
         <Link to="/departures" className="inline-flex items-center gap-2 text-sm font-semibold text-primary-500">
@@ -137,7 +182,29 @@ const DepartureDetail = () => {
           Back to departures
         </Link>
         <Card className="text-center py-12">
-          <p className="text-sm text-slate-500">Departure not found</p>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mb-4"></div>
+          <p className="text-sm text-slate-500">Loading departure details...</p>
+        </Card>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !departure) {
+    return (
+      <div className="space-y-8">
+        <Link to="/departures" className="inline-flex items-center gap-2 text-sm font-semibold text-primary-500">
+          <ArrowLeft className="h-4 w-4" />
+          Back to departures
+        </Link>
+        <Card className="text-center py-12">
+          <svg className="mx-auto h-12 w-12 text-slate-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <p className="text-sm font-medium text-slate-900 mb-2">{error || 'Departure not found'}</p>
+          <Button onClick={() => navigate('/departures')} variant="secondary">
+            Back to Departures
+          </Button>
         </Card>
       </div>
     );

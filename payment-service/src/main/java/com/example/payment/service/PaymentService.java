@@ -172,7 +172,7 @@ public class PaymentService {
             payment.setStatus(PaymentStatus.REFUNDED);
             payment.setNotes("Booking cancelled - payment refunded");
         } else {
-            payment.setStatus(PaymentStatus.CANCELLED);
+            payment.setStatus(PaymentStatus.FAILED);
             payment.setNotes("Booking cancelled - payment cancelled");
         }
 

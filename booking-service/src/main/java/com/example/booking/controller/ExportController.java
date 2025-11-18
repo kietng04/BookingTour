@@ -88,45 +88,6 @@ public class ExportController {
     }
 
     /**
-     * Export booking invoice to PDF
-     * GET /export/bookings/{bookingId}/invoice
-     */
-    @GetMapping("/bookings/{bookingId}/invoice")
-    public ResponseEntity<Resource> exportBookingInvoiceToPdf(@PathVariable Long bookingId) {
-        log.info("Exporting invoice for booking ID: {}", bookingId);
-
-        try {
-            // Generate PDF
-            ByteArrayInputStream pdfStream = exportService.exportBookingInvoiceToPdf(bookingId);
-
-            // Prepare file name
-            String fileName = "invoice_" + bookingId + "_" +
-                    LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".pdf";
-
-            // Set headers
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-            headers.add(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
-            headers.add(HttpHeaders.PRAGMA, "no-cache");
-            headers.add(HttpHeaders.EXPIRES, "0");
-
-            log.info("PDF invoice generated successfully for booking ID: {}", bookingId);
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .body(new InputStreamResource(pdfStream));
-
-        } catch (ResponseStatusException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Failed to generate PDF invoice for booking ID: {}", bookingId, e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Failed to generate invoice: " + e.getMessage());
-        }
-    }
-
-    /**
      * Export dashboard statistics to Excel
      * GET /export/dashboard/excel
      * Required params: startDate, endDate
