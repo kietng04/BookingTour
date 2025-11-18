@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Download, Mail, Phone } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 import Card from '../../components/common/Card.jsx';
 import Button from '../../components/common/Button.jsx';
 import BookingTimeline from '../../components/bookings/BookingTimeline.jsx';
 import StatusPill from '../../components/common/StatusPill.jsx';
-import { bookingsAPI, departuresAPI, usersAPI, exportAPI } from '../../services/api.js';
+import { bookingsAPI, departuresAPI, usersAPI } from '../../services/api.js';
 import { formatCurrency, formatDate } from '../../utils/format.js';
 
 const buildTimelineForStatus = (status) => {
@@ -54,7 +54,6 @@ const BookingDetail = () => {
   const [departure, setDeparture] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [confirming, setConfirming] = useState(false);
 
@@ -101,20 +100,6 @@ const BookingDetail = () => {
 
     fetchData();
   }, [numericId]);
-
-  const handleDownloadInvoice = async () => {
-    if (!numericId) return;
-
-    try {
-      setDownloadingInvoice(true);
-      await exportAPI.downloadInvoicePdf(numericId);
-    } catch (err) {
-      console.error('Failed to download invoice:', err);
-      alert('Failed to download invoice. Please try again.');
-    } finally {
-      setDownloadingInvoice(false);
-    }
-  };
 
   const handleConfirmBooking = async () => {
     if (!numericId) return;
@@ -193,15 +178,6 @@ const BookingDetail = () => {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <StatusPill status={booking.status} />
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleDownloadInvoice}
-            disabled={downloadingInvoice}
-          >
-            <Download className="h-4 w-4" />
-            {downloadingInvoice ? 'Đang tải...' : 'Tải hóa đơn PDF'}
-          </Button>
           {booking.status === 'PENDING' && (
             <>
               <Button
