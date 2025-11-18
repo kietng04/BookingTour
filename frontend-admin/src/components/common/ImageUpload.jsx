@@ -45,6 +45,19 @@ const ImageUpload = ({ onUploadSuccess, multiple = false, existingImages = [] })
   const handleFileChange = async (files) => {
     if (!files || files.length === 0) return;
 
+    // Validate file size (5MB = 5 * 1024 * 1024 bytes)
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+    const oversizedFiles = Array.from(files).filter(file => file.size > MAX_FILE_SIZE);
+
+    if (oversizedFiles.length > 0) {
+      const fileNames = oversizedFiles.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)}MB)`).join(', ');
+      alert(`Các file sau vượt quá giới hạn 5MB:\n${fileNames}\n\nVui lòng chọn file có kích thước nhỏ hơn.`);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
     setUploading(true);
 
     try {

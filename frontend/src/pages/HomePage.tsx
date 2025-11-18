@@ -269,7 +269,7 @@ const HomePage: React.FC = () => {
                 Chia sẻ kế hoạch du lịch của bạn với các chuyên gia để có hành trình được tùy chỉnh, quyền truy cập độc quyền và các khuyến nghị từ người trong cuộc.
               </p>
               <Link
-                to="/support"
+                to="/custom-tour-request"
                 className="mt-6 inline-flex items-center justify-center rounded-full bg-white/90 px-5 py-3 text-sm font-semibold text-gray-900 shadow-lg transition hover:bg-white focus-visible:bg-white"
               >
                 Lên kế hoạch chuyến đi tùy chỉnh
