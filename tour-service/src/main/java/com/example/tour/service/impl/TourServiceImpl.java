@@ -127,8 +127,15 @@ public class TourServiceImpl implements TourService {
         tour.setChildPrice(request.getChildPrice());
         if (request.getHeroImageUrl() != null && !request.getHeroImageUrl().isBlank()) {
             tour.setHeroImageUrl(request.getHeroImageUrl().trim());
+
+            // Create TourImage entity for heroImageUrl with isPrimary=true
+            TourImage heroImage = new TourImage();
+            heroImage.setImageUrl(request.getHeroImageUrl().trim());
+            heroImage.setIsPrimary(true);
+            heroImage.setTour(tour);
+            tour.getImages().add(heroImage);
         }
-        
+
         if (request.getSchedules() != null && !request.getSchedules().isEmpty()) {
             List<TourSchedule> schedules = request.getSchedules().stream()
             .map(scheduleRequest -> {
@@ -186,6 +193,24 @@ public class TourServiceImpl implements TourService {
 
         if (request.getHeroImageUrl() != null && !request.getHeroImageUrl().isBlank()) {
             tour.setHeroImageUrl(request.getHeroImageUrl().trim());
+
+            // Update or create TourImage entity for heroImageUrl
+            TourImage existingPrimary = tour.getImages().stream()
+                    .filter(img -> Boolean.TRUE.equals(img.getIsPrimary()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existingPrimary != null) {
+                // Update existing primary image
+                existingPrimary.setImageUrl(request.getHeroImageUrl().trim());
+            } else {
+                // Create new primary image
+                TourImage heroImage = new TourImage();
+                heroImage.setImageUrl(request.getHeroImageUrl().trim());
+                heroImage.setIsPrimary(true);
+                heroImage.setTour(tour);
+                tour.getImages().add(heroImage);
+            }
         }
 
         // Validate prices after setting them
