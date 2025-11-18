@@ -115,15 +115,9 @@ const MyCustomTours = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Chưa có yêu cầu tour nào
             </h3>
-            <p className="text-gray-600 mb-6">
-              Bắt đầu bằng cách tạo yêu cầu tour tùy chỉnh đầu tiên của bạn. Chúng tôi sẽ thiết kế tour phù hợp với nhu cầu của bạn!
+            <p className="text-gray-600">
+              Hiện tại bạn chưa có yêu cầu tour tùy chỉnh nào.
             </p>
-            <Link
-              to="/custom-tour-request"
-              className="inline-block bg-brand-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-brand-600 transition"
-            >
-              Tạo yêu cầu đầu tiên
-            </Link>
           </div>
         </div>
       ) : (

@@ -68,7 +68,15 @@ spring:
           filters:
             - StripPrefix=2
             - PrefixPath=/auth
-        # Forward auth endpoints /api/users/auth/** to /auth/** in user-service (must come first)
+        # Forward auth endpoints /api/auth/** to /auth/** in user-service (must come first)
+        - id: auth-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
+
+        # Forward auth endpoints /api/users/auth/** to /auth/** in user-service (legacy support)
         - id: user-auth
           uri: lb://user-service
           predicates:
