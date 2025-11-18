@@ -11,7 +11,7 @@ const navigation = [
   { icon: Calendar, label: 'Chuyến đi', to: '/departures' },
   { icon: CalendarClock, label: 'Đặt chỗ', to: '/bookings' },
   { icon: MapPin, label: 'Tour tùy chỉnh', to: '/custom-tours' },
-  { icon: MessageCircle, label: 'Đánh giá', to: '/reviews' },
+  // { icon: MessageCircle, label: 'Đánh giá', to: '/reviews' }, // Disabled - not in use
   { icon: Users, label: 'Người dùng', to: '/users' }
 ];
 

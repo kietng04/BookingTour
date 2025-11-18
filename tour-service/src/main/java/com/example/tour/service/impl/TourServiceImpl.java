@@ -7,6 +7,7 @@ import com.example.tour.model.Tour;
 import com.example.tour.model.TourSchedule;
 import com.example.tour.repository.TourRepository;
 import com.example.tour.service.TourService;
+import com.example.tour.model.TourImage;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -127,8 +128,15 @@ public class TourServiceImpl implements TourService {
         tour.setChildPrice(request.getChildPrice());
         if (request.getHeroImageUrl() != null && !request.getHeroImageUrl().isBlank()) {
             tour.setHeroImageUrl(request.getHeroImageUrl().trim());
+
+            // Create TourImage entity for heroImageUrl with isPrimary=true
+            TourImage heroImage = new TourImage();
+            heroImage.setImageUrl(request.getHeroImageUrl().trim());
+            heroImage.setIsPrimary(true);
+            heroImage.setTour(tour);
+            tour.getImages().add(heroImage);
         }
-        
+
         if (request.getSchedules() != null && !request.getSchedules().isEmpty()) {
             List<TourSchedule> schedules = request.getSchedules().stream()
             .map(scheduleRequest -> {
@@ -186,6 +194,24 @@ public class TourServiceImpl implements TourService {
 
         if (request.getHeroImageUrl() != null && !request.getHeroImageUrl().isBlank()) {
             tour.setHeroImageUrl(request.getHeroImageUrl().trim());
+
+            // Update or create TourImage entity for heroImageUrl
+            TourImage existingPrimary = tour.getImages().stream()
+                    .filter(img -> Boolean.TRUE.equals(img.getIsPrimary()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existingPrimary != null) {
+                // Update existing primary image
+                existingPrimary.setImageUrl(request.getHeroImageUrl().trim());
+            } else {
+                // Create new primary image
+                TourImage heroImage = new TourImage();
+                heroImage.setImageUrl(request.getHeroImageUrl().trim());
+                heroImage.setIsPrimary(true);
+                heroImage.setTour(tour);
+                tour.getImages().add(heroImage);
+            }
         }
 
         // Validate prices after setting them
@@ -279,12 +305,9 @@ public class TourServiceImpl implements TourService {
             if (!dayNumbers.add(schedule.getDayNumber())) 
                 throw new IllegalArgumentException("Số ngày " + schedule.getDayNumber() + " bị trùng lặp trong lịch trình");
             
-            if (schedule.getScheduleDescription() == null || schedule.getScheduleDescription().isBlank()) 
+            if (schedule.getScheduleDescription() == null || schedule.getScheduleDescription().isBlank())
                 throw new IllegalArgumentException("Mô tả lịch trình ngày " + schedule.getDayNumber() + " không được để trống");
-            
-            if (schedule.getScheduleDescription().trim().length() < 10) 
-                throw new IllegalArgumentException("Mô tả lịch trình ngày " + schedule.getDayNumber() + " phải có ít nhất 10 ký tự");
-            
+
         }
         List<Integer> missingDays = IntStream.rangeClosed(1, totalDays)
         .filter(i -> !dayNumbers.contains(i))

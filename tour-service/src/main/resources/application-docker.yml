@@ -1,6 +1,18 @@
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
 spring:
   datasource:
-    url: jdbc:postgresql://postgres-db:5432/tourdb
+    url: jdbc:postgresql://postgres-db:5432/tourdb?useUnicode=true&characterEncoding=UTF-8
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
   rabbitmq:
     host: rabbitmq
     port: 5672
