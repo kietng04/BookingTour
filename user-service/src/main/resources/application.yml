@@ -1,11 +1,16 @@
 server:
   port: 8081
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 spring:
   application:
     name: user-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/userdb
+    url: jdbc:postgresql://localhost:5432/userdb?useUnicode=true&characterEncoding=UTF-8
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -19,6 +24,15 @@ spring:
         format_sql: true
         jdbc:
           time_zone: Asia/Ho_Chi_Minh
+          charset: UTF-8
+        connection:
+          characterEncoding: UTF-8
+          useUnicode: true
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
   security:
     oauth2:
       client:

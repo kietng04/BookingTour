@@ -1,181 +1,177 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
+import { regionsAPI } from '../../services/api';
+import Card from '../../components/common/Card';
+import Badge from '../../components/common/Badge';
+import Button from '../../components/common/Button';
 
-const CustomTourDetailModal = ({ tour, onClose, onStatusUpdate }) => {
-  const [status, setStatus] = useState(tour.status);
-  const [adminNotes, setAdminNotes] = useState(tour.adminNotes || '');
+const CustomTourDetailModal = ({ tour, onClose }) => {
+  const [regions, setRegions] = useState([]);
+  const [provinces, setProvinces] = useState([]);
 
-  const handleSubmit = () => {
-    if (status === 'PENDING' && !adminNotes.trim()) {
-      alert('Vui lòng nhập ghi chú khi chuyển trạng thái');
-      return;
+  useEffect(() => {
+    fetchRegionsAndProvinces();
+  }, [tour]);
+
+  const fetchRegionsAndProvinces = async () => {
+    try {
+      const regionsData = await regionsAPI.getAll();
+      setRegions(regionsData || []);
+
+      if (tour.regionId) {
+        const provincesData = await regionsAPI.getProvinces(tour.regionId);
+        setProvinces(provincesData || []);
+      }
+    } catch (err) {
+      console.error('Error fetching regions/provinces:', err);
     }
-    onStatusUpdate(tour.id, status, adminNotes);
+  };
+
+  const getRegionName = () => {
+    const region = regions.find(r => r.id === tour.regionId);
+    return region ? region.name : 'N/A';
+  };
+
+  const getProvinceName = () => {
+    const province = provinces.find(p => p.id === tour.provinceId);
+    return province ? province.name : 'N/A';
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    return new Date(dateString).toLocaleDateString('vi-VN');
+  };
+
+  const getStatusVariant = (status) => {
+    const variants = {
+      PENDING: 'warning',
+      COMPLETED: 'success',
+      REJECTED: 'danger',
+      CANCELLED: 'neutral'
+    };
+    return variants[status] || 'neutral';
+  };
+
+  const getStatusLabel = (status) => {
+    const labels = {
+      PENDING: 'Đang chờ',
+      COMPLETED: 'Đã duyệt',
+      REJECTED: 'Từ chối',
+      CANCELLED: 'Đã hủy'
+    };
+    return labels[status] || status;
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900">
-                Chi tiết yêu cầu #{tour.id}
-              </h2>
-              <p className="text-sm text-slate-500 mt-1">
-                Gửi lúc: {new Date(tour.createdAt).toLocaleString('vi-VN')}
-              </p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div
+        className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-5 flex items-center justify-between rounded-t-3xl">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Chi tiết yêu cầu</p>
+            <h2 className="text-2xl font-semibold text-slate-900 mt-1">Tour Tùy Chỉnh #{tour.id}</h2>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant={getStatusVariant(tour.status)}>
+                {getStatusLabel(tour.status)}
+              </Badge>
             </div>
-            <button
-              onClick={onClose}
-              className="text-slate-400 hover:text-slate-600"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 transition-colors p-2 hover:bg-slate-100 rounded-full"
+            title="Đóng"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
-          {/* Content */}
-          <div className="space-y-6">
-            {/* Destination and Travel Info */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Điểm đến
-                </label>
-                <p className="text-slate-900 font-semibold text-lg">{tour.destination}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Số người
-                </label>
-                <p className="text-slate-900">{tour.numberOfPeople} người</p>
-              </div>
-            </div>
+        {/* Content */}
+        <div className="px-6 py-6 space-y-6">
 
-            {/* Dates */}
-            <div className="grid md:grid-cols-2 gap-6">
+          {/* Tour Info Card */}
+          <Card>
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Ngày khởi hành
-                </label>
-                <p className="text-slate-900">{formatDate(tour.startDate)}</p>
+                <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Tên tour</p>
+                <p className="text-base font-medium text-slate-900">{tour.tourName}</p>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Ngày kết thúc
-                </label>
-                <p className="text-slate-900">{formatDate(tour.endDate)}</p>
-              </div>
-            </div>
 
-            {/* Budget */}
-            {tour.budgetRange && (
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Ngân sách dự kiến
-                </label>
-                <p className="text-slate-900">{tour.budgetRange}</p>
-              </div>
-            )}
-
-            {/* Contact Info */}
-            <div className="bg-slate-50 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-slate-900 mb-3">
-                Thông tin liên hệ
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs text-slate-600 mb-1">Email</label>
-                  <p className="text-slate-900">{tour.contactEmail}</p>
+                  <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Ngày khởi hành</p>
+                  <p className="text-sm text-slate-900">{formatDate(tour.startDate)}</p>
                 </div>
-                {tour.contactPhone && (
-                  <div>
-                    <label className="block text-xs text-slate-600 mb-1">Số điện thoại</label>
-                    <p className="text-slate-900">{tour.contactPhone}</p>
-                  </div>
-                )}
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Ngày kết thúc</p>
+                  <p className="text-sm text-slate-900">{formatDate(tour.endDate)}</p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Số người lớn</p>
+                  <p className="text-sm text-slate-900">{tour.numAdult} người</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Số trẻ em</p>
+                  <p className="text-sm text-slate-900">{tour.numChildren} trẻ</p>
+                </div>
               </div>
             </div>
+          </Card>
 
-            {/* Special Request */}
-            {tour.specialRequest && (
+          {/* Location Card */}
+          <Card>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-400 mb-4">Địa điểm</p>
+            <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Yêu cầu đặc biệt
-                </label>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-slate-900 whitespace-pre-wrap">{tour.specialRequest}</p>
-                </div>
+                <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Khu vực</p>
+                <p className="text-sm text-slate-900">{getRegionName()}</p>
               </div>
-            )}
-
-            <hr className="border-slate-200" />
-
-            {/* Status Update Section */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Trạng thái
-              </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                <option value="PENDING">Đang chờ xử lý</option>
-                <option value="COMPLETED">Hoàn thành</option>
-                <option value="REJECTED">Từ chối</option>
-              </select>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Tỉnh/Thành phố</p>
+                <p className="text-sm text-slate-900">{getProvinceName()}</p>
+              </div>
             </div>
+          </Card>
 
-            {/* Admin Notes */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Ghi chú của admin
-                {status !== 'PENDING' && <span className="text-red-500 ml-1">*</span>}
-              </label>
-              <textarea
-                value={adminNotes}
-                onChange={(e) => setAdminNotes(e.target.value)}
-                rows="4"
-                placeholder="Nhập phản hồi cho khách hàng..."
-                className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-              <p className="mt-1 text-xs text-slate-500">
-                {status === 'COMPLETED'
-                  ? 'Hãy thông báo chi tiết về tour đã được thiết kế và hướng dẫn tiếp theo cho khách hàng.'
-                  : status === 'REJECTED'
-                  ? 'Hãy giải thích lý do từ chối một cách lịch sự và đề xuất phương án thay thế nếu có.'
-                  : 'Ghi chú này sẽ được gửi đến khách hàng nếu bạn thay đổi trạng thái.'}
+          {/* Description Card */}
+          {tour.description && (
+            <Card>
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400 mb-3">Mô tả chi tiết</p>
+              <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+                {tour.description}
               </p>
-            </div>
-          </div>
+            </Card>
+          )}
 
-          {/* Actions */}
-          <div className="flex gap-3 mt-8 pt-6 border-t border-slate-200">
-            <button
-              onClick={handleSubmit}
-              className="flex-1 bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition"
-            >
-              Cập nhật
-            </button>
-            <button
-              onClick={onClose}
-              className="flex-1 bg-slate-200 text-slate-800 py-3 rounded-lg font-semibold hover:bg-slate-300 transition"
-            >
-              Đóng
-            </button>
-          </div>
+          {/* Metadata Card */}
+          <Card className="bg-slate-50">
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Ngày tạo</p>
+                <p className="text-slate-700">{tour.createdAt ? formatDate(tour.createdAt) : 'N/A'}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Cập nhật lần cuối</p>
+                <p className="text-slate-700">{tour.updatedAt ? formatDate(tour.updatedAt) : 'N/A'}</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Footer */}
+        <div className="sticky bottom-0 bg-white border-t border-slate-200 px-6 py-4 rounded-b-3xl">
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            className="w-full"
+          >
+            Đóng
+          </Button>
         </div>
       </div>
     </div>

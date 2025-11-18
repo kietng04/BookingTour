@@ -22,12 +22,22 @@ async function fetchAdminAPI(endpoint, options = {}) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ message: 'Request failed' }));
-      throw new Error(errorData.message || `HTTP ${response.status}`);
+      const error = new Error(errorData.message || `HTTP ${response.status}`);
+      
+      // Only log errors that are not database-related empty data issues
+      if (!errorData.message?.includes('does not exist') && response.status !== 404) {
+        console.error(`Admin API Error (${endpoint}):`, error);
+      }
+      
+      throw error;
     }
 
     return await response.json();
   } catch (error) {
-    console.error(`Admin API Error (${endpoint}):`, error);
+    // Only log non-network errors or actual server errors
+    if (!error.message?.includes('does not exist')) {
+      console.error(`Admin API Error (${endpoint}):`, error);
+    }
     throw error;
   }
 }

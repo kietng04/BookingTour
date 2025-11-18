@@ -1,11 +1,16 @@
 server:
   port: 8082
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 spring:
   application:
     name: tour-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/tourdb
+    url: jdbc:postgresql://localhost:5432/tourdb?useUnicode=true&characterEncoding=UTF-8
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -17,6 +22,16 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        jdbc:
+          charset: UTF-8
+        connection:
+          characterEncoding: UTF-8
+          useUnicode: true
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
   cloudinary:
     cloud-name: ${CLOUDINARY_CLOUD_NAME}
     api-key: ${CLOUDINARY_API_KEY}
