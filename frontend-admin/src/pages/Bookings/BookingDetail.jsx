@@ -8,21 +8,27 @@ import StatusPill from '../../components/common/StatusPill.jsx';
 import { bookingsAPI, departuresAPI, usersAPI } from '../../services/api.js';
 import { formatCurrency, formatDate } from '../../utils/format.js';
 
-const buildTimelineForStatus = (status) => {
+const buildTimelineForStatus = (status, bookingDate) => {
+  const now = new Date().toISOString();
+  const baseTimestamp = bookingDate || now;
+
   const timeline = [
     {
       label: 'Đặt chỗ được tạo',
       status: 'completed',
+      timestamp: baseTimestamp,
       description: 'Khách hàng đã gửi yêu cầu đặt tour.',
     },
     {
       label: 'Giữ chỗ',
       status: status === 'PENDING' ? 'pending' : 'confirmed',
+      timestamp: baseTimestamp,
       description: 'Tour-service giữ chỗ qua RabbitMQ.',
     },
     {
       label: 'Xử lý thanh toán',
       status: status === 'CONFIRMED' || status === 'COMPLETED' ? 'confirmed' : status === 'CANCELLED' ? 'cancelled' : 'pending',
+      timestamp: baseTimestamp,
       description: 'Payment-service xác nhận thanh toán.',
     },
   ];
@@ -31,6 +37,7 @@ const buildTimelineForStatus = (status) => {
     timeline.push({
       label: 'Chuyến đi hoàn tất',
       status: 'completed',
+      timestamp: baseTimestamp,
       description: 'Chuyến đi đã hoàn tất.',
     });
   }
@@ -39,6 +46,7 @@ const buildTimelineForStatus = (status) => {
     timeline.push({
       label: 'Đặt chỗ bị hủy',
       status: 'cancelled',
+      timestamp: baseTimestamp,
       description: 'Đặt chỗ bị hủy, ghế đã được trả về inventory.',
     });
   }
@@ -235,7 +243,7 @@ const BookingDetail = () => {
       </Card>
 
       <BookingTimeline
-        events={buildTimelineForStatus(booking.status)}
+        events={buildTimelineForStatus(booking.status, booking.createdAt || booking.bookingDate)}
       />
     </div>
   );
