@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
 import { regionsAPI } from '../../services/api';
+import Card from '../../components/common/Card';
+import Badge from '../../components/common/Badge';
+import Button from '../../components/common/Button';
 
 const CustomTourDetailModal = ({ tour, onClose }) => {
   const [regions, setRegions] = useState([]);
@@ -38,164 +42,136 @@ const CustomTourDetailModal = ({ tour, onClose }) => {
     return new Date(dateString).toLocaleDateString('vi-VN');
   };
 
-  const getStatusBadge = (status) => {
-    const classes = {
-      PENDING: 'bg-yellow-100 text-yellow-800',
-      COMPLETED: 'bg-green-100 text-green-800',
-      REJECTED: 'bg-red-100 text-red-800',
-      CANCELLED: 'bg-gray-100 text-gray-800'
+  const getStatusVariant = (status) => {
+    const variants = {
+      PENDING: 'warning',
+      COMPLETED: 'success',
+      REJECTED: 'danger',
+      CANCELLED: 'neutral'
     };
+    return variants[status] || 'neutral';
+  };
+
+  const getStatusLabel = (status) => {
     const labels = {
       PENDING: 'Đang chờ',
       COMPLETED: 'Đã duyệt',
       REJECTED: 'Từ chối',
       CANCELLED: 'Đã hủy'
     };
-    return (
-      <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${classes[status]}`}>
-        {labels[status]}
-      </span>
-    );
+    return labels[status] || status;
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div
+        className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-5 flex items-center justify-between rounded-t-3xl">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">Chi tiết Tour Tùy Chỉnh</h2>
-            <p className="text-sm text-slate-500 mt-1">Mã yêu cầu: #{tour.id}</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Chi tiết yêu cầu</p>
+            <h2 className="text-2xl font-semibold text-slate-900 mt-1">Tour Tùy Chỉnh #{tour.id}</h2>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant={getStatusVariant(tour.status)}>
+                {getStatusLabel(tour.status)}
+              </Badge>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition"
+            className="text-slate-400 hover:text-slate-600 transition-colors p-2 hover:bg-slate-100 rounded-full"
+            title="Đóng"
           >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Content */}
         <div className="px-6 py-6 space-y-6">
-          {/* Status */}
-          <div className="bg-slate-50 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-slate-700">Trạng thái:</span>
-              {getStatusBadge(tour.status)}
-            </div>
-          </div>
 
-          {/* Tour Name */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Tên tour mong muốn
-            </label>
-            <div className="w-full border border-slate-300 rounded-lg px-4 py-3 bg-slate-50 text-slate-900">
-              {tour.tourName}
-            </div>
-          </div>
+          {/* Tour Info Card */}
+          <Card>
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Tên tour</p>
+                <p className="text-base font-medium text-slate-900">{tour.tourName}</p>
+              </div>
 
-          {/* Dates */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Ngày khởi hành
-              </label>
-              <div className="w-full border border-slate-300 rounded-lg px-4 py-3 bg-slate-50 text-slate-900">
-                {formatDate(tour.startDate)}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Ngày khởi hành</p>
+                  <p className="text-sm text-slate-900">{formatDate(tour.startDate)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Ngày kết thúc</p>
+                  <p className="text-sm text-slate-900">{formatDate(tour.endDate)}</p>
+                </div>
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Ngày kết thúc
-              </label>
-              <div className="w-full border border-slate-300 rounded-lg px-4 py-3 bg-slate-50 text-slate-900">
-                {formatDate(tour.endDate)}
-              </div>
-            </div>
-          </div>
 
-          {/* Number of People */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Số người lớn
-              </label>
-              <div className="w-full border border-slate-300 rounded-lg px-4 py-3 bg-slate-50 text-slate-900">
-                {tour.numAdult} người
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Số người lớn</p>
+                  <p className="text-sm text-slate-900">{tour.numAdult} người</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Số trẻ em</p>
+                  <p className="text-sm text-slate-900">{tour.numChildren} trẻ</p>
+                </div>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Số trẻ em
-              </label>
-              <div className="w-full border border-slate-300 rounded-lg px-4 py-3 bg-slate-50 text-slate-900">
-                {tour.numChildren} trẻ
-              </div>
-            </div>
-          </div>
+          </Card>
 
-          {/* Region and Province */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Khu vực
-              </label>
-              <div className="w-full border border-slate-300 rounded-lg px-4 py-3 bg-slate-50 text-slate-900">
-                {getRegionName()}
+          {/* Location Card */}
+          <Card>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-400 mb-4">Địa điểm</p>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Khu vực</p>
+                <p className="text-sm text-slate-900">{getRegionName()}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Tỉnh/Thành phố</p>
+                <p className="text-sm text-slate-900">{getProvinceName()}</p>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Tỉnh/Thành phố
-              </label>
-              <div className="w-full border border-slate-300 rounded-lg px-4 py-3 bg-slate-50 text-slate-900">
-                {getProvinceName()}
-              </div>
-            </div>
-          </div>
+          </Card>
 
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Mô tả chi tiết
-            </label>
-            <div className="w-full border border-slate-300 rounded-lg px-4 py-3 bg-slate-50 text-slate-900 min-h-[100px] whitespace-pre-wrap">
-              {tour.description || 'Không có mô tả'}
-            </div>
-          </div>
+          {/* Description Card */}
+          {tour.description && (
+            <Card>
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400 mb-3">Mô tả chi tiết</p>
+              <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+                {tour.description}
+              </p>
+            </Card>
+          )}
 
-          {/* Timestamps */}
-          <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-slate-200">
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">
-                Ngày tạo
-              </label>
-              <div className="text-sm text-slate-700">
-                {tour.createdAt ? formatDate(tour.createdAt) : 'N/A'}
+          {/* Metadata Card */}
+          <Card className="bg-slate-50">
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Ngày tạo</p>
+                <p className="text-slate-700">{tour.createdAt ? formatDate(tour.createdAt) : 'N/A'}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-400 mb-1">Cập nhật lần cuối</p>
+                <p className="text-slate-700">{tour.updatedAt ? formatDate(tour.updatedAt) : 'N/A'}</p>
               </div>
             </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">
-                Cập nhật lần cuối
-              </label>
-              <div className="text-sm text-slate-700">
-                {tour.updatedAt ? formatDate(tour.updatedAt) : 'N/A'}
-              </div>
-            </div>
-          </div>
+          </Card>
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4">
-          <button
+        <div className="sticky bottom-0 bg-white border-t border-slate-200 px-6 py-4 rounded-b-3xl">
+          <Button
             onClick={onClose}
-            className="w-full bg-slate-600 text-white py-3 rounded-lg font-semibold hover:bg-slate-700 transition"
+            variant="ghost"
+            className="w-full"
           >
             Đóng
-          </button>
+          </Button>
         </div>
       </div>
     </div>
