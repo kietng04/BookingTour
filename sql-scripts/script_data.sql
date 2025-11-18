@@ -1,5 +1,8 @@
 \c tourdb;
 
+-- Set client encoding to UTF-8 for Vietnamese characters
+SET client_encoding = 'UTF8';
+
 -- Xóa dữ liệu cũ (nếu có)
 TRUNCATE TABLE tour_discounts, tour_logs, custom_tours, payments, bookings, departures, 
          tour_images, tour_schedules, tours, provinces, regions, user_verification, users CASCADE;
