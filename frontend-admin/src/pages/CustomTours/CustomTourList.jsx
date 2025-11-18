@@ -15,10 +15,11 @@ const CustomTourList = () => {
     setLoading(true);
     try {
       const data = await customTourService.getAllCustomTours(statusFilter || null);
-      setCustomTours(data.content || data);
+      setCustomTours(data.content || data || []);
     } catch (error) {
       console.error('Error fetching custom tours:', error);
-      alert('Không thể tải danh sách yêu cầu: ' + error.message);
+      // Don't show alert for empty data, just set empty array
+      setCustomTours([]);
     } finally {
       setLoading(false);
     }
