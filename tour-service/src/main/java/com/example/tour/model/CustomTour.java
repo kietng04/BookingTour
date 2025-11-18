@@ -66,6 +66,7 @@ public class CustomTour {
     public enum CustomTourStatus {
         PENDING,
         COMPLETED,
-        REJECTED
+        REJECTED,
+        CANCELLED
     }
 }
