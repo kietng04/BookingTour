@@ -36,7 +36,7 @@ const UserTable = ({ users, onToggleActive, onDelete }) => {
       key: "provider",
       label: "Nhà cung cấp",
       render: (_, row) => (
-        <Badge variant="secondary">
+        <Badge variant="neutral">
           {providerLabel(row.provider, row.isOAuthUser)}
         </Badge>
       ),
@@ -45,7 +45,7 @@ const UserTable = ({ users, onToggleActive, onDelete }) => {
       key: "role",
       label: "Vai trò",
       render: (value) => (
-        <Badge variant={value === "ADMIN" ? "primary" : "secondary"}>
+        <Badge variant={value === "ADMIN" ? "primary" : "neutral"}>
           {value || "CUSTOMER"}
         </Badge>
       ),
