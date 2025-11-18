@@ -34,7 +34,7 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
        (:regionId IS NULL OR t.regionId = :regionId)
        AND (:provinceId IS NULL OR t.provinceId = :provinceId)
        AND (
-              :status IS NULL 
+              :status IS NULL
               OR t.status = :status
        )
        AND (
@@ -51,7 +51,6 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
                      AND (:applyEndDateFilter = false OR d.endDate <= :endDate)
               )
        )
-       ORDER BY t.createdAt DESC
        """)
        Page<Tour> findByFilters(
               @Param("regionId") Integer regionId,
