@@ -7,8 +7,9 @@ export default defineConfig({
     port: 5174,
     open: true,
     proxy: {
+      // Dashboard endpoints: route to booking-service
       '/api/dashboard': {
-        target: 'http://localhost:8093',
+        target: 'http://localhost:8083',
         changeOrigin: true,
         secure: false,
         ws: false,
