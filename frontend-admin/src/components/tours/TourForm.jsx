@@ -29,7 +29,8 @@ const defaultValues = {
   mainDestination: '',
   adultPrice: '',
   childPrice: '',
-  heroImageUrl: ''
+  heroImageUrl: '',
+  imageUrls: []
 };
 
 const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
@@ -46,6 +47,7 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
   const [loadingRegions, setLoadingRegions] = useState(true);
   const [loadingProvinces, setLoadingProvinces] = useState(false);
   const [schedules, setSchedules] = useState(initialValues?.schedules || []);
+  const [uploadedImages, setUploadedImages] = useState(initialValues?.imageUrls || []);
 
   // Fetch regions on component mount
   useEffect(() => {
@@ -120,10 +122,11 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
   }, [selectedRegionId, initialValues, setValue, loadingRegions]);
 
   const handleFormSubmit = (formData) => {
-    // Include schedules in the submission
+    // Include schedules and images in the submission
     const dataWithSchedules = {
       ...formData,
-      schedules: schedules.filter(s => s.scheduleDescription && s.scheduleDescription.trim() !== '')
+      schedules: schedules.filter(s => s.scheduleDescription && s.scheduleDescription.trim() !== ''),
+      imageUrls: uploadedImages.length > 0 ? uploadedImages : (formData.heroImageUrl ? [formData.heroImageUrl] : [])
     };
     onSubmit(dataWithSchedules);
   };
@@ -293,29 +296,65 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
       </div>
 
       <div className="space-y-6">
-        {/* Hero Image */}
+        {/* Tour Images */}
         <Card className="space-y-4">
-          <h3 className="text-lg font-semibold text-slate-900">Ảnh đại diện</h3>
-          <p className="text-xs text-slate-500">Tải ảnh lên Cloudinary. Ảnh sẽ được tối ưu tự động.</p>
+          <h3 className="text-lg font-semibold text-slate-900">Ảnh tour</h3>
+          <p className="text-xs text-slate-500">
+            Tải nhiều ảnh lên Cloudinary. Ảnh đầu tiên sẽ là ảnh đại diện (banner chính).
+          </p>
 
           <ImageUpload
-            onUploadSuccess={(imageUrl) => {
-              setValue('heroImageUrl', imageUrl);
+            onUploadSuccess={(imageUrls) => {
+              // Handle both single image (string) and multiple images (array)
+              const urls = Array.isArray(imageUrls) ? imageUrls : [imageUrls];
+              setUploadedImages(prev => [...prev, ...urls]);
+              // Set first image as hero image for backward compatibility
+              if (uploadedImages.length === 0 && urls.length > 0) {
+                setValue('heroImageUrl', urls[0]);
+              }
             }}
-            multiple={false}
+            multiple={true}
+            existingImages={uploadedImages}
           />
 
-          {heroImageValue && (
-            <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-              <p className="text-xs text-slate-500 mb-2 font-medium">Xem trước:</p>
-              <img
-                src={heroImageValue}
-                alt="Ảnh xem trước"
-                className="w-full h-32 object-cover rounded-lg mb-2"
-              />
-              <p className="text-xs text-slate-600 font-mono break-all">
-                {heroImageValue}
-              </p>
+          {uploadedImages.length > 0 && (
+            <div className="mt-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-slate-500 font-medium">
+                  Ảnh đã tải ({uploadedImages.length})
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setUploadedImages([])}
+                  className="text-xs text-red-600 hover:text-red-800"
+                >
+                  Xóa tất cả
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {uploadedImages.map((url, idx) => (
+                  <div key={idx} className="relative rounded-lg border border-slate-200 bg-slate-50 p-2">
+                    <img
+                      src={url}
+                      alt={`Ảnh ${idx + 1}`}
+                      className="w-full h-24 object-cover rounded-lg mb-1"
+                    />
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-slate-600">
+                        {idx === 0 && <span className="bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full font-medium">Banner</span>}
+                        {idx > 0 && <span className="text-slate-400">Ảnh {idx + 1}</span>}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setUploadedImages(prev => prev.filter((_, i) => i !== idx))}
+                        className="text-xs text-red-600 hover:text-red-800"
+                      >
+                        Xóa
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </Card>

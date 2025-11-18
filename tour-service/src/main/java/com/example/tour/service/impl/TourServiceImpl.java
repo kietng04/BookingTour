@@ -126,7 +126,28 @@ public class TourServiceImpl implements TourService {
         tour.setMainDestination(request.getMainDestination().trim());
         tour.setAdultPrice(request.getAdultPrice());
         tour.setChildPrice(request.getChildPrice());
-        if (request.getHeroImageUrl() != null && !request.getHeroImageUrl().isBlank()) {
+
+        // Handle multiple images (new feature)
+        if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
+            boolean isFirst = true;
+            for (String imageUrl : request.getImageUrls()) {
+                if (imageUrl != null && !imageUrl.isBlank()) {
+                    TourImage tourImage = new TourImage();
+                    tourImage.setImageUrl(imageUrl.trim());
+                    tourImage.setIsPrimary(isFirst); // First image is primary
+                    tourImage.setTour(tour);
+                    tour.getImages().add(tourImage);
+
+                    // Set heroImageUrl to first image for backward compatibility
+                    if (isFirst) {
+                        tour.setHeroImageUrl(imageUrl.trim());
+                        isFirst = false;
+                    }
+                }
+            }
+        }
+        // Fallback to single heroImageUrl for backward compatibility
+        else if (request.getHeroImageUrl() != null && !request.getHeroImageUrl().isBlank()) {
             tour.setHeroImageUrl(request.getHeroImageUrl().trim());
 
             // Create TourImage entity for heroImageUrl with isPrimary=true
