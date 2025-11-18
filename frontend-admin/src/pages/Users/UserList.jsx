@@ -16,7 +16,16 @@ const UserList = () => {
       setError('');
       const data = await usersAPI.getAll();
       const list = (data && data.content) ? data.content : data || [];
-      setUsers(list);
+
+      // Filter out admin users from the list
+      const filteredUsers = list.filter(user => {
+        const email = user.email?.toLowerCase();
+        const username = user.username?.toLowerCase();
+        // Exclude admin accounts
+        return email !== 'admin@gmail.com' && username !== 'admin';
+      });
+
+      setUsers(filteredUsers);
     } catch (err) {
       console.error('Failed to fetch users', err);
       setError('Không thể tải danh sách người dùng.');

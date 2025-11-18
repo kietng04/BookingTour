@@ -68,8 +68,8 @@ public interface CustomTourRepository extends JpaRepository<CustomTour, Long> {
         AND (:userId IS NULL OR c.userId = :userId)
         AND (
             :keyword IS NULL OR :keyword = ''
-            OR LOWER(c.destination) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.specialRequest) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(c.tourName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
         )
         ORDER BY c.createdAt DESC
         """)

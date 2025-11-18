@@ -54,12 +54,6 @@ const DepartureForm = ({
           tourName: tour.tourName || tour.tour_name
         }));
         setTours(normalizedTours);
-        
-        // If tourId is provided in initialValues and tours are loaded, set it in the form
-        if (initialValues?.tourId && normalizedTours.length > 0) {
-          const tourIdStr = String(initialValues.tourId);
-          setValue('tourId', tourIdStr);
-        }
       } catch (error) {
         console.error('Failed to fetch tours:', error);
         setTours([]);
@@ -68,7 +62,25 @@ const DepartureForm = ({
       }
     };
     fetchTours();
-  }, [initialValues, setValue]);
+  }, []);
+
+  // Auto-select tour from initialValues AFTER tours are loaded
+  useEffect(() => {
+    // Only run when tours are loaded and we have initialValues with tourId
+    if (!loadingTours && tours.length > 0 && initialValues?.tourId) {
+      const tourIdStr = String(initialValues.tourId);
+
+      // Verify tour exists in the loaded tours list
+      const tourExists = tours.some(t => String(t.tourId) === tourIdStr);
+
+      if (tourExists) {
+        console.log('[DepartureForm] Auto-selecting tour:', tourIdStr);
+        setValue('tourId', tourIdStr, { shouldValidate: true });
+      } else {
+        console.warn('[DepartureForm] Tour not found in list:', tourIdStr);
+      }
+    }
+  }, [loadingTours, tours, initialValues, setValue]);
 
   // Fetch tour details when tourId changes
   useEffect(() => {
@@ -95,7 +107,7 @@ const DepartureForm = ({
 
   // Auto-calculate endDate when startDate changes (based on tour duration)
   useEffect(() => {
-    if (startDate && selectedTour?.days && mode === 'create') {
+    if (startDate && selectedTour?.days) {
       const start = new Date(startDate);
       const expectedEndDate = new Date(start);
       expectedEndDate.setDate(start.getDate() + selectedTour.days - 1);
@@ -103,7 +115,7 @@ const DepartureForm = ({
       const expectedEndDateStr = expectedEndDate.toISOString().split('T')[0];
       setValue('endDate', expectedEndDateStr);
     }
-  }, [startDate, selectedTour, mode, setValue]);
+  }, [startDate, selectedTour, setValue]);
 
   // Calculate reserved slots for edit mode
   const reservedSlots = mode === 'edit' && initialValues
@@ -123,8 +135,20 @@ const DepartureForm = ({
       return 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu';
     }
 
-    // Removed strict validation - allow flexible departure dates
-    // This enables creating custom duration departures for business flexibility
+    // STRICT VALIDATION: Duration must match tour days
+    if (selectedTour && selectedTour.days) {
+      const actualDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+      const expectedDays = selectedTour.days;
+
+      if (actualDays !== expectedDays) {
+        const expectedEnd = new Date(start);
+        expectedEnd.setDate(start.getDate() + expectedDays - 1);
+        const expectedEndStr = expectedEnd.toISOString().split('T')[0];
+
+        return `Thời lượng không khớp với tour. Tour yêu cầu ${expectedDays} ngày. ` +
+               `Vui lòng chọn ngày kết thúc: ${expectedEndStr}`;
+      }
+    }
 
     return true;
   };
@@ -178,7 +202,9 @@ const DepartureForm = ({
             error={errors.tourId?.message}
             disabled={disableTourSelection || loadingTours || mode === 'edit'}
           >
-            <option value="">Chọn một tour</option>
+            <option value="">
+              {loadingTours ? 'Đang tải danh sách tour...' : 'Chọn một tour'}
+            </option>
             {tours.map((tour) => (
               <option key={tour.tourId} value={String(tour.tourId)}>
                 {tour.tourName}
@@ -190,16 +216,19 @@ const DepartureForm = ({
               Không thể thay đổi tour cho chuyến đi đã tồn tại
             </p>
           )}
+          {disableTourSelection && mode === 'create' && (
+            <p className="mt-1 text-sm text-blue-600">
+              ℹ️ Tour đã được chọn tự động từ trang chi tiết tour
+            </p>
+          )}
           {selectedTour && (
             <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
               <p className="text-sm text-blue-900">
                 <span className="font-medium">Thời lượng tour gốc:</span> {selectedTour.days} ngày {selectedTour.nights} đêm
               </p>
-              {mode === 'create' && (
-                <p className="text-xs text-blue-700 mt-1">
-                  Ngày kết thúc sẽ được tự động điền (có thể chỉnh sửa để tạo lịch linh hoạt)
-                </p>
-              )}
+              <p className="text-xs text-blue-700 mt-1">
+                Ngày kết thúc sẽ được tự động tính dựa trên thời lượng tour
+              </p>
             </div>
           )}
         </div>
@@ -222,11 +251,31 @@ const DepartureForm = ({
               type="date"
               {...register('endDate', { validate: validateEndDate })}
               error={errors.endDate?.message}
-              disabled={isLoading}
+              disabled={isLoading || (selectedTour && selectedTour.days > 0)}
               min={startDate}
+              className={(selectedTour && selectedTour.days > 0) ? 'bg-slate-50' : ''}
             />
+            {selectedTour && selectedTour.days > 0 && (
+              <p className="mt-1 text-xs text-slate-500">
+                Ngày kết thúc được tự động tính dựa trên thời lượng tour ({selectedTour.days} ngày)
+              </p>
+            )}
           </div>
         </div>
+
+        {/* Duration Info */}
+        {startDate && endDate && selectedTour && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-sm text-green-700">
+                Thời lượng chuyến đi: <strong>{selectedTour.days} ngày {selectedTour.nights} đêm</strong>
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Total Slots */}
         <div>

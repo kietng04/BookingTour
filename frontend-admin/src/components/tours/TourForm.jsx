@@ -285,7 +285,7 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
 
         {/* Tour Schedules */}
         <TourSchedules
-          days={daysValue}
+          days={Number(daysValue) || 0}
           initialSchedules={initialValues?.schedules || []}
           onChange={setSchedules}
           disabled={submitting}

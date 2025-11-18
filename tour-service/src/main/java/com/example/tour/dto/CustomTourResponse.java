@@ -9,16 +9,15 @@ public class CustomTourResponse {
 
     private Long id;
     private Long userId;
-    private String destination;
+    private String tourName;
+    private Integer numAdult;
+    private Integer numChildren;
+    private Long regionId;
+    private Long provinceId;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Integer numberOfPeople;
-    private String specialRequest;
+    private String description;
     private String status;
-    private String contactEmail;
-    private String contactPhone;
-    private String budgetRange;
-    private String adminNotes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -26,16 +25,15 @@ public class CustomTourResponse {
     public CustomTourResponse(CustomTour customTour) {
         this.id = customTour.getId();
         this.userId = customTour.getUserId();
-        this.destination = customTour.getDestination();
+        this.tourName = customTour.getTourName();
+        this.numAdult = customTour.getNumAdult();
+        this.numChildren = customTour.getNumChildren();
+        this.regionId = customTour.getRegionId();
+        this.provinceId = customTour.getProvinceId();
         this.startDate = customTour.getStartDate();
         this.endDate = customTour.getEndDate();
-        this.numberOfPeople = customTour.getNumberOfPeople();
-        this.specialRequest = customTour.getSpecialRequest();
+        this.description = customTour.getDescription();
         this.status = customTour.getStatus().name();
-        this.contactEmail = customTour.getContactEmail();
-        this.contactPhone = customTour.getContactPhone();
-        this.budgetRange = customTour.getBudgetRange();
-        this.adminNotes = customTour.getAdminNotes();
         this.createdAt = customTour.getCreatedAt();
         this.updatedAt = customTour.getUpdatedAt();
     }
@@ -61,12 +59,44 @@ public class CustomTourResponse {
         this.userId = userId;
     }
 
-    public String getDestination() {
-        return destination;
+    public String getTourName() {
+        return tourName;
     }
 
-    public void setDestination(String destination) {
-        this.destination = destination;
+    public void setTourName(String tourName) {
+        this.tourName = tourName;
+    }
+
+    public Integer getNumAdult() {
+        return numAdult;
+    }
+
+    public void setNumAdult(Integer numAdult) {
+        this.numAdult = numAdult;
+    }
+
+    public Integer getNumChildren() {
+        return numChildren;
+    }
+
+    public void setNumChildren(Integer numChildren) {
+        this.numChildren = numChildren;
+    }
+
+    public Long getRegionId() {
+        return regionId;
+    }
+
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
+    }
+
+    public Long getProvinceId() {
+        return provinceId;
+    }
+
+    public void setProvinceId(Long provinceId) {
+        this.provinceId = provinceId;
     }
 
     public LocalDate getStartDate() {
@@ -85,20 +115,12 @@ public class CustomTourResponse {
         this.endDate = endDate;
     }
 
-    public Integer getNumberOfPeople() {
-        return numberOfPeople;
+    public String getDescription() {
+        return description;
     }
 
-    public void setNumberOfPeople(Integer numberOfPeople) {
-        this.numberOfPeople = numberOfPeople;
-    }
-
-    public String getSpecialRequest() {
-        return specialRequest;
-    }
-
-    public void setSpecialRequest(String specialRequest) {
-        this.specialRequest = specialRequest;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getStatus() {
@@ -107,38 +129,6 @@ public class CustomTourResponse {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getContactEmail() {
-        return contactEmail;
-    }
-
-    public void setContactEmail(String contactEmail) {
-        this.contactEmail = contactEmail;
-    }
-
-    public String getContactPhone() {
-        return contactPhone;
-    }
-
-    public void setContactPhone(String contactPhone) {
-        this.contactPhone = contactPhone;
-    }
-
-    public String getBudgetRange() {
-        return budgetRange;
-    }
-
-    public void setBudgetRange(String budgetRange) {
-        this.budgetRange = budgetRange;
-    }
-
-    public String getAdminNotes() {
-        return adminNotes;
-    }
-
-    public void setAdminNotes(String adminNotes) {
-        this.adminNotes = adminNotes;
     }
 
     public LocalDateTime getCreatedAt() {
