@@ -385,40 +385,6 @@ export const exportAPI = {
   },
 
   /**
-   * Download booking invoice as PDF
-   * @param {number} bookingId - Booking ID
-   */
-  downloadInvoicePdf: async (bookingId) => {
-    const url = `${API_BASE_URL}/export/bookings/${bookingId}/invoice`;
-
-    try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${getAdminToken()}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to download invoice PDF');
-      }
-
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = `invoice_${bookingId}_${new Date().toISOString().split('T')[0]}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(downloadUrl);
-    } catch (error) {
-      console.error('Error downloading invoice PDF:', error);
-      throw error;
-    }
-  },
-
-  /**
    * Download dashboard stats as Excel file
    * @param {string} startDate - Start date (YYYY-MM-DD)
    * @param {string} endDate - End date (YYYY-MM-DD)

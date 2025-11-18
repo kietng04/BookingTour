@@ -16,13 +16,6 @@ public interface ExportService {
     ByteArrayInputStream exportBookingsToExcel(List<Booking> bookings);
 
     /**
-     * Export booking invoice to PDF
-     * @param bookingId Booking ID
-     * @return PDF file as ByteArrayInputStream
-     */
-    ByteArrayInputStream exportBookingInvoiceToPdf(Long bookingId);
-
-    /**
      * Export dashboard statistics to Excel
      * @param startDate Start date for stats
      * @param endDate End date for stats
