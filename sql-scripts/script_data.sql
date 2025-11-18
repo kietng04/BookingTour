@@ -80,9 +80,11 @@ INSERT INTO provinces (province_name, region_id) VALUES
 ('Tỉnh Đồng Tháp', 3);
 
 -- 3. Users
+-- Password for admin: "admin" (BCrypt hashed with strength 10)
+-- Password for nguyenvana: "password" (BCrypt hashed with strength 10)
 INSERT INTO users (username, full_name, email, phone_number, password_hash, status) VALUES
-('admin', 'Quản Trị Viên', 'admin@tour.vn', '0900000000', 'hashed_admin_pw', 'ACTIVE'),
-('nguyenvana', 'Nguyễn Văn A', 'vana@gmail.com', '0911111111', 'hashed_pw_a', 'ACTIVE');
+('admin', 'Quản Trị Viên', 'admin@gmail.com', '0900000000', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'ACTIVE'),
+('nguyenvana', 'Nguyễn Văn A', 'vana@gmail.com', '0911111111', '$2a$10$3euPaDCmg1JbKyl1E/6JqeXuSMpY0f8.EI/Jmz4sXuXNzNYvuZWty', 'ACTIVE');
 
 -- 4. Tours
 INSERT INTO tours (tour_name, tour_slug, region_id, province_id, description, days, nights,
