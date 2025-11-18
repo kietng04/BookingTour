@@ -4,6 +4,9 @@
 
 \c tourdb;
 
+-- Set client encoding to UTF-8
+SET client_encoding = 'UTF8';
+
 -- Insert admin user if not exists (by username)
 INSERT INTO users (username, full_name, email, phone_number, password_hash, status)
 VALUES ('admin', 'Quản Trị Viên', 'admin@gmail.com', '0900000000',
