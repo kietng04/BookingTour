@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://postgres-db:5432/tourdb
+    url: jdbc:postgresql://postgres-db:5432/tourdb?useUnicode=true&characterEncoding=UTF-8
   rabbitmq:
     host: rabbitmq
     port: 5672
