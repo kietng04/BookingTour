@@ -176,14 +176,9 @@ public class EmailVerificationService {
         } catch (Exception e) {
             logger.error("Failed to activate user account for: {}", email, e);
         }
-        
-        try {
-            emailService.sendWelcomeEmail(email, "User");
-            logger.info("Welcome email sent to: {}", email);
-        } catch (Exception e) {
-            logger.error("Failed to send welcome email to: {}", email, e);
-        }
-        
+
+        // Welcome email removed - email notification will be sent when admin confirms booking instead
+
         logger.info("Email verification successful for: {}", email);
         return true;
     }

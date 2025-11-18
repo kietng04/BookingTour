@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { customTourService } from '../../services/customTourService';
+import CustomTourDetailModal from './CustomTourDetailModal';
 
 const CustomTourList = () => {
   const [customTours, setCustomTours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
   const [processing, setProcessing] = useState({});
+  const [selectedTour, setSelectedTour] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
     fetchCustomTours();
@@ -55,6 +58,26 @@ const CustomTourList = () => {
     }
   };
 
+  const handleCancel = async (id) => {
+    if (!confirm('Xác nhận hủy tour tùy chỉnh này? Tour đã xác nhận sẽ bị hủy.')) return;
+
+    setProcessing(prev => ({ ...prev, [id]: true }));
+    try {
+      await customTourService.updateCustomTourStatus(id, { status: 'CANCELLED' });
+      alert('Đã hủy tour thành công!');
+      fetchCustomTours();
+    } catch (error) {
+      alert('Lỗi khi hủy tour: ' + error.message);
+    } finally {
+      setProcessing(prev => ({ ...prev, [id]: false }));
+    }
+  };
+
+  const handleViewDetail = (tour) => {
+    setSelectedTour(tour);
+    setShowDetailModal(true);
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('vi-VN');
@@ -64,12 +87,14 @@ const CustomTourList = () => {
     const classes = {
       PENDING: 'bg-yellow-100 text-yellow-800',
       COMPLETED: 'bg-green-100 text-green-800',
-      REJECTED: 'bg-red-100 text-red-800'
+      REJECTED: 'bg-red-100 text-red-800',
+      CANCELLED: 'bg-gray-100 text-gray-800'
     };
     const labels = {
       PENDING: 'Đang chờ',
       COMPLETED: 'Đã duyệt',
-      REJECTED: 'Từ chối'
+      REJECTED: 'Từ chối',
+      CANCELLED: 'Đã hủy'
     };
     return (
       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${classes[status]}`}>
@@ -98,6 +123,7 @@ const CustomTourList = () => {
           <option value="PENDING">Đang chờ</option>
           <option value="COMPLETED">Đã duyệt</option>
           <option value="REJECTED">Từ chối</option>
+          <option value="CANCELLED">Đã hủy</option>
         </select>
       </div>
 
@@ -154,7 +180,13 @@ const CustomTourList = () => {
                     {getStatusBadge(tour.status)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                      <button
+                        onClick={() => handleViewDetail(tour)}
+                        className="px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700"
+                      >
+                        Chi tiết
+                      </button>
                       {tour.status === 'PENDING' && (
                         <>
                           <button
@@ -173,8 +205,17 @@ const CustomTourList = () => {
                           </button>
                         </>
                       )}
-                      {tour.status !== 'PENDING' && (
-                        <span className="text-slate-400 text-xs italic">Đã xử lý</span>
+                      {tour.status === 'COMPLETED' && (
+                        <button
+                          onClick={() => handleCancel(tour.id)}
+                          disabled={processing[tour.id]}
+                          className="px-3 py-1 bg-orange-600 text-white text-xs font-medium rounded hover:bg-orange-700 disabled:opacity-50"
+                        >
+                          {processing[tour.id] ? 'Đang hủy...' : 'Hủy'}
+                        </button>
+                      )}
+                      {(tour.status === 'REJECTED' || tour.status === 'CANCELLED') && (
+                        <span className="text-slate-400 text-xs italic">Không thể thao tác</span>
                       )}
                     </div>
                   </td>
@@ -183,6 +224,17 @@ const CustomTourList = () => {
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* Detail Modal */}
+      {showDetailModal && selectedTour && (
+        <CustomTourDetailModal
+          tour={selectedTour}
+          onClose={() => {
+            setShowDetailModal(false);
+            setSelectedTour(null);
+          }}
+        />
       )}
     </div>
   );
