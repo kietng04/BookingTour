@@ -126,7 +126,13 @@ const BookingDetail = () => {
 
   const handleCancelBooking = async () => {
     if (!numericId) return;
-    if (!window.confirm('Bạn có chắc muốn hủy đặt chỗ này? Hành động này không thể hoàn tác.')) {
+
+    const isConfirmed = booking?.status === 'CONFIRMED';
+    const confirmMessage = isConfirmed
+      ? 'Đặt chỗ này đã được xác nhận. Bạn có chắc muốn hủy? Khách hàng sẽ cần được hoàn tiền. Hành động này không thể hoàn tác.'
+      : 'Bạn có chắc muốn hủy đặt chỗ này? Hành động này không thể hoàn tác.';
+
+    if (!window.confirm(confirmMessage)) {
       return;
     }
 
@@ -179,24 +185,24 @@ const BookingDetail = () => {
         <div className="flex flex-wrap items-center gap-3">
           <StatusPill status={booking.status} />
           {booking.status === 'PENDING' && (
-            <>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={handleConfirmBooking}
-                disabled={confirming}
-              >
-                {confirming ? 'Đang xác nhận...' : 'Xác nhận đặt chỗ'}
-              </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={handleCancelBooking}
-                disabled={cancelling}
-              >
-                {cancelling ? 'Đang hủy...' : 'Hủy đặt chỗ'}
-              </Button>
-            </>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleConfirmBooking}
+              disabled={confirming}
+            >
+              {confirming ? 'Đang xác nhận...' : 'Xác nhận đặt chỗ'}
+            </Button>
+          )}
+          {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={handleCancelBooking}
+              disabled={cancelling}
+            >
+              {cancelling ? 'Đang hủy...' : 'Hủy đặt chỗ'}
+            </Button>
           )}
         </div>
       </div>
