@@ -279,12 +279,9 @@ public class TourServiceImpl implements TourService {
             if (!dayNumbers.add(schedule.getDayNumber())) 
                 throw new IllegalArgumentException("Số ngày " + schedule.getDayNumber() + " bị trùng lặp trong lịch trình");
             
-            if (schedule.getScheduleDescription() == null || schedule.getScheduleDescription().isBlank()) 
+            if (schedule.getScheduleDescription() == null || schedule.getScheduleDescription().isBlank())
                 throw new IllegalArgumentException("Mô tả lịch trình ngày " + schedule.getDayNumber() + " không được để trống");
-            
-            if (schedule.getScheduleDescription().trim().length() < 10) 
-                throw new IllegalArgumentException("Mô tả lịch trình ngày " + schedule.getDayNumber() + " phải có ít nhất 10 ký tự");
-            
+
         }
         List<Integer> missingDays = IntStream.rangeClosed(1, totalDays)
         .filter(i -> !dayNumbers.contains(i))
