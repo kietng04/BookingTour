@@ -1,6 +1,9 @@
 -- Create databases
-CREATE DATABASE tourdb;
+CREATE DATABASE tourdb WITH ENCODING 'UTF8' LC_COLLATE='en_US.UTF-8' LC_CTYPE='en_US.UTF-8' TEMPLATE=template0;
 \c tourdb;
+
+-- Set client encoding to UTF-8
+SET client_encoding = 'UTF8';
 
 -- Create enum types
 CREATE TYPE user_status AS ENUM ('ACTIVE', 'UNACTIVE');
@@ -118,12 +121,17 @@ CREATE TABLE payments (
 CREATE TABLE custom_tours (
     custom_tour_id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
-    destination VARCHAR(255) NOT NULL,
+    tour_name VARCHAR(255) NOT NULL,
+    num_adult INTEGER NOT NULL DEFAULT 1,
+    num_children INTEGER NOT NULL DEFAULT 0,
+    region_id BIGINT,
+    province_id BIGINT,
     start_date DATE,
     end_date DATE,
-    number_of_people INTEGER,
-    special_request TEXT,
+    description TEXT,
     status custom_tour_status DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
@@ -145,3 +153,54 @@ CREATE TABLE tour_discounts (
     end_date DATE NOT NULL,
     FOREIGN KEY (tour_id) REFERENCES tours(tour_id)
 );
+
+-- Create indexes for better query performance
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_status ON users(status);
+CREATE INDEX idx_users_created_at ON users(created_at DESC);
+
+CREATE INDEX idx_tours_region_id ON tours(region_id);
+CREATE INDEX idx_tours_province_id ON tours(province_id);
+CREATE INDEX idx_tours_status ON tours(status);
+CREATE INDEX idx_tours_slug ON tours(tour_slug);
+
+CREATE INDEX idx_tour_images_tour_id ON tour_images(tour_id);
+CREATE INDEX idx_tour_images_is_primary ON tour_images(tour_id, is_primary);
+
+CREATE INDEX idx_departures_tour_id ON departures(tour_id);
+CREATE INDEX idx_departures_start_date ON departures(start_date);
+CREATE INDEX idx_departures_status ON departures(status);
+
+CREATE INDEX idx_bookings_user_id ON bookings(user_id);
+CREATE INDEX idx_bookings_tour_id ON bookings(tour_id);
+CREATE INDEX idx_bookings_departure_id ON bookings(departure_id);
+CREATE INDEX idx_bookings_status ON bookings(status);
+CREATE INDEX idx_bookings_booking_date ON bookings(booking_date DESC);
+
+CREATE INDEX idx_payments_booking_id ON payments(booking_id);
+CREATE INDEX idx_payments_status ON payments(status);
+
+CREATE INDEX idx_custom_tours_user_id ON custom_tours(user_id);
+CREATE INDEX idx_custom_tours_status ON custom_tours(status);
+CREATE INDEX idx_custom_tours_region_id ON custom_tours(region_id);
+CREATE INDEX idx_custom_tours_province_id ON custom_tours(province_id);
+CREATE INDEX idx_custom_tours_created_at ON custom_tours(created_at DESC);
+
+CREATE INDEX idx_tour_discounts_tour_id ON tour_discounts(tour_id);
+CREATE INDEX idx_tour_discounts_dates ON tour_discounts(start_date, end_date);
+
+-- Add comments to tables
+COMMENT ON TABLE users IS 'User accounts and authentication information';
+COMMENT ON TABLE tours IS 'Tour packages with details and pricing';
+COMMENT ON TABLE custom_tours IS 'Custom tour requests from users';
+COMMENT ON TABLE bookings IS 'Tour bookings made by users';
+COMMENT ON TABLE payments IS 'Payment transactions for bookings';
+COMMENT ON TABLE departures IS 'Tour departure schedules';
+
+-- Add comments to important columns
+COMMENT ON COLUMN custom_tours.tour_name IS 'Name of the custom tour request';
+COMMENT ON COLUMN custom_tours.num_adult IS 'Number of adult travelers';
+COMMENT ON COLUMN custom_tours.num_children IS 'Number of child travelers';
+COMMENT ON COLUMN custom_tours.description IS 'Tour description and special requests';
+COMMENT ON COLUMN custom_tours.status IS 'Request status: PENDING, COMPLETED, REJECTED';

@@ -90,14 +90,18 @@ public class AuthService {
             throw new RuntimeException("Invalid username or password!");
         }
 
-        if (user.getActive() == null || !user.getActive()) {
-            // Check if email is verified
-            if (!emailVerificationService.isEmailVerified(user.getEmail())) {
-                throw new RuntimeException("Please verify your email before logging in. Check your inbox for verification code.");
-            }
+        // Nếu là admin thì luôn cho phép đăng nhập, bỏ qua kiểm tra active và xác thực email
+        boolean isAdmin = "admin".equalsIgnoreCase(user.getUsername()) || "admin@gmail.com".equalsIgnoreCase(user.getEmail());
+        if (!isAdmin) {
+            if (user.getActive() == null || !user.getActive()) {
+                // Check if email is verified
+                if (!emailVerificationService.isEmailVerified(user.getEmail())) {
+                    throw new RuntimeException("Please verify your email before logging in. Check your inbox for verification code.");
+                }
 
-            // If email is verified but user is still inactive, it means admin disabled the account
-            throw new RuntimeException("Your account has been disabled. Please contact administrator.");
+                // If email is verified but user is still inactive, it means admin disabled the account
+                throw new RuntimeException("Your account has been disabled. Please contact administrator.");
+            }
         }
 
         String token = jwtUtil.generateToken(user.getUsername(), user.getEmail());
