@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { BarChart2, BookOpen, CalendarClock, LayoutDashboard, LogOut, Users, Calendar, MessageCircle } from 'lucide-react';
+import { BarChart2, BookOpen, CalendarClock, LayoutDashboard, LogOut, Users, Calendar, MessageCircle, MapPin } from 'lucide-react';
 import clsx from 'clsx';
 import { useAdminAuth } from '../context/AdminAuthContext.jsx';
 import Button from '../components/common/Button.jsx';
@@ -10,6 +10,7 @@ const navigation = [
   { icon: BookOpen, label: 'Tour du lịch', to: '/tours' },
   { icon: Calendar, label: 'Chuyến đi', to: '/departures' },
   { icon: CalendarClock, label: 'Đặt chỗ', to: '/bookings' },
+  { icon: MapPin, label: 'Tour tùy chỉnh', to: '/custom-tours' },
   { icon: MessageCircle, label: 'Đánh giá', to: '/reviews' },
   { icon: Users, label: 'Người dùng', to: '/users' }
 ];

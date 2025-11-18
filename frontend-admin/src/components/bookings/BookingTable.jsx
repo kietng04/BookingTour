@@ -63,64 +63,75 @@ const BookingTable = ({ bookings, onRefresh }) => {
 
   const renderPaymentStatus = (bookingId) => {
     const status = paymentStatuses[bookingId];
-    if (!status) return <span className="text-xs text-slate-400">Loading...</span>;
+    if (!status) return <span className="text-xs text-slate-400">Đang tải...</span>;
 
-    const statusColors = {
-      COMPLETED: 'bg-green-100 text-green-700',
-      PENDING: 'bg-yellow-100 text-yellow-700',
-      PROCESSING: 'bg-blue-100 text-blue-700',
-      FAILED: 'bg-red-100 text-red-700',
-      REFUNDED: 'bg-purple-100 text-purple-700',
-      UNKNOWN: 'bg-slate-100 text-slate-500'
+    const statusConfig = {
+      COMPLETED: { label: 'Đã thanh toán', color: 'bg-green-100 text-green-700' },
+      PENDING: { label: 'Chờ thanh toán', color: 'bg-yellow-100 text-yellow-700' },
+      PROCESSING: { label: 'Đang xử lý', color: 'bg-blue-100 text-blue-700' },
+      FAILED: { label: 'Thất bại', color: 'bg-red-100 text-red-700' },
+      REFUNDED: { label: 'Đã hoàn tiền', color: 'bg-purple-100 text-purple-700' },
+      UNKNOWN: { label: 'Không xác định', color: 'bg-slate-100 text-slate-500' }
     };
 
-    const colorClass = statusColors[status] || statusColors.UNKNOWN;
+    const config = statusConfig[status] || statusConfig.UNKNOWN;
 
     return (
-      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colorClass}`}>
-        {status}
+      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
+        {config.label}
       </span>
     );
   };
 
+  // Calculate booking count per user
+  const userBookingCount = bookings.reduce((acc, booking) => {
+    acc[booking.userId] = (acc[booking.userId] || 0) + 1;
+    return acc;
+  }, {});
+
   const columns = [
     {
-      key: 'id',
-      label: 'Booking ID',
-      render: (value) => <span className="font-mono text-xs text-slate-500">{value}</span>
-    },
-    {
-      key: 'guestName',
-      label: 'Guest / tour',
+      key: 'tourName',
+      label: 'Tên Tour',
       render: (value, row) => (
         <div>
           <p className="font-medium text-slate-800">{value}</p>
-          <p className="text-xs text-slate-400">{row.tourName}</p>
+          <p className="text-xs text-slate-400 font-mono">ID: {row.id}</p>
+        </div>
+      )
+    },
+    {
+      key: 'guestName',
+      label: 'Người dùng',
+      render: (value, row) => (
+        <div>
+          <p className="font-medium text-slate-800">{value}</p>
+          <p className="text-xs text-slate-400">User ID: {row.userId}</p>
         </div>
       )
     },
     {
       key: 'travelDate',
-      label: 'Travel date',
+      label: 'Ngày khởi hành',
       render: (value) => formatDate(value)
     },
     {
-      key: 'guests',
-      label: 'Guests'
+      key: 'userId',
+      label: 'Số booking',
+      render: (value) => (
+        <span className="text-sm font-medium text-slate-700">
+          {userBookingCount[value] || 0}
+        </span>
+      )
     },
     {
       key: 'amount',
-      label: 'Amount',
+      label: 'Tổng tiền',
       render: (value) => formatCurrency(value)
     },
     {
-      key: 'id',
-      label: 'Payment',
-      render: (value) => renderPaymentStatus(value)
-    },
-    {
       key: 'status',
-      label: 'Booking Status',
+      label: 'Trạng thái',
       render: (value) => <StatusPill status={value} />
     }
   ];
@@ -150,12 +161,12 @@ const BookingTable = ({ bookings, onRefresh }) => {
                 disabled={isConfirming}
               >
                 <CheckCircle className="h-4 w-4" />
-                {isConfirming ? 'Confirming...' : 'Xác nhận'}
+                {isConfirming ? 'Đang xác nhận...' : 'Xác nhận'}
               </Button>
             )}
             <Button to={`/bookings/${row.id}`} size="sm" variant="ghost">
               <Eye className="h-4 w-4" />
-              View
+              Xem chi tiết
             </Button>
           </div>
         );

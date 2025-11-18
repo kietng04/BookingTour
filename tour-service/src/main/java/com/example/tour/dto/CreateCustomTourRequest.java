@@ -6,8 +6,20 @@ import java.time.LocalDate;
 
 public class CreateCustomTourRequest {
 
-    @NotBlank(message = "Destination is required")
-    private String destination;
+    @NotBlank(message = "Tour name is required")
+    private String tourName;
+
+    @NotNull(message = "Number of adults is required")
+    @Min(value = 1, message = "Number of adults must be at least 1")
+    private Integer numAdult;
+
+    @NotNull(message = "Number of children is required")
+    @Min(value = 0, message = "Number of children cannot be negative")
+    private Integer numChildren;
+
+    private Long regionId;
+
+    private Long provinceId;
 
     @NotNull(message = "Start date is required")
     @Future(message = "Start date must be in the future")
@@ -16,29 +28,47 @@ public class CreateCustomTourRequest {
     @NotNull(message = "End date is required")
     private LocalDate endDate;
 
-    @NotNull(message = "Number of people is required")
-    @Min(value = 1, message = "Number of people must be at least 1")
-    @Max(value = 50, message = "Number of people cannot exceed 50")
-    private Integer numberOfPeople;
-
-    private String specialRequest;
-
-    @NotBlank(message = "Contact email is required")
-    @Email(message = "Invalid email format")
-    private String contactEmail;
-
-    @Pattern(regexp = "^[0-9]{10,11}$", message = "Phone number must be 10-11 digits")
-    private String contactPhone;
-
-    private String budgetRange;
+    private String description;
 
     // Getters and Setters
-    public String getDestination() {
-        return destination;
+    public String getTourName() {
+        return tourName;
     }
 
-    public void setDestination(String destination) {
-        this.destination = destination;
+    public void setTourName(String tourName) {
+        this.tourName = tourName;
+    }
+
+    public Integer getNumAdult() {
+        return numAdult;
+    }
+
+    public void setNumAdult(Integer numAdult) {
+        this.numAdult = numAdult;
+    }
+
+    public Integer getNumChildren() {
+        return numChildren;
+    }
+
+    public void setNumChildren(Integer numChildren) {
+        this.numChildren = numChildren;
+    }
+
+    public Long getRegionId() {
+        return regionId;
+    }
+
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
+    }
+
+    public Long getProvinceId() {
+        return provinceId;
+    }
+
+    public void setProvinceId(Long provinceId) {
+        this.provinceId = provinceId;
     }
 
     public LocalDate getStartDate() {
@@ -57,43 +87,11 @@ public class CreateCustomTourRequest {
         this.endDate = endDate;
     }
 
-    public Integer getNumberOfPeople() {
-        return numberOfPeople;
+    public String getDescription() {
+        return description;
     }
 
-    public void setNumberOfPeople(Integer numberOfPeople) {
-        this.numberOfPeople = numberOfPeople;
-    }
-
-    public String getSpecialRequest() {
-        return specialRequest;
-    }
-
-    public void setSpecialRequest(String specialRequest) {
-        this.specialRequest = specialRequest;
-    }
-
-    public String getContactEmail() {
-        return contactEmail;
-    }
-
-    public void setContactEmail(String contactEmail) {
-        this.contactEmail = contactEmail;
-    }
-
-    public String getContactPhone() {
-        return contactPhone;
-    }
-
-    public void setContactPhone(String contactPhone) {
-        this.contactPhone = contactPhone;
-    }
-
-    public String getBudgetRange() {
-        return budgetRange;
-    }
-
-    public void setBudgetRange(String budgetRange) {
-        this.budgetRange = budgetRange;
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

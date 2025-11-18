@@ -137,7 +137,7 @@ const MyCustomTours = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-xl font-semibold text-gray-900">
-                      {tour.destination}
+                      {tour.tourName}
                     </h3>
                     {getStatusBadge(tour.status)}
                   </div>
@@ -152,35 +152,16 @@ const MyCustomTours = () => {
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
-                      {tour.numberOfPeople} người
+                      {tour.numAdult} người lớn{tour.numChildren > 0 && `, ${tour.numChildren} trẻ em`}
                     </span>
-                    {tour.budgetRange && (
-                      <span className="flex items-center gap-1">
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {tour.budgetRange}
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
 
-              {tour.specialRequest && (
+              {tour.description && (
                 <div className="mb-4">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-1">Yêu cầu đặc biệt:</h4>
-                  <p className="text-sm text-gray-600 line-clamp-2">{tour.specialRequest}</p>
-                </div>
-              )}
-
-              {tour.adminNotes && tour.status !== 'PENDING' && (
-                <div className={`rounded-lg p-4 border-l-4 ${
-                  tour.status === 'COMPLETED' ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'
-                }`}>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-1">
-                    Phản hồi từ đội ngũ tư vấn:
-                  </h4>
-                  <p className="text-sm text-gray-700">{tour.adminNotes}</p>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-1">Mô tả chi tiết:</h4>
+                  <p className="text-sm text-gray-600 line-clamp-3">{tour.description}</p>
                 </div>
               )}
 
@@ -188,10 +169,11 @@ const MyCustomTours = () => {
                 <span>
                   Gửi lúc: {new Date(tour.createdAt).toLocaleString('vi-VN')}
                 </span>
-                <div className="flex gap-2">
-                  <span>Email: {tour.contactEmail}</span>
-                  {tour.contactPhone && <span>• SĐT: {tour.contactPhone}</span>}
-                </div>
+                {tour.updatedAt && tour.updatedAt !== tour.createdAt && (
+                  <span>
+                    Cập nhật: {new Date(tour.updatedAt).toLocaleString('vi-VN')}
+                  </span>
+                )}
               </div>
             </div>
           ))}

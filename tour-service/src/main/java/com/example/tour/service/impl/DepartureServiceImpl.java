@@ -50,8 +50,8 @@ public class DepartureServiceImpl implements DepartureService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Tour not found for id " + tourId));
 
-        // Removed strict duration validation to allow flexible departure dates
-        // validateDepartureDuration(request.getStartDate(), request.getEndDate(), tour);
+        // Strict duration validation - departure must match tour duration
+        validateDepartureDuration(request.getStartDate(), request.getEndDate(), tour);
 
         Departure departure = new Departure();
         departure.setTour(tour);
@@ -77,10 +77,10 @@ public class DepartureServiceImpl implements DepartureService {
             departure.setEndDate(request.getEndDate());
         }
 
-        // Removed strict duration validation to allow flexible departure dates
-        // if (request.getStartDate() != null || request.getEndDate() != null) {
-        //     validateDepartureDuration(departure.getStartDate(), departure.getEndDate(), departure.getTour());
-        // }
+        // Strict duration validation - departure must match tour duration
+        if (request.getStartDate() != null || request.getEndDate() != null) {
+            validateDepartureDuration(departure.getStartDate(), departure.getEndDate(), departure.getTour());
+        }
 
         if (request.getTotalSlots() != null) {
             int reserved = departure.getTotalSlots() - departure.getRemainingSlots();

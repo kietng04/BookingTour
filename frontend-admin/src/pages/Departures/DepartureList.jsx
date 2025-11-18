@@ -326,18 +326,10 @@ const DepartureList = () => {
       ) : (
         <Card>
           <Table columns={columns} data={departures} />
-          <div className="mt-4 pt-4 border-t text-sm text-slate-600 flex justify-between items-center">
+          <div className="mt-4 pt-4 border-t text-sm text-slate-600">
             <span>
               Showing <span className="font-semibold">{departures.length}</span> departure{departures.length !== 1 ? 's' : ''}
             </span>
-            {Object.values(filters).some(v => v) && (
-              <button
-                onClick={handleResetFilters}
-                className="text-primary-600 hover:text-primary-700"
-              >
-                Clear all filters
-              </button>
-            )}
           </div>
         </Card>
       )}

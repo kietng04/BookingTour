@@ -45,14 +45,14 @@ public class CustomTourServiceImpl implements CustomTourService {
         // Create custom tour entity
         CustomTour customTour = new CustomTour();
         customTour.setUserId(userId);
-        customTour.setDestination(request.getDestination());
+        customTour.setTourName(request.getTourName());
+        customTour.setNumAdult(request.getNumAdult());
+        customTour.setNumChildren(request.getNumChildren());
+        customTour.setRegionId(request.getRegionId());
+        customTour.setProvinceId(request.getProvinceId());
         customTour.setStartDate(request.getStartDate());
         customTour.setEndDate(request.getEndDate());
-        customTour.setNumberOfPeople(request.getNumberOfPeople());
-        customTour.setSpecialRequest(request.getSpecialRequest());
-        customTour.setContactEmail(request.getContactEmail());
-        customTour.setContactPhone(request.getContactPhone());
-        customTour.setBudgetRange(request.getBudgetRange());
+        customTour.setDescription(request.getDescription());
         customTour.setStatus(CustomTour.CustomTourStatus.PENDING);
 
         CustomTour saved = customTourRepository.save(customTour);
@@ -133,9 +133,8 @@ public class CustomTourServiceImpl implements CustomTourService {
                         "Custom tour not found with ID: " + id
                 ));
 
-        // Update status and admin notes
+        // Update status only
         customTour.setStatus(request.getStatus());
-        customTour.setAdminNotes(request.getAdminNotes());
 
         CustomTour updated = customTourRepository.save(customTour);
         logger.info("Custom tour status updated successfully for ID: {}", id);

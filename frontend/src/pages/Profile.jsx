@@ -253,24 +253,20 @@ const Profile = () => {
                   <Phone className="w-4 h-4 inline mr-2" />
                   Số điện thoại
                 </label>
-                <div className="flex gap-2">
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 disabled:bg-gray-50 disabled:text-gray-500"
-                  />
-                  {!isEditing && !isOAuthUser && (
-                    <button
-                      onClick={() => setShowChangePhoneModal(true)}
-                      className="px-3 py-2 text-sm font-medium text-brand-600 border border-brand-300 rounded-md hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
-                    >
-                      Thay đổi
-                    </button>
-                  )}
-                </div>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  placeholder={formData.phone || "Nhập số điện thoại"}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 disabled:bg-gray-50 disabled:text-gray-500"
+                />
+                {isOAuthUser && !formData.phone && (
+                  <p className="text-xs text-yellow-600 mt-1">
+                    Vui lòng bấm "Chỉnh sửa thông tin" để thêm số điện thoại
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -357,24 +353,55 @@ const Profile = () => {
 
           {/* Action buttons */}
           <div className="flex justify-center gap-4 pt-6 border-t border-gray-200">
-            {isEditing && (
+            {!isEditing && (
               <button
-                onClick={handleSave}
-                disabled={loading}
-                className="inline-flex items-center gap-2 px-6 py-2 bg-brand-600 text-white font-medium rounded-md hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => setIsEditing(true)}
+                className="inline-flex items-center gap-2 px-6 py-2 bg-brand-600 text-white font-medium rounded-md hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
               >
-                {loading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Đang cập nhật...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    {isOAuthUser ? 'Lưu thông tin' : 'Cập nhật thông tin'}
-                  </>
-                )}
+                <Edit2 className="w-4 h-4" />
+                Chỉnh sửa thông tin
               </button>
+            )}
+
+            {isEditing && (
+              <>
+                <button
+                  onClick={handleSave}
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 px-6 py-2 bg-brand-600 text-white font-medium rounded-md hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Đang cập nhật...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      {isOAuthUser ? 'Lưu thông tin' : 'Cập nhật thông tin'}
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    // Reset form data to original user data
+                    setFormData({
+                      fullName: user.fullName || '',
+                      email: user.email || '',
+                      phone: user.phoneNumber || '',
+                      currentPassword: '',
+                      newPassword: '',
+                      confirmPassword: ''
+                    });
+                  }}
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <X className="w-4 h-4" />
+                  Hủy
+                </button>
+              </>
             )}
             
             {!isOAuthUser && (

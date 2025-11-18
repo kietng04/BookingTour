@@ -1,27 +1,27 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Download, Mail, Phone } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 import Card from '../../components/common/Card.jsx';
 import Button from '../../components/common/Button.jsx';
 import BookingTimeline from '../../components/bookings/BookingTimeline.jsx';
 import StatusPill from '../../components/common/StatusPill.jsx';
-import { bookingsAPI, departuresAPI, usersAPI, exportAPI } from '../../services/api.js';
+import { bookingsAPI, departuresAPI, usersAPI } from '../../services/api.js';
 import { formatCurrency, formatDate } from '../../utils/format.js';
 
 const buildTimelineForStatus = (status) => {
   const timeline = [
     {
-      label: 'Booking created',
+      label: 'Đặt chỗ được tạo',
       status: 'completed',
       description: 'Khách hàng đã gửi yêu cầu đặt tour.',
     },
     {
-      label: 'Seat reservation',
+      label: 'Giữ chỗ',
       status: status === 'PENDING' ? 'pending' : 'confirmed',
       description: 'Tour-service giữ chỗ qua RabbitMQ.',
     },
     {
-      label: 'Payment processing',
+      label: 'Xử lý thanh toán',
       status: status === 'CONFIRMED' || status === 'COMPLETED' ? 'confirmed' : status === 'CANCELLED' ? 'cancelled' : 'pending',
       description: 'Payment-service xác nhận thanh toán.',
     },
@@ -29,7 +29,7 @@ const buildTimelineForStatus = (status) => {
 
   if (status === 'COMPLETED') {
     timeline.push({
-      label: 'Trip completed',
+      label: 'Chuyến đi hoàn tất',
       status: 'completed',
       description: 'Chuyến đi đã hoàn tất.',
     });
@@ -37,7 +37,7 @@ const buildTimelineForStatus = (status) => {
 
   if (status === 'CANCELLED') {
     timeline.push({
-      label: 'Booking cancelled',
+      label: 'Đặt chỗ bị hủy',
       status: 'cancelled',
       description: 'Đặt chỗ bị hủy, ghế đã được trả về inventory.',
     });
@@ -54,8 +54,8 @@ const BookingDetail = () => {
   const [departure, setDeparture] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     if (!numericId) {
@@ -101,17 +101,26 @@ const BookingDetail = () => {
     fetchData();
   }, [numericId]);
 
-  const handleDownloadInvoice = async () => {
+  const handleConfirmBooking = async () => {
     if (!numericId) return;
+    if (!window.confirm('Bạn có chắc muốn xác nhận đặt chỗ này? Email xác nhận sẽ được gửi đến khách hàng.')) {
+      return;
+    }
 
     try {
-      setDownloadingInvoice(true);
-      await exportAPI.downloadInvoicePdf(numericId);
+      setConfirming(true);
+      console.log('[BookingDetail] Confirming booking:', numericId);
+      await bookingsAPI.confirm(numericId);
+      console.log('[BookingDetail] Booking confirmed successfully');
+      alert('Đã xác nhận đặt chỗ thành công! Email đã được gửi đến khách hàng.');
+      // Refresh booking data
+      const bookingData = await bookingsAPI.getById(numericId);
+      setBooking(bookingData);
     } catch (err) {
-      console.error('Failed to download invoice:', err);
-      alert('Failed to download invoice. Please try again.');
+      console.error('[BookingDetail] Failed to confirm booking:', err);
+      alert('Lỗi khi xác nhận đặt chỗ: ' + (err.message || 'Unknown error'));
     } finally {
-      setDownloadingInvoice(false);
+      setConfirming(false);
     }
   };
 
@@ -153,14 +162,12 @@ const BookingDetail = () => {
   const tourName = departure?.tourName ?? `Booking #${booking.id}`;
   const bookingDateLabel = booking.bookingDate ? formatDate(booking.bookingDate) : 'Chưa cập nhật';
   const totalAmount = booking.totalAmount ?? 0;
-  const depositAmount = totalAmount * 0.2;
-  const balanceAmount = totalAmount - depositAmount;
 
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Booking detail</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Chi tiết đặt chỗ</p>
           <h1 className="text-2xl font-semibold text-slate-900">{tourName}</h1>
           <p className="text-sm text-slate-500">ID {booking.id} · {bookingDateLabel}</p>
           {departure && (
@@ -171,75 +178,55 @@ const BookingDetail = () => {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <StatusPill status={booking.status} />
-          <Button variant="secondary" size="sm">
-            <Download className="h-4 w-4" />
-            Export itinerary
-          </Button>
           {booking.status === 'PENDING' && (
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={handleCancelBooking}
-              disabled={cancelling}
-            >
-              {cancelling ? 'Cancelling...' : 'Hủy đặt chỗ'}
-            </Button>
+            <>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleConfirmBooking}
+                disabled={confirming}
+              >
+                {confirming ? 'Đang xác nhận...' : 'Xác nhận đặt chỗ'}
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={handleCancelBooking}
+                disabled={cancelling}
+              >
+                {cancelling ? 'Đang hủy...' : 'Hủy đặt chỗ'}
+              </Button>
+            </>
           )}
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <Card className="space-y-5">
-          <h3 className="text-lg font-semibold text-slate-900">Guest profile</h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-1 text-sm text-slate-600">
-              <p className="text-xs uppercase tracking-widest text-slate-400">Primary guest</p>
-              <p className="font-medium text-slate-800">{user?.fullName || user?.username || 'Chưa cập nhật'}</p>
-            </div>
-            <div className="space-y-1 text-sm text-slate-600">
-              <p className="text-xs uppercase tracking-widest text-slate-400">User ID</p>
-              <p className="font-medium text-slate-800">{booking.userId}</p>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Mail className="h-4 w-4" />
-              {user?.email || 'Chưa có email'}
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Phone className="h-4 w-4" />
-              {user?.phoneNumber || 'Chưa cập nhật' }
-            </div>
+      <Card className="space-y-5">
+        <h3 className="text-lg font-semibold text-slate-900">Thông tin khách hàng</h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-1 text-sm text-slate-600">
+            <p className="text-xs uppercase tracking-widest text-slate-400">Khách hàng chính</p>
+            <p className="font-medium text-slate-800">{user?.fullName || user?.username || 'Chưa cập nhật'}</p>
           </div>
-          <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
-            <p className="text-xs uppercase tracking-widest text-slate-400">Notes</p>
-            <p>{booking.seats} khách · Trạng thái hiện tại: {booking.status}</p>
+          <div className="space-y-1 text-sm text-slate-600">
+            <p className="text-xs uppercase tracking-widest text-slate-400">Mã người dùng</p>
+            <p className="font-medium text-slate-800">{booking.userId}</p>
           </div>
-        </Card>
-
-        <Card className="space-y-4 bg-slate-900 text-slate-100">
-          <h3 className="text-lg font-semibold text-white">Financial summary</h3>
-          <div className="flex items-center justify-between text-sm">
-            <span>Total amount</span>
-            <span className="text-lg font-semibold text-white">{formatCurrency(totalAmount)}</span>
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Mail className="h-4 w-4" />
+            {user?.email || 'Chưa có email'}
           </div>
-          <div className="flex items-center justify-between text-sm text-slate-300">
-            <span>Deposit (20%)</span>
-            <span>{formatCurrency(depositAmount)}</span>
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Phone className="h-4 w-4" />
+            {user?.phoneNumber || 'Chưa cập nhật' }
           </div>
-          <div className="flex items-center justify-between text-sm text-slate-300">
-            <span>Balance</span>
-            <span>{formatCurrency(balanceAmount)}</span>
-          </div>
-          <Button
-            variant="secondary"
-            className="w-full text-slate-900"
-            onClick={handleDownloadInvoice}
-            disabled={downloadingInvoice}
-          >
-            <Download className="h-4 w-4" />
-            {downloadingInvoice ? 'Downloading...' : 'Download Invoice PDF'}
-          </Button>
-        </Card>
-      </div>
+        </div>
+        <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+          <p className="text-xs uppercase tracking-widest text-slate-400">Ghi chú</p>
+          <p>{booking.seats} khách · Trạng thái hiện tại: {booking.status}</p>
+          <p className="mt-2 font-semibold text-slate-900">Tổng tiền: {formatCurrency(totalAmount)}</p>
+        </div>
+      </Card>
 
       <BookingTimeline
         events={buildTimelineForStatus(booking.status)}

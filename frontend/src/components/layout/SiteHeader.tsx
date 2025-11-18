@@ -8,7 +8,7 @@ import { regionsAPI } from '../../services/api';
 
 const navItems = [
   { label: 'Tour', to: '/tours' },
-  { label: 'Điểm đến', to: '/destinations' },
+  { label: 'Chuyến đi tùy chỉnh', to: '/custom-tour-request' },
 ];
 
 const primaryNavClass =

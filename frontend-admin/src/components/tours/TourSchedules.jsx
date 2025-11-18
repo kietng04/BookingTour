@@ -2,25 +2,76 @@ import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import Card from '../common/Card.jsx';
 
+/**
+ * Sync schedules with target days:
+ * - If more days needed: add empty schedules
+ * - If fewer days: keep existing schedules up to target
+ */
+const syncSchedulesWithDays = (existingSchedules, targetDays) => {
+  const currentLength = existingSchedules.length;
+
+  // Already matches
+  if (currentLength === targetDays) {
+    return existingSchedules;
+  }
+
+  // Need to add more schedules
+  if (currentLength < targetDays) {
+    const additional = Array.from(
+      { length: targetDays - currentLength },
+      (_, i) => ({
+        dayNumber: currentLength + i + 1,
+        scheduleDescription: ''
+      })
+    );
+    return [...existingSchedules, ...additional];
+  }
+
+  // Need to remove schedules (keep first N)
+  return existingSchedules.slice(0, targetDays);
+};
+
 const TourSchedules = ({ days, initialSchedules = [], onChange, disabled = false }) => {
   const [schedules, setSchedules] = useState([]);
+  const [initialized, setInitialized] = useState(false);
 
-  // Initialize schedules based on number of days
+  // Initialize schedules only once when component mounts or when days changes
   useEffect(() => {
-    if (initialSchedules && initialSchedules.length > 0) {
-      // Use existing schedules
-      setSchedules(initialSchedules);
-    } else if (days && days > 0) {
-      // Create empty schedules for each day
-      const newSchedules = Array.from({ length: days }, (_, index) => ({
-        dayNumber: index + 1,
-        scheduleDescription: ''
-      }));
-      setSchedules(newSchedules);
+    if (days && days > 0) {
+      if (!initialized && initialSchedules && initialSchedules.length > 0) {
+        // First time: use initial schedules
+        const synced = syncSchedulesWithDays(initialSchedules, days);
+        setSchedules(synced);
+        setInitialized(true);
+      } else if (initialized || (initialSchedules.length === 0)) {
+        // Already initialized or no initial data: sync with days count
+        setSchedules(prev => {
+          // If we already have schedules, sync them with new days count
+          if (prev.length > 0) {
+            return syncSchedulesWithDays(prev, days);
+          }
+          // Otherwise create new empty schedules
+          return Array.from({ length: days }, (_, index) => ({
+            dayNumber: index + 1,
+            scheduleDescription: ''
+          }));
+        });
+        setInitialized(true);
+      }
     } else {
       setSchedules([]);
+      setInitialized(false);
     }
-  }, [days, initialSchedules]);
+  }, [days]); // Only depend on days, not initialSchedules
+
+  // Handle initial schedules (for edit mode) - run only once
+  useEffect(() => {
+    if (!initialized && initialSchedules && initialSchedules.length > 0 && days > 0) {
+      const synced = syncSchedulesWithDays(initialSchedules, days);
+      setSchedules(synced);
+      setInitialized(true);
+    }
+  }, []); // Run only once on mount
 
   // Notify parent when schedules change
   useEffect(() => {

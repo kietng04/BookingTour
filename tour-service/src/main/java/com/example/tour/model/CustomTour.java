@@ -27,8 +27,20 @@ public class CustomTour {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(nullable = false)
-    private String destination;
+    @Column(name = "tour_name", nullable = false)
+    private String tourName;
+
+    @Column(name = "num_adult", nullable = false)
+    private Integer numAdult;
+
+    @Column(name = "num_children", nullable = false)
+    private Integer numChildren;
+
+    @Column(name = "region_id")
+    private Long regionId;
+
+    @Column(name = "province_id")
+    private Long provinceId;
 
     @Column(name = "start_date")
     private LocalDate startDate;
@@ -36,27 +48,12 @@ public class CustomTour {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "number_of_people")
-    private Integer numberOfPeople;
-
-    @Column(name = "special_request", columnDefinition = "TEXT")
-    private String specialRequest;
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CustomTourStatus status = CustomTourStatus.PENDING;
-
-    @Column(name = "contact_email")
-    private String contactEmail;
-
-    @Column(name = "contact_phone", length = 20)
-    private String contactPhone;
-
-    @Column(name = "budget_range", length = 50)
-    private String budgetRange;
-
-    @Column(name = "admin_notes", columnDefinition = "TEXT")
-    private String adminNotes;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
