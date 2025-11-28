@@ -1,0 +1,161 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                   IMPORT DATABASE - QUICK REFERENCE                        ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+🎯 TÓM TẮT - 3 CÁCH IMPORT DATABASE:
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ⭐ CÁCH 1: DOCKER (CHỈ CẦN 1 LỆNH - RECOMMENDED)                          │
+│                                                                              │
+│  Command:                                                                   │
+│  $ docker-compose up -d postgres-db booking-db payment-db                  │
+│                                                                              │
+│  Lợi ích:                                                                   │
+│  • Chỉ 1 lệnh                                                              │
+│  • Tự động tạo databases, tables, seed data                               │
+│  • Tất cả services sẽ dùng được luôn                                       │
+│  • Dễ reset lại (docker-compose down)                                      │
+│                                                                              │
+│  Kiểm tra:                                                                  │
+│  $ docker-compose ps                    # Xem status                       │
+│  $ docker-compose logs postgres-db      # Xem logs                         │
+│                                                                              │
+│  Kết nối database:                                                         │
+│  $ docker-compose exec postgres-db psql -U postgres -d userdb -c "SELECT *
+ FROM users;"                          │
+│                                                                              │
+│  Thời gian: ~15 giây                                                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🔧 CÁCH 2: SCRIPT TỰ ĐỘNG (CÓ MENU)                                         │
+│                                                                              │
+│  Command:                                                                   │
+│                                                                              │
+│  Windows:                                                                   │
+│  $ .\import-db.bat                                                          │
+│                                                                              │
+│  Linux/Mac:                                                                 │
+│  $ chmod +x import-db.sh                                                    │
+│  $ ./import-db.sh                                                           │
+│                                                                              │
+│  Menu:                                                                      │
+│  1. Import tất cả (Init + Seed Data)                                       │
+│  2. Import chỉ schema (Init)                                               │
+│  3. Import chỉ dữ liệu (Seed Data)                                         │
+│  4. Reset + Import                                                          │
+│  5. Kiểm tra kết nối                                                       │
+│  6. Thoát                                                                   │
+│                                                                              │
+│  Thời gian: ~5-10 giây                                                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 💻 CÁCH 3: COMMAND LINE TRỰC TIẾP (WINDOWS POWERSHELL)                      │
+│                                                                              │
+│  Commands:                                                                  │
+│  $ $env:PGPASSWORD="postgres"                                              │
+│  $ psql -U postgres -h localhost -p 5432 -f "sql-scripts\init-databases.sql"│
+│  $ psql -U postgres -h localhost -p 5432 -f "sql-scripts\init-booking-db.sql"│
+│  $ psql -U postgres -h localhost -p 5432 -f "sql-scripts\init-payment-db.sql"│
+│                                                                              │
+│  (Linux/Mac - thay \ thành /)                                              │
+│                                                                              │
+│  Thời gian: ~5 giây                                                         │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ KIỂM TRA KẾT QUẢ - Sau khi import thành công, chạy:
+
+1. Xem databases:
+   $ psql -U postgres -h localhost -p 5432 -c "\l"
+
+2. Xem tables trong userdb:
+   $ psql -U postgres -h localhost -p 5432 -d userdb -c "\dt"
+
+3. Đếm users:
+   $ psql -U postgres -h localhost -p 5432 -d userdb -c "SELECT COUNT(*) FROM users;"
+
+4. Đếm tours:
+   $ psql -U postgres -h localhost -p 5432 -d userdb -c "SELECT COUNT(*) FROM tours;"
+
+Kết quả mong đợi:
+✓ 4 databases: userdb, tourdb, bookingdb, paymentdb
+✓ Tất cả tables được tạo
+✓ Có dữ liệu mẫu (nếu import seed data)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📊 DATABASE STRUCTURE:
+
+Instance 1 (Port 5432):
+  • userdb: users, user_verification
+  • tourdb: tours, departures, tour_schedules, tour_images, tour_discounts, tour_logs, regions, provinces, custom_tours
+
+Instance 2 (Port 5433):
+  • bookingdb: bookings, booking_guests, booking_logs
+
+Instance 3 (Port 5434):
+  • paymentdb: payments, payment_methods, payment_logs, refunds
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔐 CONNECTION CREDENTIALS:
+
+Userdb & Tourdb:
+  Host: localhost | Port: 5432 | User: postgres | Pass: postgres
+
+Bookingdb:
+  Host: localhost | Port: 5433 | User: postgres | Pass: postgres
+
+Paymentdb:
+  Host: localhost | Port: 5434 | User: postgres | Pass: postgres
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📚 TỆPS HƯỚNG DẪN:
+
+• DATABASE_IMPORT_GUIDE.md ........... Hướng dẫn chi tiết (5 cách)
+• QUICK_START_DB.md ................. Quick start (nhanh nhất)
+• DATABASE_SETUP.txt ................ Hình ảnh + mô tả (dễ hiểu)
+• import-db.bat ..................... Script Windows (tự động)
+• import-db.sh ...................... Script Linux/Mac (tự động)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+⚡ TL;DR - CHỈ CẦN LÀM NHỮNG ĐIỀU NÀY:
+
+1. $ docker-compose up -d postgres-db booking-db payment-db
+2. Chờ ~15 giây
+3. $ docker-compose ps                              (kiểm tra status)
+4. $ docker-compose logs postgres-db -n 20          (kiểm tra logs)
+5. ✅ Done!
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+❓ CÓ VẤNĐỀ GÌ?
+
+• "Connection refused" → Kiểm tra PostgreSQL service + ports
+• "Database already exists" → DROP nó hoặc docker-compose down
+• "psql: command not found" → Cài PostgreSQL client
+• "Authentication failed" → Kiểm tra username/password
+
+Chi tiết → Xem DATABASE_IMPORT_GUIDE.md (phần Troubleshooting)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Xong! Bây giờ bạn có thể bắt đầu code 🚀
+
+Tiếp theo: Start backend services với `docker-compose up`
+          Hoặc nhập API endpoint: http://localhost:8080/api
+
+═══════════════════════════════════════════════════════════════════════════════
+

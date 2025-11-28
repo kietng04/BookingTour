@@ -70,6 +70,12 @@ public class DepartureServiceImpl implements DepartureService {
 
         Departure departure = getDepartureForTour(tourId, departureId);
 
+        // Validation: Cannot update departure that has already departed
+        if (departure.getStatus() == Departure.DepartureStatus.DAKHOIHANH) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot update departure that has already departed (status: DAKHOIHANH)");
+        }
+
         if (request.getStartDate() != null) {
             departure.setStartDate(request.getStartDate());
         }
@@ -100,6 +106,13 @@ public class DepartureServiceImpl implements DepartureService {
     @Override
     public void deleteDeparture(Long tourId, Long departureId) {
         Departure departure = getDepartureForTour(tourId, departureId);
+
+        // Validation: Cannot delete departure that has already departed
+        if (departure.getStatus() == Departure.DepartureStatus.DAKHOIHANH) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot delete departure that has already departed (status: DAKHOIHANH)");
+        }
+
         departureRepository.delete(departure);
     }
 
@@ -207,9 +220,13 @@ public class DepartureServiceImpl implements DepartureService {
         if (daysBetween != tour.getDays()) {
             LocalDate expectedEndDate = startDate.plusDays(tour.getDays() - 1);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    String.format("Departure duration mismatch. Tour is %d days, but departure is %d days. " +
-                            "For start date %s, end date should be %s",
-                            tour.getDays(), daysBetween, startDate, expectedEndDate));
+                    String.format("LỖI: Thời lượng chuyến đi không khớp với tour!\n" +
+                            "- Tour '%s' (ID: %d) được thiết lập: %d ngày %d đêm\n" +
+                            "- Bạn đang tạo chuyến đi: %d ngày (từ %s đến %s)\n" +
+                            "- Để khớp với tour %d ngày, ngày kết thúc phải là: %s\n" +
+                            "Vui lòng điều chỉnh ngày kết thúc hoặc kiểm tra lại thông tin tour.",
+                            tour.getTourName(), tour.getId(), tour.getDays(), tour.getNights(),
+                            daysBetween, startDate, endDate, tour.getDays(), expectedEndDate));
         }
     }
 

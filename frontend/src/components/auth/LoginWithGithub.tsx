@@ -23,9 +23,6 @@ const LoginWithGithub: React.FC = () => {
       disabled={loading}
       className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#24292e] px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-[#1b1f24] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:ring-[#24292e] disabled:cursor-not-allowed disabled:opacity-70"
     >
-      <span role="img" aria-hidden="true">
-        🐙
-      </span>
       {loading ? 'Đang chuyển hướng...' : 'Đăng nhập với GitHub'}
     </button>
   );

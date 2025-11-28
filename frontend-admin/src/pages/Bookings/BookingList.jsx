@@ -3,31 +3,63 @@ import { Download } from 'lucide-react';
 import BookingTable from '../../components/bookings/BookingTable.jsx';
 import Card from '../../components/common/Card.jsx';
 import Select from '../../components/common/Select.jsx';
+import Input from '../../components/common/Input.jsx';
 import Button from '../../components/common/Button.jsx';
-import { bookingsAPI, departuresAPI, exportAPI } from '../../services/api.js';
+import { bookingsAPI, departuresAPI, exportAPI, toursAPI } from '../../services/api.js';
 
 const BookingList = () => {
   const [bookings, setBookings] = useState([]);
+  const [tours, setTours] = useState([]);
   const [departures, setDepartures] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTour, setSelectedTour] = useState('');
   const [selectedDeparture, setSelectedDeparture] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
-    fetchDepartures();
+    fetchTours();
   }, []);
 
   useEffect(() => {
-    fetchBookings();
-  }, [selectedDeparture, selectedStatus]);
+    if (selectedTour) {
+      fetchDeparturesForTour(selectedTour);
+    } else {
+      setDepartures([]);
+      setSelectedDeparture('');
+    }
+  }, [selectedTour]);
 
-  const fetchDepartures = async () => {
+  useEffect(() => {
+    fetchBookings();
+  }, [selectedDeparture, selectedStatus, startDate, endDate]);
+
+  const fetchTours = async () => {
+    try {
+      const data = await toursAPI.getAll();
+      // API returns pagination object { content: [...], page: 0, ... }
+      const toursArray = data?.content || data || [];
+      setTours(toursArray);
+    } catch (err) {
+      console.error('Failed to fetch tours:', err);
+    }
+  };
+
+  const fetchDeparturesForTour = async (tourId) => {
     try {
       const data = await departuresAPI.getAll();
-      setDepartures(data);
+      // API may return pagination object { content: [...], ... }
+      const departuresArray = data?.content || data || [];
+      // Filter departures by tourId
+      const filtered = Array.isArray(departuresArray)
+        ? departuresArray.filter((dep) => String(dep.tourId) === String(tourId))
+        : [];
+      setDepartures(filtered);
     } catch (err) {
       console.error('Failed to fetch departures:', err);
+      setDepartures([]);
     }
   };
 
@@ -41,6 +73,12 @@ const BookingList = () => {
       }
       if (selectedStatus) {
         params.status = selectedStatus;
+      }
+      if (startDate) {
+        params.startDate = startDate;
+      }
+      if (endDate) {
+        params.endDate = endDate;
       }
 
       const data = await bookingsAPI.getAll(params);
@@ -78,6 +116,12 @@ const BookingList = () => {
       if (selectedStatus) {
         params.status = selectedStatus;
       }
+      if (startDate) {
+        params.startDate = startDate;
+      }
+      if (endDate) {
+        params.endDate = endDate;
+      }
 
       await exportAPI.downloadBookingsExcel(params);
       alert('Bookings exported successfully!');
@@ -102,23 +146,61 @@ const BookingList = () => {
       <Card className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-slate-900">Bộ lọc</h3>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <Select
-            label="Lọc theo chuyến đi"
-            value={selectedDeparture}
-            onChange={(e) => setSelectedDeparture(e.target.value)}
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              setSelectedTour('');
+              setSelectedDeparture('');
+              setSelectedStatus('');
+              setStartDate('');
+              setEndDate('');
+            }}
           >
-            <option value="">Tất cả chuyến đi</option>
-            {departures.map((dep) => (
-              <option key={dep.departureId} value={dep.departureId}>
-                {dep.tourName} - {new Date(dep.startDate).toLocaleDateString()}
-              </option>
-            ))}
+            Xóa bộ lọc
+          </Button>
+        </div>
+        <div className="grid gap-4 md:grid-cols-4">
+          {/* Step 1: Select Tour */}
+          <Select
+            label="Tên chuyến đi"
+            value={selectedTour}
+            onChange={(e) => {
+              setSelectedTour(e.target.value);
+              setSelectedDeparture('');
+              setStartDate('');
+              setEndDate('');
+            }}
+          >
+            <option value="">Chọn chuyến đi</option>
+            {(Array.isArray(tours) ? tours : []).map((tour) => {
+              const id = tour.tourId || tour.id;
+              return (
+                <option key={id} value={id}>
+                  {tour.tourName || tour.name || `Tour #${id}`}
+                </option>
+              );
+            })}
           </Select>
 
+          {/* Step 2: Select Date (only show if tour is selected) */}
+          {selectedTour && (
+            <Select
+              label="Ngày khởi hành"
+              value={selectedDeparture}
+              onChange={(e) => setSelectedDeparture(e.target.value)}
+            >
+              <option value="">Tất cả ngày khởi hành</option>
+              {departures.map((dep) => (
+                <option key={dep.departureId} value={dep.departureId}>
+                  {new Date(dep.startDate).toLocaleDateString('vi-VN')}
+                </option>
+              ))}
+            </Select>
+          )}
+
           <Select
-            label="Lọc theo trạng thái"
+            label="Trạng thái"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
           >
@@ -129,6 +211,26 @@ const BookingList = () => {
             <option value="FAILED">Thất bại</option>
           </Select>
         </div>
+
+        {/* Optional: Date range filter (show when departure is selected) */}
+        {selectedDeparture && (
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input
+              label="Lọc theo ngày đặt - Từ ngày"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+
+            <Input
+              label="Đến ngày"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              min={startDate}
+            />
+          </div>
+        )}
       </Card>
 
       {loading ? (

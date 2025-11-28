@@ -22,6 +22,12 @@ const TourCreate = () => {
       }));
     }
 
+    // Fix: Properly handle nights = 0 (don't use || operator)
+    // If form.nights is provided (even if 0), use it. Otherwise default to days - 1
+    const nights = form.nights != null && form.nights !== ''
+      ? Number(form.nights)
+      : Math.max(days - 1, 0);
+
     return {
       tourName: form.tourName,
       slug: form.slug,
@@ -30,7 +36,7 @@ const TourCreate = () => {
       provinceId: Number(form.provinceId),
       description: form.description || '',
       days,
-      nights: Number(form.nights) || Math.max(days - 1, 0),
+      nights,
       departurePoint: form.departurePoint || '',
       mainDestination: form.mainDestination || '',
       adultPrice: Number(form.adultPrice) || 0,

@@ -47,8 +47,8 @@ const TourEdit = () => {
       regionId: t.regionId ? Number(t.regionId) : '',
       provinceId: t.provinceId ? Number(t.provinceId) : '',
       description: t.description || '',
-      days: t.days || '',
-      nights: t.nights || '',
+      days: t.days != null ? t.days : '',
+      nights: t.nights != null ? t.nights : '',  // Fix: Handle nights = 0 properly
       departurePoint: t.departurePoint || '',
       mainDestination: t.mainDestination || '',
       adultPrice: t.adultPrice || '',
@@ -59,6 +59,12 @@ const TourEdit = () => {
   };
 
   const adaptPayload = (form) => {
+    const days = Number(form.days) || 1;
+    // Fix: Properly handle nights = 0 (same logic as TourCreate)
+    const nights = form.nights != null && form.nights !== ''
+      ? Number(form.nights)
+      : Math.max(days - 1, 0);
+
     return {
       tourName: form.tourName,
       slug: form.slug,
@@ -66,8 +72,8 @@ const TourEdit = () => {
       regionId: Number(form.regionId),
       provinceId: Number(form.provinceId),
       description: form.description || '',
-      days: Number(form.days) || 1,
-      nights: Number(form.nights) || 0,
+      days,
+      nights,
       departurePoint: form.departurePoint || '',
       mainDestination: form.mainDestination || '',
       adultPrice: Number(form.adultPrice) || 0,

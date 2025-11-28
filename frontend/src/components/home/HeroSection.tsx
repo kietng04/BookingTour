@@ -22,7 +22,7 @@ const HeroSection: React.FC = () => {
             Tuyển chọn bởi chuyên gia bản địa
           </div>
           <h1 className="mt-6 text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
-            Khám phá những trải nghiệm châu Âu được yêu thích nhất.
+            Khám phá những trải nghiệm Việt Nam được yêu thích nhất.
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-white/80 sm:text-xl">
             Lịch trình linh hoạt, hướng dẫn viên đáng tin cậy và quyền lợi độc quyền dành cho thành viên. An tâm lên kế hoạch cho hành trình tiếp theo ngay hôm nay.

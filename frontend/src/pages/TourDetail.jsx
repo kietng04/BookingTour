@@ -68,6 +68,15 @@ const transformTourDetail = (data) => {
     'Nâng hạng phòng và dịch vụ cao cấp theo yêu cầu riêng'
   ];
 
+  // Fallback itinerary nếu không có schedules
+  const defaultItinerary = data.days 
+    ? Array.from({ length: data.days }, (_, i) => ({
+        day: i + 1,
+        title: `Ngày ${i + 1}`,
+        items: ['Khám phá địa danh nổi bật', 'Trải nghiệm văn hóa địa phương', 'Thưởng thức ẩm thực đặc sản']
+      }))
+    : [];
+
   return {
     id: data.slug ?? `tour-${data.id}`,
     slug: data.slug ?? `tour-${data.id}`,
@@ -82,7 +91,9 @@ const transformTourDetail = (data) => {
     thumbnail: primaryImage?.imageUrl ?? DEFAULT_TOUR_IMAGE,
     gallery: gallery.length > 0 ? gallery : [primaryImage?.imageUrl ?? DEFAULT_TOUR_IMAGE],
     highlights: buildHighlights(data),
-    itinerary: transformScheduleToItinerary(data.schedules),
+    itinerary: (data.schedules && data.schedules.length > 0) 
+      ? transformScheduleToItinerary(data.schedules) 
+      : defaultItinerary,
     includes,
     excludes,
     policies: {
@@ -429,28 +440,28 @@ const TourDetail = () => {
         <div className="flex gap-8">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`pb-4 text-sm font-medium transition-colors border-b-2 ${
+            className={`px-4 py-3 font-medium border-b-2 transition ${
               activeTab === 'overview'
-                ? 'border-primary-500 text-primary-600'
+                ? 'border-primary-500 text-primary-500'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
-            Tổng quan
+            Lịch trình
           </button>
           <button
-            onClick={() => setActiveTab('reviews')}
-            className={`pb-4 text-sm font-medium transition-colors border-b-2 ${
-              activeTab === 'reviews'
-                ? 'border-primary-500 text-primary-600'
+            onClick={() => setActiveTab('services')}
+            className={`px-4 py-3 font-medium border-b-2 transition ${
+              activeTab === 'services'
+                ? 'border-primary-500 text-primary-500'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
-            Đánh giá ({reviews.length})
+            Dịch vụ
           </button>
         </div>
       </section>
 
-      {/* Tab Content */}
+      {/* Tab Content - Overview Tab */}
       {activeTab === 'overview' && (
         <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-6">
@@ -508,85 +519,89 @@ const TourDetail = () => {
         </section>
       )}
 
-      {activeTab === 'reviews' && (
-        <section className="space-y-6">
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl font-semibold text-slate-900">Nhận xét xác thực từ du khách</h2>
-            <p className="text-sm text-slate-600">
-              Tất cả đánh giá đều được kiểm duyệt bởi đội ngũ của chúng tôi
-            </p>
+      {/* Tab Content - Services Tab */}
+      {activeTab === 'services' && (
+        <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] py-8">
+          <div className="space-y-6">
+            <Card className="space-y-4">
+              <h2 className="text-lg font-semibold text-slate-900">Dịch vụ & Tiện ích</h2>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Tour này bao gồm các dịch vụ và tiện ích sau để đảm bảo trải nghiệm tốt nhất cho khách hàng.
+              </p>
+            </Card>
+
+            <Card className="space-y-4">
+              <h3 className="text-base font-semibold text-slate-900">Dịch vụ chính</h3>
+              <ul className="space-y-3 text-sm text-slate-600">
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-500 font-bold">✓</span>
+                  <span>Vận chuyển đầy đủ bằng xe cao cấp được bảo hiểm</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-500 font-bold">✓</span>
+                  <span>Hướng dẫn viên tiếng Việt chuyên nghiệp</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-500 font-bold">✓</span>
+                  <span>Lưu trú tại các khách sạn 3-4 sao theo tiêu chuẩn</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-500 font-bold">✓</span>
+                  <span>Các bữa ăn chính được lựa chọn từ nhà hàng đã đánh giá</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-500 font-bold">✓</span>
+                  <span>Vé vào các điểm tham quan chính</span>
+                </li>
+              </ul>
+            </Card>
+
+            <Card className="space-y-4">
+              <h3 className="text-base font-semibold text-slate-900">Tiện ích bổ sung</h3>
+              <ul className="space-y-3 text-sm text-slate-600">
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-500 font-bold">⭐</span>
+                  <span>Wi-Fi miễn phí ở khách sạn</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-500 font-bold">⭐</span>
+                  <span>Phục vụ nước uống miễn phí trên xe</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-500 font-bold">⭐</span>
+                  <span>Hỗ trợ 24/7 từ đội ngũ của chúng tôi</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-500 font-bold">⭐</span>
+                  <span>Bảo hiểm du lịch cơ bản</span>
+                </li>
+              </ul>
+            </Card>
           </div>
 
-          {loadingReviews ? (
-            <Card className="text-center py-12">
-              <p className="text-sm text-slate-500">Đang tải đánh giá...</p>
+          <div className="space-y-6">
+            <Card className="space-y-4">
+              <h3 className="text-lg font-semibold text-slate-900">Bao gồm trong giá</h3>
+              <ul className="space-y-2 text-sm text-slate-600">
+                {tour.includes.map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <Shield className="mt-1 h-4 w-4 text-primary-500" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="border-t border-slate-200 pt-4">
+                <h4 className="text-sm font-semibold text-slate-700">Không bao gồm</h4>
+                <ul className="mt-2 space-y-2 text-sm text-slate-500">
+                  {tour.excludes.map((item) => (
+                    <li key={item}>• {item}</li>
+                  ))}
+                </ul>
+              </div>
             </Card>
-          ) : reviewsError ? (
-            <Card className="text-center py-12">
-              <p className="text-sm text-red-600">Không thể tải đánh giá</p>
-              <p className="text-xs text-red-500">{reviewsError}</p>
-            </Card>
-          ) : reviews.length === 0 ? (
-            <Card className="text-center py-12">
-              <p className="text-sm text-slate-500">Chưa có đánh giá cho tour này</p>
-              <p className="text-xs text-slate-400 mt-2">Hãy là người đầu tiên đánh giá!</p>
-            </Card>
-          ) : (
-            <div className="max-w-4xl mx-auto">
-              <ReviewsPanel reviews={reviews} />
             </div>
-          )}
         </section>
       )}
-
-      {/* Review Form Section */}
-      <section className="space-y-6">
-        {submitSuccess && (
-          <Card className="bg-green-50 border-green-200">
-            <div className="text-center py-6">
-              <p className="text-green-800 font-medium">Đánh giá của bạn đã được gửi thành công!</p>
-              <p className="text-sm text-green-600 mt-2">
-                Đánh giá sẽ được kiểm duyệt và hiển thị sau khi được duyệt.
-              </p>
-            </div>
-          </Card>
-        )}
-
-        {isAuthenticated ? (
-          !showReviewForm ? (
-            <Card className="text-center py-12">
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                Bạn đã trải nghiệm tour này?
-              </h3>
-              <p className="text-sm text-slate-600 mb-4">
-                Chia sẻ đánh giá của bạn để giúp người khác có thêm thông tin!
-              </p>
-              <Button onClick={() => setShowReviewForm(true)}>
-                Viết đánh giá
-              </Button>
-            </Card>
-          ) : (
-            <ReviewForm
-              tourId={tour.tourId}
-              tourName={tour.name}
-              onSuccess={handleSubmitReview}
-              onCancel={() => setShowReviewForm(false)}
-            />
-          )
-        ) : (
-          <Card className="text-center py-12">
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">
-              Đăng nhập để viết đánh giá
-            </h3>
-            <p className="text-sm text-slate-600 mb-4">
-              Bạn cần đăng nhập để chia sẻ trải nghiệm của mình
-            </p>
-            <Button to="/login">
-              Đăng nhập ngay
-            </Button>
-          </Card>
-        )}
-      </section>
 
       <SectionTitle
         align="center"
