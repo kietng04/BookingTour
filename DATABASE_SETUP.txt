@@ -1,0 +1,246 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                  BookingTour - Database Setup Guide                         ║
+║                    3 Cách Import Database Dễ Nhất                           ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CÁCH 1: DOCKER COMPOSE (RECOMMENDED) - CHỈ CẦN 1 LỆNH                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+   📍 Điều kiện: Docker & Docker Compose đã cài đặt
+
+   🎯 Lệnh:
+   
+      docker-compose up -d postgres-db booking-db payment-db
+
+   ⏱️  Thời gian: ~15 giây
+
+   ✅ Tự động làm:
+      ✓ Tạo 3 PostgreSQL containers
+      ✓ Tạo 4 databases (userdb, tourdb, bookingdb, paymentdb)
+      ✓ Tạo tất cả tables (từ init scripts)
+      ✓ Insert dữ liệu mẫu (từ seed scripts)
+
+   🔍 Kiểm tra:
+   
+      docker-compose ps                          # Xem status
+      docker-compose logs postgres-db -n 20      # Xem logs
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CÁCH 2: SCRIPT TỰ ĐỘNG - CÓ MENU TƯƠNG TÁC                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+   📍 Điều kiện: PostgreSQL CLI (psql) đã cài đặt
+
+   🎯 Chạy script:
+   
+      Windows:   .\import-db.bat
+      Linux/Mac: chmod +x import-db.sh && ./import-db.sh
+
+   📋 Menu lựa chọn:
+      1. Import tất cả (Init + Seed Data)
+      2. Import chỉ schema (Init)
+      3. Import chỉ dữ liệu (Seed Data)
+      4. Reset + Import (Drop + Create + Init + Seed)
+      5. Kiểm tra kết nối
+      6. Thoát
+
+   ⏱️  Thời gian: ~5-10 giây
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CÁCH 3: COMMAND LINE TRỰC TIẾP - NẾU BẠN BIẾT PSQL                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+   📍 Điều kiện: PostgreSQL CLI (psql) đã cài đặt
+
+   🎯 Lệnh (Windows):
+   
+      $env:PGPASSWORD="postgres"
+      psql -U postgres -h localhost -p 5432 -f "sql-scripts\init-databases.sql"
+      psql -U postgres -h localhost -p 5432 -f "sql-scripts\init-booking-db.sql"
+      psql -U postgres -h localhost -p 5432 -f "sql-scripts\init-payment-db.sql"
+
+   🎯 Lệnh (Linux/Mac):
+   
+      export PGPASSWORD="postgres"
+      psql -U postgres -h localhost -p 5432 -f "sql-scripts/init-databases.sql"
+      psql -U postgres -h localhost -p 5432 -f "sql-scripts/init-booking-db.sql"
+      psql -U postgres -h localhost -p 5432 -f "sql-scripts/init-payment-db.sql"
+
+   ⏱️  Thời gian: ~5 giây
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                           KIỂM TRA KẾT QUẢ                                 ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+   Chạy những lệnh này để xác nhận:
+
+   1️⃣  Kiểm tra kết nối:
+       
+       psql -U postgres -h localhost -p 5432 -c "\l"
+
+   2️⃣  Xem tất cả databases:
+       
+       psql -U postgres -h localhost -p 5432 -c "SELECT datname FROM pg_database WHERE datname IN ('userdb', 'tourdb', 'bookingdb', 'paymentdb');"
+
+   3️⃣  Xem tất cả tables:
+       
+       psql -U postgres -h localhost -p 5432 -d userdb -c "\dt"
+
+   4️⃣  Đếm records:
+       
+       psql -U postgres -h localhost -p 5432 -d userdb -c "SELECT COUNT(*) FROM users;"
+       psql -U postgres -h localhost -p 5432 -d userdb -c "SELECT COUNT(*) FROM tours;"
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                      DATABASE ARCHITECTURE                                  ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+   ┌──────────────────────────────────────────────────────────┐
+   │          POSTGRES INSTANCE 1 (Port 5432)                │
+   ├──────────────────────────────────────────────────────────┤
+   │                                                          │
+   │  📦 Database: userdb                                    │
+   │     ├─ users ...................... User accounts        │
+   │     └─ user_verification ......... Email verification   │
+   │                                                          │
+   │  📦 Database: tourdb                                    │
+   │     ├─ tours ...................... Tour packages       │
+   │     ├─ departures ................ Tour schedules       │
+   │     ├─ tour_schedules ........... Day-by-day itinerary │
+   │     ├─ tour_images ............... Tour photos          │
+   │     ├─ tour_discounts ........... Promotions           │
+   │     ├─ tour_logs ................. Audit logs           │
+   │     ├─ regions & provinces ...... Location data        │
+   │     └─ custom_tours ............. Custom requests      │
+   │                                                          │
+   └──────────────────────────────────────────────────────────┘
+
+   ┌──────────────────────────────────────────────────────────┐
+   │          POSTGRES INSTANCE 2 (Port 5433)                │
+   ├──────────────────────────────────────────────────────────┤
+   │                                                          │
+   │  📦 Database: bookingdb                                 │
+   │     ├─ bookings .................. Booking records      │
+   │     ├─ booking_guests ........... Guest information    │
+   │     └─ booking_logs ............. Audit logs           │
+   │                                                          │
+   └──────────────────────────────────────────────────────────┘
+
+   ┌──────────────────────────────────────────────────────────┐
+   │          POSTGRES INSTANCE 3 (Port 5434)                │
+   ├──────────────────────────────────────────────────────────┤
+   │                                                          │
+   │  📦 Database: paymentdb                                 │
+   │     ├─ payments .................. Payment records      │
+   │     ├─ payment_methods ......... Saved payment methods │
+   │     ├─ payment_logs ............. Audit logs           │
+   │     └─ refunds ................... Refund records       │
+   │                                                          │
+   └──────────────────────────────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    CONNECTION CREDENTIALS                                   ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+   Userdb & Tourdb:
+   • Host: localhost
+   • Port: 5432
+   • Username: postgres
+   • Password: postgres
+   • Database: userdb hoặc tourdb
+
+   Bookingdb:
+   • Host: localhost
+   • Port: 5433
+   • Username: postgres
+   • Password: postgres
+   • Database: bookingdb
+
+   Paymentdb:
+   • Host: localhost
+   • Port: 5434
+   • Username: postgres
+   • Password: postgres
+   • Database: paymentdb
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    SQL SCRIPTS DESCRIPTION                                  ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+   📄 init-databases.sql
+      └─ Tạo schema + tables cho userdb & tourdb
+      └─ Tạo ENUMs, indexes, foreign keys
+      └─ ⏱️  Chạy lần đầu
+
+   📄 init-booking-db.sql
+      └─ Tạo schema + tables cho bookingdb
+      └─ Tạo booking, booking_guests, booking_logs tables
+      └─ ⏱️  Chạy lần đầu
+
+   📄 init-payment-db.sql
+      └─ Tạo schema + tables cho paymentdb
+      └─ Tạo payments, payment_methods, payment_logs tables
+      └─ ⏱️  Chạy lần đầu
+
+   📄 script_data.sql
+      └─ Insert dữ liệu mẫu (users, tours, departures, etc.)
+      └─ ⏱️  Optional - bạn có thể bỏ qua nếu muốn test trống
+
+   📄 seed_01_userdb.sql, seed_02_tourdb.sql, seed_03_bookingdb.sql, seed_04_paymentdb.sql
+      └─ Seed dữ liệu riêng cho từng database
+      └─ ⏱️  Alternative thay cho script_data.sql
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                      TROUBLESHOOTING                                        ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+   ❌ "Connection refused"
+      → Kiểm tra PostgreSQL service đã start?
+      → Kiểm tra port 5432, 5433, 5434 không bị conflict?
+      → docker-compose ps
+
+   ❌ "Database already exists"
+      → DROP DATABASE nó trước
+      → Hoặc reset: docker-compose down && docker volume prune
+
+   ❌ "psql: command not found"
+      → Cài PostgreSQL hoặc thêm vào PATH
+      → Windows: https://www.postgresql.org/download/windows/
+      → Mac: brew install postgresql@15
+      → Linux: sudo apt-get install postgresql-client
+
+   ❌ "Authentication failed"
+      → Kiểm tra username/password (mặc định: postgres/postgres)
+      → Kiểm tra host/port có đúng?
+
+   ❌ "Permission denied"
+      → Tạo .pgpass file
+      → Windows: %APPDATA%\postgresql\pgpass.conf
+      → Linux: ~/.pgpass (chmod 600)
+      → Format: localhost:5432:*:postgres:postgres
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    QUICK START CHECKLIST                                    ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+   ☐ Cài đặt Docker & Docker Compose (hoặc PostgreSQL)
+   ☐ Clone BookingTour repository
+   ☐ Chạy: docker-compose up -d postgres-db booking-db payment-db
+   ☐ Chờ ~15 giây
+   ☐ Kiểm tra: docker-compose ps
+   ☐ Test kết nối: psql -U postgres -h localhost -p 5432 -c "\l"
+   ☐ ✅ Done! Databases ready to use
+
+   ═══════════════════════════════════════════════════════════════════════════
+   Xem DATABASE_IMPORT_GUIDE.md để biết chi tiết hơn!
+   ═══════════════════════════════════════════════════════════════════════════
+

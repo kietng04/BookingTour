@@ -1,0 +1,271 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║           📚 DATABASE IMPORT GUIDES - COMPLETE MAP                         ║
+║                 Tất Cả File Hướng Dẫn + Cách Dùng                          ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                                            ┃
+┃  🚀 BẮTĐẦU TỪDÂY! (Nếu bạn không biết phải làm gì)                      ┃
+┃                                                                            ┃
+┃  Mở file: START_HERE.md                                                  ┃
+┃                                                                            ┃
+┃  Nội dung: 3 lựa chọn quick, instructions ngắn gọn                       ┃
+┃  Thời gian: 1-2 phút                                                     ┃
+┃                                                                            ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+                                     ↓
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                                                                            │
+│               📋 Chọn File Hướng Dẫn Phù Hợp Với Bạn                      │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────┬──────────────────────────────────────────┐
+│                                 │                                          │
+│  ⚡ NHANH NHẤT (TL;DR)           │  📘 CHI TIẾT (FULL)                     │
+│  Chỉ cần commands               │  Hướng dẫn đầy đủ                      │
+│                                 │                                          │
+│  File: IMPORT_DB_SUMMARY.txt    │  File: DATABASE_IMPORT_GUIDE.md         │
+│  Thời gian: 1 phút              │  Thời gian: 10-15 phút                 │
+│                                 │                                          │
+│  Nội dung:                      │  Nội dung:                             │
+│  ✓ 3 commands chính             │  ✓ 5 cách import                       │
+│  ✓ Quick check                  │  ✓ Từng bước chi tiết                  │
+│  ✓ Troubleshooting              │  ✓ DBeaver GUI method                  │
+│                                 │  ✓ Backup restore                      │
+│                                 │  ✓ Spring Boot config                  │
+│                                 │  ✓ Troubleshooting chi tiết            │
+│                                 │                                          │
+├─────────────────────────────────┼──────────────────────────────────────────┤
+│                                 │                                          │
+│  🌐 VISUAL (DIAGRAM)            │  📱 WEB UI (HTML)                       │
+│  ASCII diagram + text           │  Beautiful web interface                │
+│                                 │                                          │
+│  File: DATABASE_SETUP.txt       │  File: DATABASE_IMPORT_QUICK_GUIDE.html │
+│  Thời gian: 5 phút              │  Thời gian: 5 phút                     │
+│                                 │  Mở bằng: Browser (Chrome, Firefox)    │
+│                                 │                                          │
+│  Nội dung:                      │  Nội dung:                             │
+│  ✓ 3 cách import diagram        │  ✓ Interactive sections                │
+│  ✓ Database architecture        │  ✓ Beautiful styling                   │
+│  ✓ Connection credentials       │  ✓ Easy to copy-paste                  │
+│  ✓ SQL scripts description      │  ✓ Mobile responsive                   │
+│                                 │                                          │
+└─────────────────────────────────┴──────────────────────────────────────────┘
+
+                                     ↓
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                                                                            │
+│                    🔧 SCRIPTS TỰ ĐỘNG (INTERACTIVE)                        │
+│                                                                            │
+│  Windows:  import-db.bat                                                  │
+│  Linux:    import-db.sh                                                   │
+│                                                                            │
+│  Lợi ích: Menu tương tác, 6 lựa chọn khác nhau                           │
+│  Thời gian: Chọn option 1 → Done trong 5-10 giây                         │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+                                     ↓
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                                                                            │
+│              📚 INDEX & MAP (Nếu bạn muốn tìm hiểu thêm)                   │
+│                                                                            │
+│  File: DATABASE_FILES_README.md                                           │
+│  File: GUIDE_MAP.txt (file này)                                           │
+│                                                                            │
+│  Nội dung:                                                                │
+│  ✓ Index tất cả files                                                     │
+│  ✓ Mô tả từng file                                                       │
+│  ✓ Nên đọc cái nào                                                       │
+│  ✓ Checklist hoàn chỉnh                                                  │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+                                     ↓
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                                            ┃
+┃                    ✅ READY TO GO - START IMPORTING!                      ┃
+┃                                                                            ┃
+┃  Recommended: Chỉ chạy 1 lệnh này:                                        ┃
+┃                                                                            ┃
+┃  docker-compose up -d postgres-db booking-db payment-db                  ┃
+┃                                                                            ┃
+┃  Thời gian: ~15 giây                                                      ┃
+┃  Done!                                                                     ┃
+┃                                                                            ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📊 QUICK REFERENCE TABLE
+
+┌─────────────────────┬──────────────────┬─────────────┬──────────────────────┐
+│ File                │ Mục Đích         │ Thời Gian   │ Thích Hợp Cho        │
+├─────────────────────┼──────────────────┼─────────────┼──────────────────────┤
+│ START_HERE.md       │ Bắt đầu          │ 1-2 phút    │ Người mới             │
+│                     │                  │             │                      │
+│ IMPORT_DB_SUMMARY   │ TL;DR            │ 1 phút      │ Người vội             │
+│                     │                  │             │                      │
+│ QUICK_START_DB.md   │ Quick start      │ 2-3 phút    │ Người sắp code        │
+│                     │                  │             │                      │
+│ DATABASE_SETUP.txt  │ Diagram ASCII    │ 5 phút      │ Người thích hình vẽ   │
+│                     │                  │             │                      │
+│ DATABASE_IMPORT_    │ Chi tiết 100%    │ 10-15 phút  │ Người muốn hiểu sâu   │
+│ GUIDE.md            │                  │             │                      │
+│                     │                  │             │                      │
+│ DATABASE_IMPORT_    │ Web UI           │ 5 phút      │ Người muốn UI đẹp     │
+│ QUICK_GUIDE.html    │                  │             │                      │
+│                     │                  │             │                      │
+│ DATABASE_FILES_     │ Index + Map      │ 3 phút      │ Người muốn overview   │
+│ README.md           │                  │             │                      │
+│                     │                  │             │                      │
+│ import-db.bat       │ Script Windows   │ 5 giây      │ Người dùng Windows    │
+│                     │                  │             │                      │
+│ import-db.sh        │ Script Linux     │ 5 giây      │ Người dùng Linux/Mac  │
+│                     │                  │             │                      │
+│ GUIDE_MAP.txt       │ Map này          │ 2 phút      │ Để biết nên đọc cái nào│
+│                     │                  │             │                      │
+└─────────────────────┴──────────────────┴─────────────┴──────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 DECISION TREE - NÊN ĐỌC CÁI NÀO?
+
+┌─ Bạn muốn làm gì?
+│
+├─ "Chỉ cần chạy lệnh" → IMPORT_DB_SUMMARY.txt
+│
+├─ "Quick start" → START_HERE.md hoặc QUICK_START_DB.md
+│
+├─ "Hiểu chi tiết" → DATABASE_IMPORT_GUIDE.md
+│
+├─ "Nhìn diagram" → DATABASE_SETUP.txt
+│
+├─ "UI đẹp" → DATABASE_IMPORT_QUICK_GUIDE.html
+│
+├─ "Index/Map" → DATABASE_FILES_README.md
+│
+└─ "Chạy script" → import-db.bat (Windows) hoặc import-db.sh (Linux/Mac)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ RECOMMENDED WORKFLOW
+
+1️⃣  Bạn ở đâu bây giờ?
+    → File: START_HERE.md (read now!)
+
+2️⃣  Chọn cách nào?
+    → Recommended: docker-compose up -d postgres-db booking-db payment-db
+
+3️⃣  Thành công?
+    → Check: IMPORT_DB_SUMMARY.txt (Verification section)
+
+4️⃣  Muốn hiểu sâu?
+    → Read: DATABASE_IMPORT_GUIDE.md
+
+5️⃣  Cần troubleshoot?
+    → Check: DATABASE_IMPORT_GUIDE.md → Troubleshooting section
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📝 FILES CREATED - SUMMARY
+
+Total Files Created:
+├── 9 Documentation Files (Markdown + Text + HTML)
+│   ├── START_HERE.md                        (Entry point)
+│   ├── IMPORT_DB_SUMMARY.txt               (TL;DR)
+│   ├── QUICK_START_DB.md                   (Quick)
+│   ├── DATABASE_SETUP.txt                  (Diagram)
+│   ├── DATABASE_IMPORT_GUIDE.md            (Full)
+│   ├── DATABASE_IMPORT_QUICK_GUIDE.html    (Web UI)
+│   ├── DATABASE_FILES_README.md            (Index)
+│   ├── GUIDE_MAP.txt                       (This file)
+│   └── IMPORT_DB_SUMMARY.txt               (Reference)
+│
+├── 2 Automation Scripts
+│   ├── import-db.bat                       (Windows)
+│   └── import-db.sh                        (Linux/Mac)
+│
+└── Original Files (sql-scripts)
+    ├── init-databases.sql
+    ├── init-booking-db.sql
+    ├── init-payment-db.sql
+    ├── script_data.sql
+    └── ... (seed scripts)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎓 LEARNING PATH
+
+Beginner:
+1. START_HERE.md (read)
+2. docker-compose up (execute)
+3. Done! ✅
+
+Intermediate:
+1. QUICK_START_DB.md (read)
+2. Choose method (script or command)
+3. Execute
+4. Done! ✅
+
+Advanced:
+1. DATABASE_IMPORT_GUIDE.md (read)
+2. Choose favorite method
+3. Execute
+4. Understand internals
+5. Optional: Read source SQL scripts
+6. Done! ✅
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✨ NEXT STEPS AFTER IMPORTING DATABASE
+
+✅ Database imported
+   ↓
+✅ Start all services: docker-compose up -d
+   ↓
+✅ Check services: docker-compose ps
+   ↓
+✅ Test API: curl http://localhost:8080/actuator/health
+   ↓
+✅ Import Postman collection: BookingTour.postman_collection.json
+   ↓
+✅ Start coding! 🚀
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 THE ULTIMATE QUICK REFERENCE
+
+┏────────────────────────────────────────────────────────────────────────────┓
+┃                                                                            ┃
+┃  COMMAND TO RULE THEM ALL:                                               ┃
+┃                                                                            ┃
+┃  docker-compose up -d postgres-db booking-db payment-db                  ┃
+┃                                                                            ┃
+┃  That's it! You're done! ✨                                               ┃
+┃                                                                            ┃
+┗────────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Bây giờ bạn có tất cả tools bạn cần!
+Chọn 1 file từ trên và bắt đầu thôi! 🚀
+
+Questions? Xem tất cả files trong thư mục BookingTour root! 📁
+
+═══════════════════════════════════════════════════════════════════════════════
+

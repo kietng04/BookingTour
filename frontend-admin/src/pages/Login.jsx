@@ -117,7 +117,7 @@ const Login = () => {
           <Input
             label="Email / Tên đăng nhập"
             type="text"
-            placeholder="admin@gmail.com"
+            placeholder="Nhập email hoặc tên đăng nhập"
             autoComplete="username"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -149,12 +149,6 @@ const Login = () => {
             {submitting ? 'Đang xử lý...' : 'Đăng nhập'}
           </Button>
         </form>
-        <div className="mt-6 rounded-lg border border-slate-600/50 bg-slate-800/50 px-4 py-3">
-          <p className="text-xs text-slate-300 mb-2 font-medium">Thông tin đăng nhập mặc định:</p>
-          <p className="text-xs text-slate-400">Email: <span className="text-slate-200 font-mono">admin@gmail.com</span></p>
-          <p className="text-xs text-slate-400">Password: <span className="text-slate-200 font-mono">admin</span></p>
-          <p className="text-xs text-slate-500 mt-2">💡 Để tạo tài khoản admin, gọi: <span className="text-primary-300 font-mono">POST /api/users/init-admin</span></p>
-        </div>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import com.example.tour.service.CustomTourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -32,14 +33,20 @@ public class CustomTourServiceImpl implements CustomTourService {
     public CustomTourResponse createCustomTour(Long userId, CreateCustomTourRequest request) {
         logger.info("Creating custom tour request for user ID: {}", userId);
 
+        // Validate userId not null
+        if (userId == null || userId <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "User ID không hợp lệ. Vui lòng đăng nhập lại để tiếp tục.");
+        }
+
         // Validate dates
         if (request.getEndDate().isBefore(request.getStartDate())) {
             throw new IllegalArgumentException("End date must be after or equal to start date");
         }
 
-        // Validate start date is in the future
+        // Validate start date is today or in the future (allow same-day bookings)
         if (request.getStartDate().isBefore(java.time.LocalDate.now())) {
-            throw new IllegalArgumentException("Start date must be in the future");
+            throw new IllegalArgumentException("Start date must be today or in the future");
         }
 
         // Create custom tour entity
@@ -55,10 +62,26 @@ public class CustomTourServiceImpl implements CustomTourService {
         customTour.setDescription(request.getDescription());
         customTour.setStatus(CustomTour.CustomTourStatus.PENDING);
 
-        CustomTour saved = customTourRepository.save(customTour);
-        logger.info("Custom tour request created with ID: {}", saved.getId());
+        // Save with proper error handling for foreign key constraints
+        try {
+            CustomTour saved = customTourRepository.save(customTour);
+            logger.info("Custom tour request created with ID: {}", saved.getId());
+            return new CustomTourResponse(saved);
+        } catch (DataIntegrityViolationException e) {
+            logger.error("Failed to create custom tour for user {}: {}", userId, e.getMessage());
 
-        return new CustomTourResponse(saved);
+            // Check if it's a foreign key constraint violation on user_id
+            if (e.getMessage() != null && e.getMessage().contains("custom_tours_user_id_fkey")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        String.format("LỖI: User ID %d không tồn tại trong hệ thống.\n" +
+                                "Có thể tài khoản của bạn đã bị xóa hoặc phiên đăng nhập đã hết hạn.\n" +
+                                "Vui lòng đăng xuất và đăng nhập lại để tiếp tục.", userId));
+            }
+
+            // Other data integrity issues
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Không thể tạo yêu cầu tour tùy chỉnh. Vui lòng kiểm tra lại thông tin.");
+        }
     }
 
     @Override

@@ -177,7 +177,12 @@ public class TourServiceImpl implements TourService {
     public Tour updateTour(Long id, UpdateTourRequest request) {
         Tour tour = tourRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với id = " + id));
-       
+
+        // Validation: Cannot update tour that has ended
+        if (tour.getStatus() == Tour.TourStatus.END) {
+            throw new IllegalStateException("Cannot update tour that has ended (status: END)");
+        }
+
         if (request.getTourName() != null) {
             validateTourName(request.getTourName());
             tour.setTourName(request.getTourName());
@@ -195,11 +200,15 @@ public class TourServiceImpl implements TourService {
             validateDescription(request.getDescription());
             tour.setDescription(request.getDescription());
         }
-        if (request.getDays() != null)
-            tour.setDays(request.getDays());
 
-        if (request.getNights() != null)
-            tour.setNights(request.getNights());
+        // Validate and update days & nights together to keep them consistent
+        if (request.getDays() != null || request.getNights() != null) {
+            Integer newDays = request.getDays() != null ? request.getDays() : tour.getDays();
+            Integer newNights = request.getNights() != null ? request.getNights() : tour.getNights();
+            validateDayAndNight(newDays, newNights);
+            tour.setDays(newDays);
+            tour.setNights(newNights);
+        }
 
         if (request.getDeparturePoint() != null)
             tour.setDeparturePoint(request.getDeparturePoint());
@@ -251,7 +260,12 @@ public class TourServiceImpl implements TourService {
     public void deleteTour(Long id) {
         Tour tour = tourRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với id = " + id));
-        
+
+        // Validation: Cannot delete tour that has ended
+        if (tour.getStatus() == Tour.TourStatus.END) {
+            throw new IllegalStateException("Cannot delete tour that has ended (status: END)");
+        }
+
         tour.setStatus(Tour.TourStatus.UNACTIVE);
         tourRepository.save(tour);
     }
@@ -280,11 +294,17 @@ public class TourServiceImpl implements TourService {
     }
 
     private void validateDayAndNight(Integer day, Integer night){
-        if ( day == null || day <= 0)
+        if (day == null || day <= 0) {
             throw new IllegalArgumentException("Số ngày phải là số nguyên dương");
-        if ( night == null || night < 0)
+        }
+        if (night == null || night <= 0) {
             throw new IllegalArgumentException("Số đêm phải là số nguyên dương");
-        
+        }
+
+        // Business rule: days and nights must differ by exactly 1
+        if (Math.abs(day - night) != 1) {
+            throw new IllegalArgumentException("Số ngày và số đêm phải chênh lệch đúng 1 (ví dụ: 3 ngày 2 đêm, 4 ngày 3 đêm).");
+        }
     }
    
     private void validateLocation(String departurePoint, String mainDestination){

@@ -70,7 +70,9 @@ public class RabbitMQConfig {
 
     @Bean
     public Binding bindingPaymentFailed(Queue paymentEventsQueue, DirectExchange paymentExchange) {
+
         return BindingBuilder.bind(paymentEventsQueue).to(paymentExchange).with(ROUTING_KEY_FAILED);
+        
     }
 
     @Bean

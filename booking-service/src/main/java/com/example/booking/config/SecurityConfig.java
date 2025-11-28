@@ -1,6 +1,6 @@
-package com.example.tour.config;
+package com.example.booking.config;
 
-import com.example.tour.filter.JwtAuthenticationFilter;
+import com.example.booking.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,20 +22,12 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints - no authentication required
+                        // Public endpoints
                         .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/tours/**").permitAll()
-                        .requestMatchers("/regions/**").permitAll()
-                        .requestMatchers("/provinces/**").permitAll()
                         
-                        // Custom tours - require authentication
-                        .requestMatchers("/custom-tours/**").authenticated()
-                        
-                        // Reviews - require authentication for POST/PUT/DELETE
-                        .requestMatchers("POST", "/reviews/**").authenticated()
-                        .requestMatchers("PUT", "/reviews/**").authenticated()
-                        .requestMatchers("DELETE", "/reviews/**").authenticated()
-                        .requestMatchers("GET", "/reviews/**").permitAll()
+                        // All booking endpoints require authentication
+                        .requestMatchers("/bookings/**").authenticated()
+                        .requestMatchers("/export/**").authenticated()
                         
                         // All other requests require authentication
                         .anyRequest().authenticated()
@@ -48,5 +40,8 @@ public class SecurityConfig {
         return http.build();
     }
 }
+
+
+
 
 
