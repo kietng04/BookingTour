@@ -13,54 +13,36 @@ import java.util.List;
 @Repository
 public interface CustomTourRepository extends JpaRepository<CustomTour, Long> {
 
-    /**
-     * Find all custom tours by user ID
-     */
+
     List<CustomTour> findByUserId(Long userId);
 
-    /**
-     * Find all custom tours by user ID, ordered by creation date descending
-     */
+
     @Query("SELECT c FROM CustomTour c WHERE c.userId = :userId ORDER BY c.createdAt DESC")
     List<CustomTour> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
 
-    /**
-     * Find custom tours by status
-     */
+
     List<CustomTour> findByStatus(CustomTour.CustomTourStatus status);
 
-    /**
-     * Find custom tours by status with pagination
-     */
+
     Page<CustomTour> findByStatus(CustomTour.CustomTourStatus status, Pageable pageable);
 
-    /**
-     * Find all custom tours ordered by creation date descending
-     */
+
     @Query("SELECT c FROM CustomTour c ORDER BY c.createdAt DESC")
     Page<CustomTour> findAllOrderByCreatedAtDesc(Pageable pageable);
 
-    /**
-     * Find custom tours by status ordered by creation date descending
-     */
+
     @Query("SELECT c FROM CustomTour c WHERE c.status = :status ORDER BY c.createdAt DESC")
     Page<CustomTour> findByStatusOrderByCreatedAtDesc(
         @Param("status") CustomTour.CustomTourStatus status,
         Pageable pageable);
 
-    /**
-     * Count custom tours by status
-     */
+
     long countByStatus(CustomTour.CustomTourStatus status);
 
-    /**
-     * Count custom tours by user ID
-     */
+
     long countByUserId(Long userId);
 
-    /**
-     * Find custom tours by multiple filters
-     */
+
     @Query("""
         SELECT c FROM CustomTour c
         WHERE

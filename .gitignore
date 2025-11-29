@@ -29,3 +29,7 @@ frontend-admin/dist/
 frontend-admin/.vite/
 
 .codex
+
+# Local secrets
+/.env
+/.env.mail

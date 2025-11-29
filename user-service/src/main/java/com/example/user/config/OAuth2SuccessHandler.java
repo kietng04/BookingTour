@@ -33,18 +33,18 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String providerId = oAuth2User.getName();
 
         Optional<User> userOpt = userRepository.findByProviderId(providerId);
-        
+
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             String jwtToken = jwtUtil.generateToken(user.getUsername(), user.getEmail());
-            
+
             String redirectUrl = String.format(
                 "http://localhost:3000/auth/callback?token=%s&username=%s&email=%s",
                 URLEncoder.encode(jwtToken, StandardCharsets.UTF_8),
                 URLEncoder.encode(user.getUsername(), StandardCharsets.UTF_8),
                 URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8)
             );
-            
+
             response.sendRedirect(redirectUrl);
         } else {
             response.sendRedirect("http://localhost:3000/auth/error?message=User not found");

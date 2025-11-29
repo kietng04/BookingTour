@@ -84,13 +84,13 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.CONFIRMED);
         Booking confirmedBooking = bookingRepository.save(booking);
 
-        // Send email notification via RabbitMQ
+
         try {
             publishBookingConfirmedEvent(confirmedBooking);
             log.info("Booking {} confirmed successfully and email notification sent", bookingId);
         } catch (Exception e) {
             log.error("Failed to send email notification for booking {}", bookingId, e);
-            // Don't fail the booking confirmation if email fails
+
         }
 
         return confirmedBooking;
@@ -105,7 +105,7 @@ public class BookingServiceImpl implements BookingService {
                     "Booking is already cancelled");
         }
 
-        // Allow canceling both PENDING and CONFIRMED bookings (admin can cancel confirmed bookings)
+
         if (booking.getStatus() != BookingStatus.PENDING && booking.getStatus() != BookingStatus.CONFIRMED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Cannot cancel booking with status: " + booking.getStatus());
@@ -114,15 +114,15 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.CANCELLED);
         Booking cancelledBooking = bookingRepository.save(booking);
 
-        // Cancel payment in payment-service
+
         try {
-            String paymentServiceUrl = "http://localhost:8084"; // payment-service direct URL
+            String paymentServiceUrl = "http://localhost:8084";
             String cancelUrl = paymentServiceUrl + "/payments/booking/" + bookingId + "/cancel";
             restTemplate.postForEntity(cancelUrl, null, Void.class);
             log.info("Payment for booking {} cancelled successfully", bookingId);
         } catch (Exception e) {
             log.error("Failed to cancel payment for booking {}: {}", bookingId, e.getMessage());
-            // Don't fail the booking cancellation if payment cancellation fails
+
         }
 
         log.info("Booking {} cancelled successfully", bookingId);
@@ -234,20 +234,18 @@ public class BookingServiceImpl implements BookingService {
         };
     }
 
-    /**
-     * Publish booking confirmed event to RabbitMQ for email notification
-     */
+
     private void publishBookingConfirmedEvent(Booking booking) {
-        // Fetch user information
+
         Map<String, Object> user = fetchUserInfo(booking.getUserId());
         String userEmail = (String) user.getOrDefault("email", "N/A");
         String userName = (String) user.getOrDefault("fullName", "Unknown");
 
-        // Fetch tour information
+
         Map<String, Object> tour = fetchTourInfo(booking.getTourId());
         String tourName = (String) tour.getOrDefault("tourName", "Tour #" + booking.getTourId());
 
-        // Fetch departure information to get start date
+
         Map<String, Object> departure = fetchDepartureInfo(booking.getTourId(), booking.getDepartureId());
         java.time.LocalDate departureDate = null;
         if (departure.containsKey("startDate")) {
@@ -263,7 +261,7 @@ public class BookingServiceImpl implements BookingService {
             }
         }
 
-        // Create event
+
         BookingConfirmedEvent event = new BookingConfirmedEvent(
                 booking.getId(),
                 booking.getUserId(),
@@ -274,11 +272,11 @@ public class BookingServiceImpl implements BookingService {
                 departureDate,
                 booking.getNumSeats(),
                 booking.getTotalAmount(),
-                "MOMO", // Default payment method
+                "MOMO",
                 booking.getCreatedAt().format(DATE_TIME_FORMATTER)
         );
 
-        // Publish to RabbitMQ
+
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.EMAIL_EXCHANGE,
                 RabbitMQConfig.EMAIL_BOOKING_CONFIRMED_KEY,
@@ -288,9 +286,7 @@ public class BookingServiceImpl implements BookingService {
         log.info("Published booking confirmed event for booking {}", booking.getId());
     }
 
-    /**
-     * Fetch user information from user-service
-     */
+
     private Map<String, Object> fetchUserInfo(Long userId) {
         try {
             String url = userServiceUrl + "/users/" + userId;
@@ -303,9 +299,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    /**
-     * Fetch tour information from tour-service
-     */
+
     private Map<String, Object> fetchTourInfo(Long tourId) {
         try {
             String url = tourServiceUrl + "/tours/" + tourId;
@@ -318,9 +312,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    /**
-     * Fetch departure information from tour-service
-     */
+
     private Map<String, Object> fetchDepartureInfo(Long tourId, Long departureId) {
         try {
             String url = tourServiceUrl + "/tours/" + tourId + "/departures/" + departureId;

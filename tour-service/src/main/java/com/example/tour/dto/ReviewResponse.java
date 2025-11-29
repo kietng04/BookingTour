@@ -42,7 +42,7 @@ public class ReviewResponse {
         this.updatedAt = review.getUpdatedAt();
     }
 
-    // Getters and Setters
+
 
     public Long getId() {
         return id;

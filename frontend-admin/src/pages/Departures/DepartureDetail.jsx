@@ -179,7 +179,7 @@ const DepartureDetail = () => {
       <div className="space-y-8">
         <Link to="/departures" className="inline-flex items-center gap-2 text-sm font-semibold text-primary-500">
           <ArrowLeft className="h-4 w-4" />
-          Back to departures
+          Quay lại danh sách chuyến đi
         </Link>
         <Card className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mb-4"></div>
@@ -195,7 +195,7 @@ const DepartureDetail = () => {
       <div className="space-y-8">
         <Link to="/departures" className="inline-flex items-center gap-2 text-sm font-semibold text-primary-500">
           <ArrowLeft className="h-4 w-4" />
-          Back to departures
+          Quay lại danh sách chuyến đi
         </Link>
         <Card className="text-center py-12">
           <svg className="mx-auto h-12 w-12 text-slate-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -214,7 +214,7 @@ const DepartureDetail = () => {
     <div className="space-y-8">
       <Link to="/departures" className="inline-flex items-center gap-2 text-sm font-semibold text-primary-500">
         <ArrowLeft className="h-4 w-4" />
-        Back to all departures
+        Quay lại tất cả chuyến đi
       </Link>
 
       {departure && (
@@ -222,7 +222,7 @@ const DepartureDetail = () => {
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-2xl font-semibold text-slate-900">{departure.tourName}</h1>
-              <p className="text-sm text-slate-500">Departure Details</p>
+              <p className="text-sm text-slate-500">Chi tiết chuyến đi</p>
             </div>
             <div className="flex gap-2">
               <Button
@@ -231,7 +231,7 @@ const DepartureDetail = () => {
                 className="flex items-center gap-2"
               >
                 <Edit className="h-4 w-4" />
-                Edit
+                Sửa
               </Button>
               <Button
                 onClick={handleDeleteClick}
@@ -241,7 +241,7 @@ const DepartureDetail = () => {
                 title={hasBookings && reservedSlots > 0 ? 'Cannot delete departure with bookings' : 'Delete departure'}
               >
                 <Trash2 className="h-4 w-4" />
-                Delete
+                Xóa
               </Button>
             </div>
           </div>
@@ -255,10 +255,10 @@ const DepartureDetail = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-amber-900">Cannot Delete</h3>
+                  <h3 className="text-sm font-medium text-amber-900">Không thể xóa</h3>
                   <p className="mt-1 text-sm text-amber-700">
-                    This departure has {reservedSlots} active booking(s) and cannot be deleted.
-                    Cancel all bookings before deleting the departure.
+                    Chuyến đi này có {reservedSlots} đặt chỗ hoạt động và không thể xóa.
+                    Hủy tất cả booking trước khi xóa chuyến đi.
                   </p>
                 </div>
               </div>
@@ -269,7 +269,7 @@ const DepartureDetail = () => {
             <Card className="space-y-3">
               <div className="flex items-center gap-2 text-primary-600">
                 <Calendar className="h-5 w-5" />
-                <h3 className="font-semibold text-slate-900">Departure Dates</h3>
+                <h3 className="font-semibold text-slate-900">Ngày chuyến đi</h3>
               </div>
               <div>
                 <p className="text-sm text-slate-900">
@@ -292,18 +292,17 @@ const DepartureDetail = () => {
             <Card className="space-y-3">
               <div className="flex items-center gap-2 text-primary-600">
                 <Users className="h-5 w-5" />
-                <h3 className="font-semibold text-slate-900">Availability</h3>
+                <h3 className="font-semibold text-slate-900">Số chỗ còn lại</h3>
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-900">{departure.remainingSlots}</p>
-                <p className="text-sm text-slate-500">of {departure.totalSlots} seats remaining</p>
+                <p className="text-sm text-slate-500">trên tổng {departure.totalSlots} chỗ còn lại</p>
                 <div className="mt-2 w-full bg-slate-200 rounded-full h-2">
                   <div
-                    className={`h-full rounded-full ${
-                      (departure.remainingSlots / departure.totalSlots) * 100 > 50
+                    className={`h-full rounded-full ${(departure.remainingSlots / departure.totalSlots) * 100 > 50
                         ? 'bg-green-500'
                         : 'bg-amber-500'
-                    }`}
+                      }`}
                     style={{
                       width: `${(departure.remainingSlots / departure.totalSlots) * 100}%`,
                     }}
@@ -315,7 +314,7 @@ const DepartureDetail = () => {
             <Card className="space-y-3">
               <div className="flex items-center gap-2 text-primary-600">
                 <MapPin className="h-5 w-5" />
-                <h3 className="font-semibold text-slate-900">Status</h3>
+                <h3 className="font-semibold text-slate-900">Trạng thái</h3>
               </div>
               <div>
                 <StatusPill status={departure.status} />
@@ -327,7 +326,7 @@ const DepartureDetail = () => {
       )}
 
       <div>
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">Customer Bookings</h2>
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">Danh sách đặt chỗ</h2>
         {loading ? (
           <Card className="text-center py-12">
             <p className="text-sm text-slate-500">Loading bookings...</p>
@@ -352,11 +351,10 @@ const DepartureDetail = () => {
         onClose={() => setShowDeleteDialog(false)}
         onConfirm={handleDeleteConfirm}
         title="Delete Departure"
-        message={`Are you sure you want to delete this departure? This action cannot be undone. ${
-          hasBookings
+        message={`Are you sure you want to delete this departure? This action cannot be undone. ${hasBookings
             ? 'All bookings associated with this departure will be affected.'
             : ''
-        }`}
+          }`}
         confirmText="Delete"
         cancelText="Cancel"
         variant="danger"

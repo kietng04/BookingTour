@@ -22,7 +22,7 @@ public class ReviewSummaryResponse {
         this.ratingDistribution = ratingDistribution;
     }
 
-    // Getters and Setters
+
 
     public Long getTotalReviews() {
         return totalReviews;

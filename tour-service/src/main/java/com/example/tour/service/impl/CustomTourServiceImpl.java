@@ -33,23 +33,23 @@ public class CustomTourServiceImpl implements CustomTourService {
     public CustomTourResponse createCustomTour(Long userId, CreateCustomTourRequest request) {
         logger.info("Creating custom tour request for user ID: {}", userId);
 
-        // Validate userId not null
+
         if (userId == null || userId <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "User ID không hợp lệ. Vui lòng đăng nhập lại để tiếp tục.");
         }
 
-        // Validate dates
+
         if (request.getEndDate().isBefore(request.getStartDate())) {
             throw new IllegalArgumentException("End date must be after or equal to start date");
         }
 
-        // Validate start date is today or in the future (allow same-day bookings)
+
         if (request.getStartDate().isBefore(java.time.LocalDate.now())) {
             throw new IllegalArgumentException("Start date must be today or in the future");
         }
 
-        // Create custom tour entity
+
         CustomTour customTour = new CustomTour();
         customTour.setUserId(userId);
         customTour.setTourName(request.getTourName());
@@ -62,7 +62,7 @@ public class CustomTourServiceImpl implements CustomTourService {
         customTour.setDescription(request.getDescription());
         customTour.setStatus(CustomTour.CustomTourStatus.PENDING);
 
-        // Save with proper error handling for foreign key constraints
+
         try {
             CustomTour saved = customTourRepository.save(customTour);
             logger.info("Custom tour request created with ID: {}", saved.getId());
@@ -70,7 +70,7 @@ public class CustomTourServiceImpl implements CustomTourService {
         } catch (DataIntegrityViolationException e) {
             logger.error("Failed to create custom tour for user {}: {}", userId, e.getMessage());
 
-            // Check if it's a foreign key constraint violation on user_id
+
             if (e.getMessage() != null && e.getMessage().contains("custom_tours_user_id_fkey")) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         String.format("LỖI: User ID %d không tồn tại trong hệ thống.\n" +
@@ -78,7 +78,7 @@ public class CustomTourServiceImpl implements CustomTourService {
                                 "Vui lòng đăng xuất và đăng nhập lại để tiếp tục.", userId));
             }
 
-            // Other data integrity issues
+
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Không thể tạo yêu cầu tour tùy chỉnh. Vui lòng kiểm tra lại thông tin.");
         }
@@ -131,7 +131,7 @@ public class CustomTourServiceImpl implements CustomTourService {
         logger.info("Fetching custom tours with filters - status: {}, userId: {}, keyword: {}",
                 status, userId, keyword);
 
-        // Sanitize keyword
+
         String searchKeyword = null;
         if (keyword != null && !keyword.trim().isEmpty()) {
             searchKeyword = keyword.trim().toLowerCase()
@@ -156,7 +156,7 @@ public class CustomTourServiceImpl implements CustomTourService {
                         "Custom tour not found with ID: " + id
                 ));
 
-        // Update status only
+
         customTour.setStatus(request.getStatus());
 
         CustomTour updated = customTourRepository.save(customTour);

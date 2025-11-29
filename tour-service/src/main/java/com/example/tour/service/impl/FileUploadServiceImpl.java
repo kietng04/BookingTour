@@ -21,7 +21,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     private static final Logger logger = LoggerFactory.getLogger(FileUploadServiceImpl.class);
 
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
     private static final List<String> ALLOWED_TYPES = Arrays.asList(
             "image/jpeg", "image/png", "image/jpg", "image/webp"
     );
@@ -36,13 +36,13 @@ public class FileUploadServiceImpl implements FileUploadService {
     public String uploadImage(MultipartFile file, String folder) throws IOException {
         logger.info("Uploading image: {} to folder: {}", file.getOriginalFilename(), folder);
 
-        // Validate file
+
         validateFile(file);
 
-        // Use default folder if not specified
+
         String targetFolder = (folder != null && !folder.isBlank()) ? folder : defaultFolder;
 
-        // Upload to Cloudinary with transformations
+
         Map<String, Object> uploadParams = ObjectUtils.asMap(
                 "folder", targetFolder,
                 "resource_type", "image",
@@ -78,22 +78,22 @@ public class FileUploadServiceImpl implements FileUploadService {
         }
 
         try {
-            // Example URL: https://res.cloudinary.com/demo/image/upload/v1234567890/tours/image-name.jpg
-            // We need: tours/image-name
 
-            // Split by "upload/"
+
+
+
             String[] parts = imageUrl.split("/upload/");
             if (parts.length < 2) {
                 return null;
             }
 
-            // Get the part after "upload/"
+
             String afterUpload = parts[1];
 
-            // Remove version (v1234567890)
+
             String withoutVersion = afterUpload.replaceFirst("v\\d+/", "");
 
-            // Remove file extension
+
             int lastDotIndex = withoutVersion.lastIndexOf('.');
             if (lastDotIndex > 0) {
                 return withoutVersion.substring(0, lastDotIndex);
@@ -107,19 +107,19 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
     private void validateFile(MultipartFile file) {
-        // Check if file is empty
+
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
         }
 
-        // Check file size
+
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new IllegalArgumentException(
                     String.format("File size exceeds maximum limit of %d MB", MAX_FILE_SIZE / (1024 * 1024))
             );
         }
 
-        // Check file type
+
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_TYPES.contains(contentType.toLowerCase())) {
             throw new IllegalArgumentException(

@@ -35,9 +35,7 @@ public class EmailService {
     @Value("${email.verification.code-length:6}")
     private int codeLength;
 
-    /**
-     * Gửi email xác thực với mã verification
-     */
+
     public void sendVerificationEmail(String toEmail, String fullName, String verificationCode) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -63,21 +61,19 @@ public class EmailService {
 
             helper.setText(htmlContent, true);
             mailSender.send(message);
-            
+
         } catch (MessagingException e) {
             sendPlainTextVerificationEmail(toEmail, fullName, verificationCode);
         }
     }
 
-    /**
-     * Gửi email xác thực dạng plain text (fallback)
-     */
+
     private void sendPlainTextVerificationEmail(String toEmail, String fullName, String verificationCode) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(toEmail);
         message.setSubject("Xác thực tài khoản BookingTour");
-        
+
         String content = String.format(
             "Xin chào %s,\n\n" +
             "Cảm ơn bạn đã đăng ký tài khoản BookingTour!\n\n" +
@@ -87,28 +83,24 @@ public class EmailService {
             "Đội ngũ BookingTour",
             fullName, verificationCode
         );
-        
+
         message.setText(content);
         mailSender.send(message);
     }
 
-    /**
-     * Tạo mã xác thực ngẫu nhiên
-     */
+
     public String generateVerificationCode() {
         Random random = new Random();
         StringBuilder code = new StringBuilder();
-        
+
         for (int i = 0; i < codeLength; i++) {
             code.append(random.nextInt(10));
         }
-        
+
         return code.toString();
     }
 
-    /**
-     * Gửi email chào mừng sau khi xác thực thành công
-     */
+
     public void sendWelcomeEmail(String toEmail, String fullName) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -125,7 +117,7 @@ public class EmailService {
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
-            
+
         } catch (MessagingException e) {
             sendPlainTextWelcomeEmail(toEmail, fullName);
         }
@@ -136,7 +128,7 @@ public class EmailService {
         message.setFrom(fromEmail);
         message.setTo(toEmail);
         message.setSubject("Chào mừng đến với BookingTour!");
-        
+
         String content = String.format(
             "Xin chào %s,\n\n" +
             "Chào mừng bạn đến với BookingTour!\n\n" +
@@ -151,16 +143,14 @@ public class EmailService {
             "Đội ngũ BookingTour",
             fullName
         );
-        
+
         message.setText(content);
         mailSender.send(message);
     }
 
-    /**
-     * Gửi email invoice đặt tour thành công (sau khi thanh toán)
-     */
-    public void sendBookingInvoiceEmail(String toEmail, String fullName, 
-                                        Long bookingId, String tourName, 
+
+    public void sendBookingInvoiceEmail(String toEmail, String fullName,
+                                        Long bookingId, String tourName,
                                         Integer numSeats, BigDecimal totalAmount,
                                         String departureDate, String paymentMethod) {
         try {
@@ -185,20 +175,20 @@ public class EmailService {
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
-            
+
         } catch (MessagingException e) {
             sendPlainTextBookingInvoice(toEmail, fullName, bookingId, tourName, numSeats, totalAmount);
         }
     }
 
-    private void sendPlainTextBookingInvoice(String toEmail, String fullName, 
-                                             Long bookingId, String tourName, 
+    private void sendPlainTextBookingInvoice(String toEmail, String fullName,
+                                             Long bookingId, String tourName,
                                              Integer numSeats, BigDecimal totalAmount) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(toEmail);
         message.setSubject("Xác nhận đặt tour thành công #" + bookingId);
-        
+
         String content = String.format(
             "Xin chào %s,\n\n" +
             "Cảm ơn bạn đã đặt tour tại BookingTour!\n\n" +
@@ -214,27 +204,25 @@ public class EmailService {
             "Đội ngũ BookingTour",
             fullName, bookingId, tourName, numSeats, totalAmount.doubleValue()
         );
-        
+
         message.setText(content);
         mailSender.send(message);
     }
 
-    /**
-     * Gửi email xác nhận đặt tour
-     */
-    public void sendBookingConfirmationEmail(String toEmail, String customerName, 
-                                           String bookingId, String tourName, 
+
+    public void sendBookingConfirmationEmail(String toEmail, String customerName,
+                                           String bookingId, String tourName,
                                            String departureDate, String numberOfPeople,
                                            String contactEmail, String contactPhone,
                                            String totalAmount, String paymentMethod,
                                            String paymentTime) {
         try {
-            sendHtmlBookingConfirmationEmail(toEmail, customerName, bookingId, tourName, 
-                                           departureDate, numberOfPeople, contactEmail, 
+            sendHtmlBookingConfirmationEmail(toEmail, customerName, bookingId, tourName,
+                                           departureDate, numberOfPeople, contactEmail,
                                            contactPhone, totalAmount, paymentMethod, paymentTime);
         } catch (Exception e) {
             logger.warn("Failed to send HTML booking confirmation email, falling back to plain text", e);
-            sendPlainTextBookingConfirmationEmail(toEmail, customerName, bookingId, tourName, 
+            sendPlainTextBookingConfirmationEmail(toEmail, customerName, bookingId, tourName,
                                                 departureDate, numberOfPeople, totalAmount);
         }
     }
@@ -247,11 +235,11 @@ public class EmailService {
                                                 String paymentTime) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        
+
         helper.setFrom(fromEmail);
         helper.setTo(toEmail);
         helper.setSubject("🎉 Xác nhận đặt tour thành công - BookingTour");
-        
+
         Context context = new Context();
         context.setVariable("customerName", customerName);
         context.setVariable("bookingId", bookingId);
@@ -263,10 +251,10 @@ public class EmailService {
         context.setVariable("totalAmount", totalAmount);
         context.setVariable("paymentMethod", paymentMethod);
         context.setVariable("paymentTime", paymentTime);
-        
+
         String htmlContent = templateEngine.process("booking-confirmation-email", context);
         helper.setText(htmlContent, true);
-        
+
         mailSender.send(message);
     }
 
@@ -278,7 +266,7 @@ public class EmailService {
         message.setFrom(fromEmail);
         message.setTo(toEmail);
         message.setSubject("Xác nhận đặt tour thành công - BookingTour");
-        
+
         String content = String.format(
             "Xin chào %s,\n\n" +
             "🎉 Chúng tôi xác nhận rằng đơn đặt tour của bạn đã được xử lý thành công!\n\n" +
@@ -301,14 +289,12 @@ public class EmailService {
             "📞 1900-xxxx",
             customerName, bookingId, tourName, departureDate, numberOfPeople, totalAmount
         );
-        
+
         message.setText(content);
         mailSender.send(message);
     }
 
-    /**
-     * Test email connectivity
-     */
+
     public boolean testEmailConnection() {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
@@ -316,7 +302,7 @@ public class EmailService {
             message.setTo(fromEmail);
             message.setSubject("Test Email Connection");
             message.setText("This is a test email to verify email configuration.");
-            
+
             mailSender.send(message);
             return true;
         } catch (Exception e) {

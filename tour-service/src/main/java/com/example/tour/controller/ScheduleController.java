@@ -40,7 +40,7 @@ public class ScheduleController {
             @PathVariable Long tourId,
             @PathVariable Long scheduleId,
             @RequestBody UpdateScheduleRequest request) {
-            
+
         TourSchedule schedule = scheduleService.updateSchedule(tourId, scheduleId, request);
         return ResponseEntity.ok(schedule);
     }
@@ -49,7 +49,7 @@ public class ScheduleController {
     public ResponseEntity<Void> deleteSchedule(
             @PathVariable Long tourId,
             @PathVariable Long scheduleId) {
-            
+
         scheduleService.deleteSchedule(tourId, scheduleId);
         return ResponseEntity.ok().build();
     }

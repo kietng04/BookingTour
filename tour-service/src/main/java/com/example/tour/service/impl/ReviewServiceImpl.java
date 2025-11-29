@@ -33,23 +33,23 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public ReviewResponse createReview(Long tourId, Long userId, CreateReviewRequest request) {
-        // Validate tour exists
+
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new RuntimeException("Tour not found with ID: " + tourId));
 
-        // Check if user already reviewed this tour
+
         boolean alreadyReviewed = reviewRepository.existsByTourIdAndUserIdAndStatusNot(tourId, userId, "REJECTED");
         if (alreadyReviewed) {
             throw new RuntimeException("You have already reviewed this tour");
         }
 
-        // Validate rating
+
         if (request.getRating() == null || request.getRating().compareTo(BigDecimal.ONE) < 0 ||
                 request.getRating().compareTo(BigDecimal.valueOf(5)) > 0) {
             throw new RuntimeException("Rating must be between 1.0 and 5.0");
         }
 
-        // Validate title length (10-200 characters)
+
         if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
             throw new RuntimeException("Title is required");
         }
@@ -60,7 +60,7 @@ public class ReviewServiceImpl implements ReviewService {
             throw new RuntimeException("Title must not exceed 200 characters");
         }
 
-        // Validate comment length (minimum 20 characters)
+
         if (request.getComment() == null || request.getComment().trim().isEmpty()) {
             throw new RuntimeException("Comment is required");
         }
@@ -68,7 +68,7 @@ public class ReviewServiceImpl implements ReviewService {
             throw new RuntimeException("Comment must be at least 20 characters");
         }
 
-        // Create review
+
         TourReview review = new TourReview();
         review.setTour(tour);
         review.setUserId(userId);
@@ -77,15 +77,15 @@ public class ReviewServiceImpl implements ReviewService {
         review.setTitle(request.getTitle());
         review.setComment(request.getComment());
         review.setBadges(request.getBadges());
-        review.setStatus("PENDING"); // Default to pending for moderation
+        review.setStatus("PENDING");
 
-        // Fetch user info from User Service to populate guestName and guestAvatar
+
         UserDTO userInfo = userServiceClient.getUserById(userId);
         if (userInfo != null) {
             review.setGuestName(userInfo.getFullName() != null ? userInfo.getFullName() : userInfo.getUsername());
             review.setGuestAvatar(userInfo.getAvatar());
         } else {
-            // Fallback if user-service is unavailable or user not found
+
             review.setGuestName("User " + userId);
             review.setGuestAvatar(null);
         }
@@ -100,12 +100,12 @@ public class ReviewServiceImpl implements ReviewService {
         TourReview review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found with ID: " + reviewId));
 
-        // Check ownership
+
         if (!review.getUserId().equals(userId)) {
             throw new RuntimeException("You can only update your own reviews");
         }
 
-        // Update fields
+
         if (request.getRating() != null) {
             if (request.getRating().compareTo(BigDecimal.ONE) < 0 ||
                     request.getRating().compareTo(BigDecimal.valueOf(5)) > 0) {
@@ -114,7 +114,7 @@ public class ReviewServiceImpl implements ReviewService {
             review.setRating(request.getRating().setScale(1, RoundingMode.HALF_UP));
         }
         if (request.getTitle() != null) {
-            // Validate title length (10-200 characters)
+
             if (request.getTitle().trim().length() < 10) {
                 throw new RuntimeException("Title must be at least 10 characters");
             }
@@ -124,7 +124,7 @@ public class ReviewServiceImpl implements ReviewService {
             review.setTitle(request.getTitle());
         }
         if (request.getComment() != null) {
-            // Validate comment length (minimum 20 characters)
+
             if (request.getComment().trim().length() < 20) {
                 throw new RuntimeException("Comment must be at least 20 characters");
             }
@@ -134,7 +134,7 @@ public class ReviewServiceImpl implements ReviewService {
             review.setBadges(request.getBadges());
         }
 
-        // Reset to PENDING after update (requires re-moderation)
+
         review.setStatus("PENDING");
 
         TourReview updated = reviewRepository.save(review);
@@ -147,7 +147,7 @@ public class ReviewServiceImpl implements ReviewService {
         TourReview review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found with ID: " + reviewId));
 
-        // Check ownership
+
         if (!review.getUserId().equals(userId)) {
             throw new RuntimeException("You can only delete your own reviews");
         }
@@ -165,10 +165,10 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ReviewSummaryResponse getReviewSummary(Long tourId) {
-        // Count approved reviews
+
         long totalReviews = reviewRepository.countByTourIdAndStatus(tourId, "APPROVED");
 
-        // Get average rating
+
         BigDecimal avgRating = reviewRepository.getAverageRatingByTourId(tourId);
         if (avgRating == null) {
             avgRating = BigDecimal.ZERO;
@@ -176,7 +176,7 @@ public class ReviewServiceImpl implements ReviewService {
             avgRating = avgRating.setScale(1, RoundingMode.HALF_UP);
         }
 
-        // Get rating distribution
+
         List<Object[]> distributionData = reviewRepository.getRatingDistribution(tourId);
         Map<Integer, Long> distribution = new HashMap<>();
         for (int i = 1; i <= 5; i++) {

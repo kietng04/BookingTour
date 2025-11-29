@@ -83,9 +83,6 @@ const UserList = () => {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-semibold text-slate-900">Quản lý người dùng</h1>
-        <p className="text-sm text-slate-500">
-          Kích hoạt hoặc vô hiệu hóa tài khoản người dùng. Tài khoản bị vô hiệu hóa không thể đăng nhập.
-        </p>
       </div>
 
       {loading ? (

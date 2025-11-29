@@ -16,10 +16,7 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
-    /**
-     * Get all approved reviews (public endpoint for Reviews page)
-     * GET /reviews/approved?minRating=4.0
-     */
+
     @GetMapping("/approved")
     public ResponseEntity<List<ReviewResponse>> getAllApprovedReviews(
             @RequestParam(required = false) BigDecimal minRating) {
@@ -27,10 +24,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
-    /**
-     * Get all approved reviews for a tour (public endpoint)
-     * GET /tours/{tourId}/reviews?minRating=4.0
-     */
+
     @GetMapping("/tours/{tourId}")
     public ResponseEntity<List<ReviewResponse>> getApprovedReviews(
             @PathVariable Long tourId,
@@ -39,28 +33,21 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
-    /**
-     * Get review summary/statistics for a tour (public endpoint)
-     * GET /reviews/tours/{tourId}/summary
-     */
+
     @GetMapping("/tours/{tourId}/summary")
     public ResponseEntity<ReviewSummaryResponse> getReviewSummary(@PathVariable Long tourId) {
         ReviewSummaryResponse summary = reviewService.getReviewSummary(tourId);
         return ResponseEntity.ok(summary);
     }
 
-    /**
-     * Create a new review (authenticated endpoint)
-     * POST /reviews/tours/{tourId}
-     * Header: X-User-Id (for now, will use JWT in future)
-     */
+
     @PostMapping("/tours/{tourId}")
     public ResponseEntity<?> createReview(
             @PathVariable Long tourId,
             @RequestHeader(value = "X-User-Id", required = false) Long userId,
             @RequestBody CreateReviewRequest request) {
         try {
-            // TODO: Extract userId from JWT token instead of header
+
             if (userId == null) {
                 return ResponseEntity.badRequest()
                         .body("{\"error\": \"User authentication required\"}");
@@ -74,11 +61,7 @@ public class ReviewController {
         }
     }
 
-    /**
-     * Update own review (authenticated endpoint)
-     * PUT /reviews/{reviewId}
-     * Header: X-User-Id (for now, will use JWT in future)
-     */
+
     @PutMapping("/{reviewId}")
     public ResponseEntity<?> updateReview(
             @PathVariable Long reviewId,
@@ -98,11 +81,7 @@ public class ReviewController {
         }
     }
 
-    /**
-     * Delete own review (authenticated endpoint)
-     * DELETE /reviews/{reviewId}
-     * Header: X-User-Id (for now, will use JWT in future)
-     */
+
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<?> deleteReview(
             @PathVariable Long reviewId,
@@ -121,11 +100,7 @@ public class ReviewController {
         }
     }
 
-    /**
-     * Get current user's reviews (authenticated endpoint)
-     * GET /reviews/my-reviews
-     * Header: X-User-Id (for now, will use JWT in future)
-     */
+
     @GetMapping("/my-reviews")
     public ResponseEntity<?> getMyReviews(
             @RequestHeader(value = "X-User-Id", required = false) Long userId) {
@@ -143,10 +118,7 @@ public class ReviewController {
         }
     }
 
-    /**
-     * Get all reviews with filters (admin endpoint)
-     * GET /reviews/admin?tourId=1&status=PENDING&minRating=3.0
-     */
+
     @GetMapping("/admin")
     public ResponseEntity<List<ReviewResponse>> getAllReviews(
             @RequestParam(required = false) Long tourId,
@@ -156,10 +128,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
-    /**
-     * Update review status (admin endpoint)
-     * PATCH /reviews/admin/{reviewId}/status
-     */
+
     @PatchMapping("/admin/{reviewId}/status")
     public ResponseEntity<?> updateReviewStatus(
             @PathVariable Long reviewId,
@@ -173,10 +142,7 @@ public class ReviewController {
         }
     }
 
-    /**
-     * Delete any review (admin endpoint)
-     * DELETE /reviews/admin/{reviewId}
-     */
+
     @DeleteMapping("/admin/{reviewId}")
     public ResponseEntity<?> deleteReviewAdmin(@PathVariable Long reviewId) {
         try {

@@ -79,7 +79,7 @@ public class TourServiceImpl implements TourService {
 
 
 
-    
+
     @Override
     public Tour getTourById(Long id) {
         Tour tour = tourRepository.findById(id)
@@ -108,10 +108,10 @@ public class TourServiceImpl implements TourService {
         validateLocation(request.getDeparturePoint(), request.getMainDestination());
         validatePrice(request.getChildPrice(), request.getAdultPrice());
         validateDescription(request.getDescription());
-        
+
         if (request.getSchedules() != null && !request.getSchedules().isEmpty())
             validateSchedules(request.getSchedules(), request.getDays());
-        
+
         Tour tour = new Tour();
         tour.setTourName(request.getTourName().trim());
         if (request.getSlug() != null && !request.getSlug().isBlank()) {
@@ -127,18 +127,18 @@ public class TourServiceImpl implements TourService {
         tour.setAdultPrice(request.getAdultPrice());
         tour.setChildPrice(request.getChildPrice());
 
-        // Handle multiple images (new feature)
+
         if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
             boolean isFirst = true;
             for (String imageUrl : request.getImageUrls()) {
                 if (imageUrl != null && !imageUrl.isBlank()) {
                     TourImage tourImage = new TourImage();
                     tourImage.setImageUrl(imageUrl.trim());
-                    tourImage.setIsPrimary(isFirst); // First image is primary
+                    tourImage.setIsPrimary(isFirst);
                     tourImage.setTour(tour);
                     tour.getImages().add(tourImage);
 
-                    // Set heroImageUrl to first image for backward compatibility
+
                     if (isFirst) {
                         tour.setHeroImageUrl(imageUrl.trim());
                         isFirst = false;
@@ -146,11 +146,11 @@ public class TourServiceImpl implements TourService {
                 }
             }
         }
-        // Fallback to single heroImageUrl for backward compatibility
+
         else if (request.getHeroImageUrl() != null && !request.getHeroImageUrl().isBlank()) {
             tour.setHeroImageUrl(request.getHeroImageUrl().trim());
 
-            // Create TourImage entity for heroImageUrl with isPrimary=true
+
             TourImage heroImage = new TourImage();
             heroImage.setImageUrl(request.getHeroImageUrl().trim());
             heroImage.setIsPrimary(true);
@@ -178,7 +178,7 @@ public class TourServiceImpl implements TourService {
         Tour tour = tourRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với id = " + id));
 
-        // Validation: Cannot update tour that has ended
+
         if (tour.getStatus() == Tour.TourStatus.END) {
             throw new IllegalStateException("Cannot update tour that has ended (status: END)");
         }
@@ -201,7 +201,7 @@ public class TourServiceImpl implements TourService {
             tour.setDescription(request.getDescription());
         }
 
-        // Validate and update days & nights together to keep them consistent
+
         if (request.getDays() != null || request.getNights() != null) {
             Integer newDays = request.getDays() != null ? request.getDays() : tour.getDays();
             Integer newNights = request.getNights() != null ? request.getNights() : tour.getNights();
@@ -225,17 +225,17 @@ public class TourServiceImpl implements TourService {
         if (request.getHeroImageUrl() != null && !request.getHeroImageUrl().isBlank()) {
             tour.setHeroImageUrl(request.getHeroImageUrl().trim());
 
-            // Update or create TourImage entity for heroImageUrl
+
             TourImage existingPrimary = tour.getImages().stream()
                     .filter(img -> Boolean.TRUE.equals(img.getIsPrimary()))
                     .findFirst()
                     .orElse(null);
 
             if (existingPrimary != null) {
-                // Update existing primary image
+
                 existingPrimary.setImageUrl(request.getHeroImageUrl().trim());
             } else {
-                // Create new primary image
+
                 TourImage heroImage = new TourImage();
                 heroImage.setImageUrl(request.getHeroImageUrl().trim());
                 heroImage.setIsPrimary(true);
@@ -244,15 +244,15 @@ public class TourServiceImpl implements TourService {
             }
         }
 
-        // Validate prices after setting them
+
         if (request.getAdultPrice() != null || request.getChildPrice() != null) {
             validatePrice(tour.getChildPrice(), tour.getAdultPrice());
         }
-        
-        if (request.getStatus() != null) 
+
+        if (request.getStatus() != null)
             tour.setStatus(Tour.TourStatus.valueOf(request.getStatus()));
-        
-        
+
+
         return tourRepository.save(tour);
     }
 
@@ -261,7 +261,7 @@ public class TourServiceImpl implements TourService {
         Tour tour = tourRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với id = " + id));
 
-        // Validation: Cannot delete tour that has ended
+
         if (tour.getStatus() == Tour.TourStatus.END) {
             throw new IllegalStateException("Cannot delete tour that has ended (status: END)");
         }
@@ -275,22 +275,22 @@ public class TourServiceImpl implements TourService {
         String regex = "^[\\p{L}\\p{N}\\s,-]+$";
         if (name == null || name.isBlank())
             throw new IllegalArgumentException("Tên tour không được để trống");
-        
+
         name = name.trim();
-        if (name.length() < 5 || name.length() > 100) 
+        if (name.length() < 5 || name.length() > 100)
             throw new IllegalArgumentException("Tên tour phải có độ dài từ 5 đến 100 ký tự");
-        
+
         if (!name.matches(regex))
             throw new IllegalArgumentException("Tên tour chỉ được chứa chữ, số và khoảng trắng (có thể có dấu tiếng Việt)");
-        
+
     }
 
     private void validateProvinceAndRegion(Integer provinceId, Integer regionId){
-        if (provinceId == null || regionId == null) 
+        if (provinceId == null || regionId == null)
             throw new IllegalArgumentException("Vui lòng chọn khu vực và tỉnh/thành phố cho tour");
-        
 
-        
+
+
     }
 
     private void validateDayAndNight(Integer day, Integer night){
@@ -301,12 +301,12 @@ public class TourServiceImpl implements TourService {
             throw new IllegalArgumentException("Số đêm phải là số nguyên dương");
         }
 
-        // Business rule: days and nights must differ by exactly 1
+
         if (Math.abs(day - night) != 1) {
             throw new IllegalArgumentException("Số ngày và số đêm phải chênh lệch đúng 1 (ví dụ: 3 ngày 2 đêm, 4 ngày 3 đêm).");
         }
     }
-   
+
     private void validateLocation(String departurePoint, String mainDestination){
         if ( departurePoint == null || departurePoint.isBlank())
             throw new IllegalArgumentException("Điểm khởi hành không được để trống");
@@ -314,9 +314,9 @@ public class TourServiceImpl implements TourService {
             throw new IllegalArgumentException("Điểm đến chính không được để trống");
 
     }
-    
+
     private void validatePrice(BigDecimal childPrice, BigDecimal adultPrice){
-        // Allow 0 prices for promotional/free tours
+
         if ( adultPrice == null || adultPrice.compareTo(BigDecimal.ZERO) < 0)
             throw new IllegalArgumentException("Giá người lớn không được là số âm");
         if ( childPrice == null || childPrice.compareTo(BigDecimal.ZERO) < 0)
@@ -332,20 +332,20 @@ public class TourServiceImpl implements TourService {
     }
 
     private void validateSchedules(List<TourScheduleRequest> schedules, Integer totalDays) {
-        if (schedules == null || schedules.isEmpty()) 
+        if (schedules == null || schedules.isEmpty())
             throw new IllegalArgumentException("Lịch trình tour không được để trống");
-        
+
         Set<Integer> dayNumbers = new HashSet<>();
         for (TourScheduleRequest schedule : schedules) {
-            if (schedule.getDayNumber() == null || schedule.getDayNumber() <= 0) 
+            if (schedule.getDayNumber() == null || schedule.getDayNumber() <= 0)
                 throw new IllegalArgumentException("Số ngày trong lịch trình phải là số nguyên dương");
-            
-            if (schedule.getDayNumber() > totalDays) 
+
+            if (schedule.getDayNumber() > totalDays)
                 throw new IllegalArgumentException("Số ngày trong lịch trình không được vượt quá tổng số ngày của tour");
-            
-            if (!dayNumbers.add(schedule.getDayNumber())) 
+
+            if (!dayNumbers.add(schedule.getDayNumber()))
                 throw new IllegalArgumentException("Số ngày " + schedule.getDayNumber() + " bị trùng lặp trong lịch trình");
-            
+
             if (schedule.getScheduleDescription() == null || schedule.getScheduleDescription().isBlank())
                 throw new IllegalArgumentException("Mô tả lịch trình ngày " + schedule.getDayNumber() + " không được để trống");
 
@@ -355,11 +355,11 @@ public class TourServiceImpl implements TourService {
         .boxed()
         .toList();
 
-        if (!missingDays.isEmpty()) 
+        if (!missingDays.isEmpty())
             throw new IllegalArgumentException("Thiếu lịch trình cho các ngày: " + missingDays);
-        
-            
-        
+
+
+
     }
 }
 

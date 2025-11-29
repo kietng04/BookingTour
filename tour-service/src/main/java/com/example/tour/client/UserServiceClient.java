@@ -7,9 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * Client for communicating with user-service via service discovery
- */
+
 @Component
 public class UserServiceClient {
 
@@ -19,11 +17,7 @@ public class UserServiceClient {
     @Autowired
     private RestTemplate restTemplate;
 
-    /**
-     * Fetch user information by user ID from user-service
-     * @param userId the user ID
-     * @return UserDTO containing user information, or null if not found
-     */
+
     public UserDTO getUserById(Long userId) {
         try {
             String url = USER_SERVICE_URL + "/users/" + userId;
@@ -40,8 +34,8 @@ public class UserServiceClient {
             return user;
         } catch (Exception e) {
             logger.error("Error fetching user info for userId: {}. Error: {}", userId, e.getMessage());
-            // Return null if user-service is down or user not found
-            // ReviewService will handle this gracefully with fallback
+
+
             return null;
         }
     }

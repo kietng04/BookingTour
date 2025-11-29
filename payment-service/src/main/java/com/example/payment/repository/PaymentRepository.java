@@ -12,18 +12,18 @@ import java.util.Optional;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    
+
     Optional<Payment> findByBookingId(Long bookingId);
-    
+
     @Query("SELECT p FROM Payment p WHERE p.status = :status")
     Page<Payment> findByStatus(@Param("status") Payment.PaymentStatus status, Pageable pageable);
-    
+
     @Query("SELECT p FROM Payment p WHERE p.transactionId = :transactionId")
     Optional<Payment> findByTransactionId(@Param("transactionId") String transactionId);
-    
+
     @Query("SELECT COUNT(p) FROM Payment p WHERE p.status = 'COMPLETED'")
     Long countCompletedPayments();
-    
+
     @Query("SELECT SUM(p.amount) FROM Payment p WHERE p.status = 'COMPLETED'")
     java.math.BigDecimal sumCompletedPaymentAmounts();
 

@@ -166,7 +166,7 @@ public class PaymentService {
         Payment payment = paymentRepository.findByBookingId(bookingId)
                 .orElseThrow(() -> new EntityNotFoundException("Payment not found for booking " + bookingId));
 
-        // Only cancel if not already completed
+
         if (payment.getStatus() == PaymentStatus.COMPLETED) {
             log.warn("[PAYMENT-SERVICE] Cannot cancel completed payment for booking {}", bookingId);
             payment.setStatus(PaymentStatus.REFUNDED);

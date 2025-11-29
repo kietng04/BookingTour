@@ -137,9 +137,6 @@ const BookingList = () => {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-semibold text-slate-900">Danh sách đặt chỗ</h1>
-        <p className="text-sm text-slate-500">
-          Theo dõi các trạng thái: chờ xử lý → đã xác nhận → hoàn tất. Tương ứng với endpoint `/admin/bookings`.
-        </p>
       </div>
 
       {/* Filters */}

@@ -1,8 +1,6 @@
 package com.example.tour.dto;
 
-/**
- * DTO for User information fetched from user-service
- */
+
 public class UserDTO {
     private Long id;
     private String username;

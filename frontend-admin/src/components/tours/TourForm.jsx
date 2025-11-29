@@ -90,7 +90,7 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
     const fetchProvinces = async () => {
       // Use selectedRegionId from watch, or fallback to initialValues.regionId
       const regionId = selectedRegionId || (initialValues?.regionId ? Number(initialValues.regionId) : null);
-      
+
       if (!regionId) {
         setProvinces([]);
         return;
@@ -100,7 +100,7 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
         setLoadingProvinces(true);
         const data = await regionsAPI.getProvinces(regionId);
         setProvinces(data || []);
-        
+
         // After provinces are loaded, set provinceId from initialValues if available
         if (initialValues?.provinceId && data && data.length > 0) {
           const provinceIdNum = Number(initialValues.provinceId);
@@ -114,7 +114,7 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
         setLoadingProvinces(false);
       }
     };
-    
+
     // Only fetch if regions are loaded (to avoid race condition)
     if (!loadingRegions) {
       fetchProvinces();
@@ -192,8 +192,8 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
               key={`province-select-${watch('provinceId') || initialValues?.provinceId || 'empty'}-${provinces.length}`}
             >
               <option value="">
-                {!selectedRegionId && !initialValues?.regionId 
-                  ? 'Chọn vùng miền trước' 
+                {!selectedRegionId && !initialValues?.regionId
+                  ? 'Chọn vùng miền trước'
                   : (loadingProvinces ? 'Đang tải...' : 'Chọn tỉnh/thành phố')}
               </option>
               {provinces.map(province => (
@@ -299,9 +299,6 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
         {/* Tour Images */}
         <Card className="space-y-4">
           <h3 className="text-lg font-semibold text-slate-900">Ảnh tour</h3>
-          <p className="text-xs text-slate-500">
-            Tải nhiều ảnh lên Cloudinary. Ảnh đầu tiên sẽ là ảnh đại diện (banner chính).
-          </p>
 
           <ImageUpload
             onUploadSuccess={(imageUrls) => {
@@ -364,11 +361,6 @@ const TourForm = ({ onSubmit, initialValues, mode, submitting = false }) => {
           <h3 className="text-lg font-semibold text-slate-900">
             {mode === 'edit' ? 'Cập nhật tour' : 'Tạo tour mới'}
           </h3>
-          <p className="text-sm text-slate-500">
-            {mode === 'edit'
-              ? 'Lưu thay đổi vào database.'
-              : 'Tạo tour mới. Tour sẽ được lưu với trạng thái đã chọn.'}
-          </p>
           <Button type="submit" size="lg" className="w-full" disabled={submitting}>
             {submitting ? 'Đang xử lý...' : (mode === 'edit' ? 'Cập nhật' : 'Tạo mới')}
           </Button>

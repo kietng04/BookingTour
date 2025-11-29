@@ -1,4 +1,4 @@
-import { DollarSign, TicketPercent, Users as UsersIcon, Download, MessageCircle } from 'lucide-react';
+import { DollarSign, TicketPercent, Users as UsersIcon, Download } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard.jsx';
 import RevenueChart from '../components/dashboard/RevenueChart.jsx';
 import DateRangeFilter from '../components/dashboard/DateRangeFilter.jsx';
@@ -6,21 +6,19 @@ import TopToursChart from '../components/dashboard/TopToursChart.jsx';
 import Card from '../components/common/Card.jsx';
 import Button from '../components/common/Button.jsx';
 import { useEffect, useState } from 'react';
-import { dashboardAPI, exportAPI, reviewsAPI } from '../services/api.js';
+import { dashboardAPI, exportAPI } from '../services/api.js';
 
 const iconMap = {
   revenue: DollarSign,
   bookings: TicketPercent,
-  users: UsersIcon,
-  reviews: MessageCircle
+  users: UsersIcon
 };
 
 const Dashboard = () => {
   const [stats, setStats] = useState([
     { id: 'revenue', title: 'Doanh thu', value: '—', change: 0, subtitle: 'Từ booking đã xác nhận' },
     { id: 'bookings', title: 'Tổng đặt tour', value: '—', change: 0, subtitle: 'Tất cả trạng thái' },
-    { id: 'users', title: 'Người dùng', value: '—', change: 0, subtitle: 'Đã đặt tour' },
-    { id: 'reviews', title: 'Đánh giá', value: '—', change: 0, subtitle: 'Chờ duyệt' },
+    { id: 'users', title: 'Người dùng', value: '—', change: 0, subtitle: 'Đã đặt tour' }
   ]);
   const [revenueTrends, setRevenueTrends] = useState([]);
   const [topTours, setTopTours] = useState([]);
@@ -52,13 +50,11 @@ const Dashboard = () => {
       const [
         statsData,
         trendsData,
-        toursData,
-        reviewStatsData
+        toursData
       ] = await Promise.all([
         dashboardAPI.getStats(dateRange),
         dashboardAPI.getRevenueTrends(dateRange),
-        dashboardAPI.getTopTours({ limit: 5 }),
-        reviewsAPI.getOverallStats()
+        dashboardAPI.getTopTours({ limit: 5 })
       ]);
 
       if (statsData) {
@@ -83,13 +79,6 @@ const Dashboard = () => {
             value: String(statsData.users?.activeUsers || 0),
             change: 0,
             subtitle: 'Đã đặt tour'
-          },
-          {
-            id: 'reviews',
-            title: 'Đánh giá',
-            value: String(reviewStatsData?.total || 0),
-            change: 0,
-            subtitle: `${reviewStatsData?.pending || 0} chờ duyệt`
           }
         ];
         setStats(updatedStats);

@@ -21,11 +21,7 @@ public class DashboardController {
     @Autowired
     private DashboardService dashboardService;
 
-    /**
-     * Get overall dashboard statistics
-     * @param startDate Optional start date (default: 30 days ago)
-     * @param endDate Optional end date (default: today)
-     */
+
     @GetMapping("/stats")
     public ResponseEntity<DashboardStatsDTO> getDashboardStats(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -44,11 +40,7 @@ public class DashboardController {
         return ResponseEntity.ok(stats);
     }
 
-    /**
-     * Get revenue trends by day
-     * @param startDate Optional start date (default: 30 days ago)
-     * @param endDate Optional end date (default: today)
-     */
+
     @GetMapping("/revenue-trends")
     public ResponseEntity<List<RevenueTrendDTO>> getRevenueTrends(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -67,10 +59,7 @@ public class DashboardController {
         return ResponseEntity.ok(trends);
     }
 
-    /**
-     * Get top performing tours by revenue
-     * @param limit Number of top tours to return (default: 5)
-     */
+
     @GetMapping("/top-tours")
     public ResponseEntity<List<TopTourDTO>> getTopTours(
             @RequestParam(defaultValue = "5") int limit) {
@@ -81,9 +70,7 @@ public class DashboardController {
         return ResponseEntity.ok(topTours);
     }
 
-    /**
-     * Get booking distribution by status
-     */
+
     @GetMapping("/booking-status")
     public ResponseEntity<List<BookingStatusStatsDTO>> getBookingStatusStats() {
         log.info("GET /dashboard/booking-status");
@@ -92,9 +79,7 @@ public class DashboardController {
         return ResponseEntity.ok(statusStats);
     }
 
-    /**
-     * Get departure occupancy rates
-     */
+
     @GetMapping("/departure-occupancy")
     public ResponseEntity<List<DepartureOccupancyDTO>> getDepartureOccupancy() {
         log.info("GET /dashboard/departure-occupancy");

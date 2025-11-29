@@ -176,15 +176,15 @@ public class GoogleOAuthService {
 
         if (existingUser.isEmpty() && StringUtils.hasText(email)) {
             existingUser = userRepository.findByEmail(email);
-            
+
             if (existingUser.isPresent()) {
                 User user = existingUser.get();
-                
+
                 logger.info("Linking Google account to existing user: email={}", email);
                 user.setProvider("GOOGLE");
                 user.setProviderId(providerId);
                 user.setIsOAuthUser(true);
-                
+
                 if (!StringUtils.hasText(user.getAvatar())) {
                     user.setAvatar(userResponse.picture());
                 }
@@ -194,7 +194,7 @@ public class GoogleOAuthService {
                             : (StringUtils.hasText(userResponse.givenName()) ? userResponse.givenName() : providerId);
                     user.setFullName(fullName);
                 }
-                
+
                 return userRepository.save(user);
             }
         }
@@ -206,7 +206,7 @@ public class GoogleOAuthService {
             String baseUsername = deriveBaseUsername(userResponse);
             user.setUsername(generateUniqueUsername(baseUsername));
             user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
-            
+
             String fullName = StringUtils.hasText(userResponse.name())
                     ? userResponse.name()
                     : (StringUtils.hasText(userResponse.givenName()) ? userResponse.givenName() : providerId);

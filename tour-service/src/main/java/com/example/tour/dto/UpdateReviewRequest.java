@@ -9,7 +9,7 @@ public class UpdateReviewRequest {
     private String comment;
     private String[] badges;
 
-    // Getters and Setters
+
 
     public BigDecimal getRating() {
         return rating;

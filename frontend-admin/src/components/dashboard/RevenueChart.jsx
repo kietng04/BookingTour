@@ -6,8 +6,8 @@ const RevenueChart = ({ data }) => (
   <Card className="h-[320px]" padding="p-0">
     <div className="flex items-center justify-between px-6 pt-6">
       <div>
-        <p className="text-xs uppercase tracking-widest text-slate-400">Revenue analytics</p>
-        <h3 className="text-lg font-semibold text-slate-900">Rolling 12 months</h3>
+        <p className="text-xs uppercase tracking-widest text-slate-400">Phân tích doanh thu</p>
+        <h3 className="text-lg font-semibold text-slate-900">12 tháng gần nhất</h3>
       </div>
       <span className="rounded-full bg-success/10 px-3 py-1 text-xs font-semibold text-success">+18% YoY</span>
     </div>

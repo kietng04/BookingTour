@@ -22,17 +22,17 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+
                         .requestMatchers("/actuator/**").permitAll()
-                        
-                        // MoMo callback - no auth (verified by signature)
+
+
                         .requestMatchers("/payments/momo/callback").permitAll()
                         .requestMatchers("/payments/momo/webhook").permitAll()
-                        
-                        // All payment endpoints require authentication
+
+
                         .requestMatchers("/payments/**").authenticated()
-                        
-                        // All other requests require authentication
+
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

@@ -50,7 +50,7 @@ public class ReservationRequestListener {
                     event.getPaymentOverride()
             );
 
-            System.err.println("Failed to reserve seats for booking: " + event.getBookingId() 
+            System.err.println("Failed to reserve seats for booking: " + event.getBookingId()
                     + ", Error: " + e.getMessage());
         }
     }

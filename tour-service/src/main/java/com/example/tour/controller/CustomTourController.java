@@ -24,14 +24,9 @@ public class CustomTourController {
     @Autowired
     private CustomTourService customTourService;
 
-    /**
-     * USER ENDPOINTS
-     */
 
-    /**
-     * Create a new custom tour request
-     * POST /custom-tours?userId={userId}
-     */
+
+
     @PostMapping
     public ResponseEntity<CustomTourResponse> createCustomTour(
             @RequestParam Long userId,
@@ -40,34 +35,23 @@ public class CustomTourController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Get custom tour by ID
-     * GET /custom-tours/{id}
-     */
+
     @GetMapping("/{id}")
     public ResponseEntity<CustomTourResponse> getCustomTourById(@PathVariable Long id) {
         CustomTourResponse response = customTourService.getCustomTourById(id);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Get all custom tours for a specific user
-     * GET /custom-tours/user/{userId}
-     */
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<CustomTourResponse>> getCustomToursByUserId(@PathVariable Long userId) {
         List<CustomTourResponse> customTours = customTourService.getCustomToursByUserId(userId);
         return ResponseEntity.ok(customTours);
     }
 
-    /**
-     * ADMIN ENDPOINTS
-     */
 
-    /**
-     * Get all custom tours with filters (admin)
-     * GET /custom-tours/admin?status={status}&userId={userId}&keyword={keyword}&page={page}&size={size}
-     */
+
+
     @GetMapping("/admin")
     public ResponseEntity<Page<CustomTourResponse>> getAllCustomTours(
             @RequestParam(required = false) String status,
@@ -78,7 +62,7 @@ public class CustomTourController {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-        // Parse status if provided
+
         CustomTour.CustomTourStatus customTourStatus = null;
         if (status != null && !status.isBlank()) {
             try {
@@ -99,10 +83,7 @@ public class CustomTourController {
         return ResponseEntity.ok(customTours);
     }
 
-    /**
-     * Update custom tour status (admin)
-     * PUT /custom-tours/{id}/status
-     */
+
     @PutMapping("/{id}/status")
     public ResponseEntity<CustomTourResponse> updateCustomTourStatus(
             @PathVariable Long id,
@@ -111,20 +92,14 @@ public class CustomTourController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Delete custom tour (admin)
-     * DELETE /custom-tours/{id}
-     */
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCustomTour(@PathVariable Long id) {
         customTourService.deleteCustomTour(id);
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Get statistics (admin)
-     * GET /custom-tours/stats
-     */
+
     @GetMapping("/stats")
     public ResponseEntity<?> getStats() {
         return ResponseEntity.ok(java.util.Map.of(

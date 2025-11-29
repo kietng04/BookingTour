@@ -189,8 +189,8 @@ const DepartureEdit = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Edit Departure</h1>
-            <p className="text-slate-600 mt-1">Update departure schedule details</p>
+            <h1 className="text-2xl font-bold text-slate-900">Sửa chuyến đi</h1>
+            <p className="text-slate-600 mt-1">Cập nhật thông tin chuyến đi</p>
           </div>
         </div>
       </div>
@@ -205,12 +205,12 @@ const DepartureEdit = () => {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-medium text-amber-900">Departure has active bookings</h3>
+              <h3 className="text-sm font-medium text-amber-900">Chuyến đi có booking hoạt động</h3>
               <div className="mt-2 text-sm text-amber-700">
                 <p>
-                  This departure has {reservedSlots} slot(s) already booked.
-                  You cannot reduce total slots below this number.
-                  Changes may affect existing bookings.
+                  Chuyến đi này đã có {reservedSlots} chỗ được đặt.
+                  Bạn không thể giảm tổng số chỗ xuống dưới con số này.
+                  Thay đổi có thể ảnh hưởng đến các booking hiện tại.
                 </p>
               </div>
             </div>
@@ -228,9 +228,9 @@ const DepartureEdit = () => {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-medium text-slate-900">Departure has started</h3>
+              <h3 className="text-sm font-medium text-slate-900">Chuyến đi đã khởi hành</h3>
               <p className="mt-1 text-sm text-slate-600">
-                This departure has already started. Exercise caution when making changes.
+                Chuyến đi này đã bắt đầu. Hãy thận trọng khi thay đổi thông tin.
               </p>
             </div>
           </div>

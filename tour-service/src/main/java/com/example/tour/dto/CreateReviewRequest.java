@@ -10,7 +10,7 @@ public class CreateReviewRequest {
     private Long bookingId;
     private String[] badges;
 
-    // Getters and Setters
+
 
     public BigDecimal getRating() {
         return rating;

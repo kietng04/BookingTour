@@ -4,6 +4,7 @@ import com.example.tour.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,22 +23,22 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints - no authentication required
+
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/tours/**").permitAll()
                         .requestMatchers("/regions/**").permitAll()
                         .requestMatchers("/provinces/**").permitAll()
-                        
-                        // Custom tours - require authentication
+
+
+                        .requestMatchers(HttpMethod.GET, "/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/reviews/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/reviews/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/reviews/**").authenticated()
+
+
                         .requestMatchers("/custom-tours/**").authenticated()
-                        
-                        // Reviews - require authentication for POST/PUT/DELETE
-                        .requestMatchers("POST", "/reviews/**").authenticated()
-                        .requestMatchers("PUT", "/reviews/**").authenticated()
-                        .requestMatchers("DELETE", "/reviews/**").authenticated()
-                        .requestMatchers("GET", "/reviews/**").permitAll()
-                        
-                        // All other requests require authentication
+
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

@@ -56,7 +56,7 @@ public class UserController {
         if (existingUser.isPresent()) {
             User user = existingUser.get();
 
-            // Only update non-null fields to allow partial updates
+
             if (updatedUser.getUsername() != null) {
                 user.setUsername(updatedUser.getUsername());
             }
@@ -97,14 +97,14 @@ public class UserController {
         try {
             String jwtToken = token.substring(7);
             String email = jwtUtil.extractEmail(jwtToken);
-            
+
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             if (request.getFullName() != null && !request.getFullName().trim().isEmpty()) {
                 user.setFullName(request.getFullName().trim());
             }
-            
+
             if (request.getPhoneNumber() != null && !request.getPhoneNumber().trim().isEmpty()) {
                 user.setPhoneNumber(request.getPhoneNumber().trim());
             }
@@ -122,7 +122,7 @@ public class UserController {
         try {
             String jwtToken = token.substring(7);
             String email = jwtUtil.extractEmail(jwtToken);
-            
+
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -138,7 +138,7 @@ public class UserController {
         try {
             String jwtToken = token.substring(7);
             String email = jwtUtil.extractEmail(jwtToken);
-            
+
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -190,12 +190,12 @@ public class UserController {
     @PostMapping("/init-admin")
     public ResponseEntity<?> initAdmin() {
         try {
-            // Check if admin already exists
+
             if (userRepository.existsByEmail("admin@gmail.com")) {
                 return ResponseEntity.ok().body("{\"message\": \"Admin user already exists\", \"email\": \"admin@gmail.com\"}");
             }
 
-            // Create new admin user
+
             User admin = new User();
             admin.setUsername("admin");
             admin.setEmail("admin@gmail.com");

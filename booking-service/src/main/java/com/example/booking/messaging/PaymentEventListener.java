@@ -53,16 +53,16 @@ public class PaymentEventListener {
             Long bookingId = Long.parseLong(message.getBookingId());
 
             if ("PAYMENT_COMPLETED".equals(message.getStatus())) {
-                // Payment completed - booking remains PENDING awaiting admin confirmation
+
                 Booking booking = bookingService.getBookingById(bookingId);
                 log.info("[BOOKING-SERVICE] Payment completed for booking {}. " +
                         "Status remains PENDING - awaiting admin confirmation", bookingId);
 
-                // Optional: Notify admin about new paid booking awaiting confirmation
-                // Future enhancement: Send notification to admin dashboard
+
+
 
             } else if ("FAILED".equals(message.getStatus())) {
-                // Payment failed - mark booking as FAILED and release seats
+
                 Booking booking = bookingService.getBookingById(bookingId);
                 bookingService.failBooking(bookingId);
 
@@ -83,9 +83,7 @@ public class PaymentEventListener {
         }
     }
 
-    /**
-     * Gửi email invoice đặt tour sau khi thanh toán thành công
-     */
+
     private void sendBookingInvoiceEmail(Booking booking) {
         try {
             Map<String, Object> userInfo = getUserInfo(booking.getUserId());

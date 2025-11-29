@@ -22,7 +22,7 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
 
     Optional<Tour> findBySlug(String slug);
 
-    
+
     @Query("SELECT t FROM Tour t WHERE LOWER(t.tourName) LIKE CONCAT('%', LOWER(:keyword), '%') " +
            "OR LOWER(t.description) LIKE CONCAT('%', LOWER(:keyword), '%')")
     Page<Tour> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
