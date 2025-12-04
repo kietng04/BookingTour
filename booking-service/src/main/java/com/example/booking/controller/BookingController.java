@@ -52,7 +52,7 @@ public class BookingController {
         );
 
         Map<String, Object> response = new HashMap<>();
-        
+
         response.put("bookingId", booking.getId());
         response.put("status", booking.getStatus().name());
         response.put("message", "Booking created, processing seat reservation");
@@ -151,23 +151,23 @@ public class BookingController {
     @PostMapping("/{id}/confirm")
     public ResponseEntity<Map<String, Object>> confirmBookingTest(@PathVariable Long id) {
         log.info("[BOOKING-SERVICE] Test confirming booking {} and sending email", id);
-        
+
         try {
             Booking booking = bookingService.confirmBooking(id);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("bookingId", booking.getId());
             response.put("status", booking.getStatus().name());
             response.put("message", "Booking confirmed and email sent successfully");
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("[BOOKING-SERVICE] Error confirming booking {}: {}", id, e.getMessage(), e);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("error", e.getMessage());
             response.put("message", "Failed to confirm booking");
-            
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }

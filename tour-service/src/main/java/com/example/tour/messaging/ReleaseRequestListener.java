@@ -40,7 +40,7 @@ public class ReleaseRequestListener {
             System.out.println("Seats released successfully for booking: " + event.getBookingId());
 
         } catch (Exception e) {
-            System.err.println("Failed to release seats for booking: " + event.getBookingId() 
+            System.err.println("Failed to release seats for booking: " + event.getBookingId()
                     + ", Error: " + e.getMessage());
         }
     }

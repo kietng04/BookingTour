@@ -236,7 +236,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private Double calculateTourOccupancyRate(Long tourId) {
-        return 0.0; // Placeholder
+        return 0.0;
     }
 
     private List<Map<String, Object>> getDeparturesFromTourService(Long tourId) {

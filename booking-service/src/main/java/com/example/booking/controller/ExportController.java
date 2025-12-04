@@ -33,11 +33,7 @@ public class ExportController {
     @Autowired
     private BookingRepository bookingRepository;
 
-    /**
-     * Export bookings list to Excel
-     * GET /export/bookings/excel
-     * Optional filters: userId, tourId, status, startDate, endDate
-     */
+
     @GetMapping("/bookings/excel")
     public ResponseEntity<Resource> exportBookingsToExcel(
             @RequestParam(required = false) Long userId,
@@ -50,7 +46,7 @@ public class ExportController {
                 userId, tourId, status, startDate, endDate);
 
         try {
-            // Fetch bookings based on filters
+
             List<Booking> bookings = fetchBookingsWithFilters(userId, tourId, status, startDate, endDate);
 
             if (bookings.isEmpty()) {
@@ -58,13 +54,13 @@ public class ExportController {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No bookings found");
             }
 
-            // Generate Excel
+
             ByteArrayInputStream excelStream = exportService.exportBookingsToExcel(bookings);
 
-            // Prepare file name
+
             String fileName = "bookings_" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".xlsx";
 
-            // Set headers
+
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
             headers.add(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
@@ -87,11 +83,7 @@ public class ExportController {
         }
     }
 
-    /**
-     * Export dashboard statistics to Excel
-     * GET /export/dashboard/excel
-     * Required params: startDate, endDate
-     */
+
     @GetMapping("/dashboard/excel")
     public ResponseEntity<Resource> exportDashboardStatsToExcel(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -100,19 +92,19 @@ public class ExportController {
         log.info("Exporting dashboard stats from {} to {}", startDate, endDate);
 
         try {
-            // Validate date range
+
             if (endDate.isBefore(startDate)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "End date must be after or equal to start date");
             }
 
-            // Generate Excel
+
             ByteArrayInputStream excelStream = exportService.exportDashboardStatsToExcel(startDate, endDate);
 
-            // Prepare file name
+
             String fileName = "dashboard_stats_" + startDate + "_to_" + endDate + ".xlsx";
 
-            // Set headers
+
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
             headers.add(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
@@ -135,18 +127,16 @@ public class ExportController {
         }
     }
 
-    /**
-     * Helper method to fetch bookings with various filters
-     */
+
     private List<Booking> fetchBookingsWithFilters(Long userId, Long tourId,
                                                      Booking.BookingStatus status,
                                                      LocalDate startDate, LocalDate endDate) {
-        // If all filters are null, return all bookings
+
         if (userId == null && tourId == null && status == null && startDate == null && endDate == null) {
             return bookingRepository.findAll();
         }
 
-        // Apply specific filters
+
         if (userId != null) {
             return bookingRepository.findByUserId(userId, org.springframework.data.domain.Pageable.unpaged()).getContent();
         }
@@ -160,14 +150,14 @@ public class ExportController {
         }
 
         if (startDate != null && endDate != null) {
-            // Filter by date range using findAll and stream filter
+
             return bookingRepository.findAll().stream()
                     .filter(b -> !b.getCreatedAt().toLocalDate().isBefore(startDate)
                             && !b.getCreatedAt().toLocalDate().isAfter(endDate))
                     .toList();
         }
 
-        // Default: return all
+
         return bookingRepository.findAll();
     }
 }

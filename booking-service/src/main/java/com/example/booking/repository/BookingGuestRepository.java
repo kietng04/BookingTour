@@ -10,13 +10,13 @@ import java.util.List;
 
 @Repository
 public interface BookingGuestRepository extends JpaRepository<BookingGuest, Long> {
-    
+
     @Query("SELECT bg FROM BookingGuest bg WHERE bg.bookingId = :bookingId")
     List<BookingGuest> findByBookingId(@Param("bookingId") Long bookingId);
-    
+
     @Query("SELECT COUNT(bg) FROM BookingGuest bg WHERE bg.bookingId = :bookingId")
     Integer countByBookingId(@Param("bookingId") Long bookingId);
-    
+
     @Query("DELETE FROM BookingGuest bg WHERE bg.bookingId = :bookingId")
     void deleteByBookingId(@Param("bookingId") Long bookingId);
 }

@@ -11,7 +11,7 @@ public class UpdateReviewStatusRequest {
         this.status = status;
     }
 
-    // Getters and Setters
+
 
     public String getStatus() {
         return status;

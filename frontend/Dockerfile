@@ -1,4 +1,3 @@
-# Build stage
 FROM node:18-alpine as build
 
 WORKDIR /app
@@ -13,7 +12,6 @@ COPY . .
 
 RUN npm run build && mv dist build
 
-# Production stage
 FROM node:18-alpine
 
 WORKDIR /app

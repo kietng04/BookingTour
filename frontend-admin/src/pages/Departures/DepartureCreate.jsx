@@ -100,8 +100,8 @@ const DepartureCreate = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Create New Departure</h1>
-            <p className="text-slate-600 mt-1">Add a new departure schedule for a tour</p>
+            <h1 className="text-2xl font-bold text-slate-900">Tạo chuyến đi mới</h1>
+            <p className="text-slate-600 mt-1">Thêm lịch trình chuyến đi mới cho tour</p>
           </div>
         </div>
       </div>
@@ -115,13 +115,13 @@ const DepartureCreate = () => {
             </svg>
           </div>
           <div className="flex-1">
-            <h3 className="text-sm font-medium text-blue-900">Before creating a departure</h3>
+            <h3 className="text-sm font-medium text-blue-900">Trước khi tạo chuyến đi</h3>
             <div className="mt-2 text-sm text-blue-700">
               <ul className="list-disc list-inside space-y-1">
-                <li>Ensure the tour is active and has all necessary details</li>
-                <li>Set realistic slot numbers based on tour capacity</li>
-                <li>Double-check date ranges to avoid conflicts</li>
-                <li>Start date must be in the future</li>
+                <li>Đảm bảo tour đang hoạt động và có đầy đủ thông tin cần thiết</li>
+                <li>Đặt số lượng chỗ hợp lý dựa trên sức chứa của tour</li>
+                <li>Kiểm tra kỹ khoảng thời gian để tránh xung đột</li>
+                <li>Ngày bắt đầu phải là ngày trong tương lai</li>
               </ul>
             </div>
           </div>

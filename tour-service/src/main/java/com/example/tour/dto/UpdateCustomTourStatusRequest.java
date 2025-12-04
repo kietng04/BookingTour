@@ -10,7 +10,7 @@ public class UpdateCustomTourStatusRequest {
 
     private String adminNotes;
 
-    // Getters and Setters
+
     public CustomTour.CustomTourStatus getStatus() {
         return status;
     }

@@ -68,7 +68,7 @@ const CustomTourRequest = () => {
     try {
       // Get userId from localStorage (assuming it's stored there after login)
       const userId = localStorage.getItem('userId');
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
 
       if (!userId) {
         setError('Vui lòng đăng nhập để gửi yêu cầu');

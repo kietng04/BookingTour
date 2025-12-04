@@ -22,12 +22,21 @@ interface PaymentDetailsResponse {
   createdAt?: string;
 }
 
-const defaultHeaders = {
-  'Content-Type': 'application/json',
-};
-
 function buildUrl(path: string) {
   return `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+}
+
+function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem('authToken');
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return headers;
 }
 
 async function handleJsonResponse<T>(response: Response): Promise<T> {
@@ -63,7 +72,7 @@ export async function createMoMoOrder(params: CreateMoMoOrderParams): Promise<Mo
 
   const response = await fetch(buildUrl('/payments/momo/orders'), {
     method: 'POST',
-    headers: defaultHeaders,
+    headers: getAuthHeaders(),
     body: JSON.stringify(payload),
   });
 
@@ -73,7 +82,7 @@ export async function createMoMoOrder(params: CreateMoMoOrderParams): Promise<Mo
 export async function getPaymentStatus(bookingId: number): Promise<PaymentDetailsResponse> {
   const response = await fetch(buildUrl(`/payments/booking/${bookingId}`), {
     method: 'GET',
-    headers: defaultHeaders,
+    headers: getAuthHeaders(),
   });
 
   return handleJsonResponse<PaymentDetailsResponse>(response);
@@ -82,7 +91,7 @@ export async function getPaymentStatus(bookingId: number): Promise<PaymentDetail
 export async function getBookingStatus(bookingId: number) {
   const response = await fetch(buildUrl(`/bookings/${bookingId}`), {
     method: 'GET',
-    headers: defaultHeaders,
+    headers: getAuthHeaders(),
   });
 
   return handleJsonResponse<unknown>(response);

@@ -8,18 +8,9 @@ import java.util.List;
 
 public interface ExportService {
 
-    /**
-     * Export bookings list to Excel
-     * @param bookings List of bookings to export
-     * @return Excel file as ByteArrayInputStream
-     */
+
     ByteArrayInputStream exportBookingsToExcel(List<Booking> bookings);
 
-    /**
-     * Export dashboard statistics to Excel
-     * @param startDate Start date for stats
-     * @param endDate End date for stats
-     * @return Excel file as ByteArrayInputStream
-     */
+
     ByteArrayInputStream exportDashboardStatsToExcel(LocalDate startDate, LocalDate endDate);
 }

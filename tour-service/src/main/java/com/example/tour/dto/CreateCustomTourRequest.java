@@ -30,7 +30,7 @@ public class CreateCustomTourRequest {
 
     private String description;
 
-    // Getters and Setters
+
     public String getTourName() {
         return tourName;
     }

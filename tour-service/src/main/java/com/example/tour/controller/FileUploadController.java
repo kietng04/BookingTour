@@ -23,10 +23,7 @@ public class FileUploadController {
     @Autowired
     private FileUploadService fileUploadService;
 
-    /**
-     * Upload a single tour image
-     * POST /upload/tour-image
-     */
+
     @PostMapping("/tour-image")
     public ResponseEntity<Map<String, String>> uploadTourImage(
             @RequestParam("file") MultipartFile file,
@@ -58,10 +55,7 @@ public class FileUploadController {
         }
     }
 
-    /**
-     * Upload multiple tour images
-     * POST /upload/tour-images
-     */
+
     @PostMapping("/tour-images")
     public ResponseEntity<Map<String, Object>> uploadMultipleTourImages(
             @RequestParam("files") MultipartFile[] files,
@@ -102,10 +96,7 @@ public class FileUploadController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Delete an image
-     * DELETE /upload/image
-     */
+
     @DeleteMapping("/image")
     public ResponseEntity<Map<String, String>> deleteImage(
             @RequestParam("imageUrl") String imageUrl) {
@@ -137,10 +128,7 @@ public class FileUploadController {
         }
     }
 
-    /**
-     * Health check endpoint
-     * GET /upload/health
-     */
+
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
         Map<String, String> response = new HashMap<>();

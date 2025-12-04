@@ -67,12 +67,19 @@ export const bookingsAPI = {
 
   getUserBookings: (userId, params = {}) => {
     const query = new URLSearchParams(params).toString();
-    return fetchAPI(`/bookings/user/${userId}${query ? `?${query}` : ''}`);
+    const token = localStorage.getItem('authToken');
+    return fetchAPI(`/bookings/user/${userId}${query ? `?${query}` : ''}`, {
+      authToken: token,
+    });
   },
 
-  cancel: (bookingId) => fetchAPI(`/bookings/${bookingId}`, {
-    method: 'DELETE',
-  }),
+  cancel: (bookingId) => {
+    const token = localStorage.getItem('authToken');
+    return fetchAPI(`/bookings/${bookingId}`, {
+      method: 'DELETE',
+      authToken: token,
+    });
+  },
 };
 
 export const regionsAPI = {

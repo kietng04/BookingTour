@@ -183,7 +183,7 @@ const BookingDetail = () => {
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Chi tiết đặt chỗ</p>
           <h1 className="text-2xl font-semibold text-slate-900">{tourName}</h1>
-          <p className="text-sm text-slate-500">ID {booking.id} · {bookingDateLabel}</p>
+          <p className="text-sm text-slate-500">ID {booking.id}</p>
           {departure && (
             <p className="text-xs text-slate-500">
               Khởi hành: {formatDate(departure.startDate)} → {formatDate(departure.endDate)} · {departure.remainingSlots}/{departure.totalSlots} chỗ
@@ -232,7 +232,7 @@ const BookingDetail = () => {
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <Phone className="h-4 w-4" />
-            {user?.phoneNumber || 'Chưa cập nhật' }
+            {user?.phoneNumber || 'Chưa cập nhật'}
           </div>
         </div>
         <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">

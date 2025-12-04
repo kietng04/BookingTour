@@ -14,7 +14,7 @@ const MyCustomTours = () => {
   const fetchCustomTours = async () => {
     try {
       const userId = localStorage.getItem('userId');
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
 
       if (!userId) {
         setError('Vui lòng đăng nhập để xem yêu cầu của bạn');

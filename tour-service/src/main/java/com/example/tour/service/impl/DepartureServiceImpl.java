@@ -50,7 +50,7 @@ public class DepartureServiceImpl implements DepartureService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Tour not found for id " + tourId));
 
-        // Strict duration validation - departure must match tour duration
+
         validateDepartureDuration(request.getStartDate(), request.getEndDate(), tour);
 
         Departure departure = new Departure();
@@ -70,7 +70,7 @@ public class DepartureServiceImpl implements DepartureService {
 
         Departure departure = getDepartureForTour(tourId, departureId);
 
-        // Validation: Cannot update departure that has already departed
+
         if (departure.getStatus() == Departure.DepartureStatus.DAKHOIHANH) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Cannot update departure that has already departed (status: DAKHOIHANH)");
@@ -83,7 +83,7 @@ public class DepartureServiceImpl implements DepartureService {
             departure.setEndDate(request.getEndDate());
         }
 
-        // Strict duration validation - departure must match tour duration
+
         if (request.getStartDate() != null || request.getEndDate() != null) {
             validateDepartureDuration(departure.getStartDate(), departure.getEndDate(), departure.getTour());
         }
@@ -107,7 +107,7 @@ public class DepartureServiceImpl implements DepartureService {
     public void deleteDeparture(Long tourId, Long departureId) {
         Departure departure = getDepartureForTour(tourId, departureId);
 
-        // Validation: Cannot delete departure that has already departed
+
         if (departure.getStatus() == Departure.DepartureStatus.DAKHOIHANH) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Cannot delete departure that has already departed (status: DAKHOIHANH)");
@@ -213,10 +213,10 @@ public class DepartureServiceImpl implements DepartureService {
             return;
         }
 
-        // Calculate actual days between start and end (inclusive)
+
         long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
 
-        // Check if it matches the tour's duration
+
         if (daysBetween != tour.getDays()) {
             LocalDate expectedEndDate = startDate.plusDays(tour.getDays() - 1);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

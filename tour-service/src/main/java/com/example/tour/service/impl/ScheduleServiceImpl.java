@@ -24,9 +24,9 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public List<TourSchedule> listSchedules(Long tourId) {
-        if (!tourRepository.existsById(tourId)) 
+        if (!tourRepository.existsById(tourId))
             throw new RuntimeException("Không tìm thấy tour với id = " + tourId);
-        
+
         return scheduleRepository.findByTourIdOrderByDayNumber(tourId);
     }
 
@@ -38,9 +38,9 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         validateSchedule(request, tour.getDays());
 
-        if (scheduleRepository.existsByTourIdAndDayNumber(tourId, request.getDayNumber())) 
+        if (scheduleRepository.existsByTourIdAndDayNumber(tourId, request.getDayNumber()))
             throw new IllegalArgumentException("Ngày " + request.getDayNumber() + " đã có lịch trình trong tour này");
-        
+
         TourSchedule schedule = new TourSchedule();
         schedule.setTour(tour);
         schedule.setDayNumber(request.getDayNumber());
@@ -66,7 +66,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         schedule.setDayNumber(request.getDayNumber());
         schedule.setScheduleDescription(request.getScheduleDescription().trim());
-        
+
         return scheduleRepository.save(schedule);
     }
 
@@ -84,41 +84,41 @@ public class ScheduleServiceImpl implements ScheduleService {
         if (request.getDayNumber() == null || request.getDayNumber() <= 0)
             throw new IllegalArgumentException("Số ngày phải là số nguyên dương");
 
-        if (request.getDayNumber() > totalDays) 
+        if (request.getDayNumber() > totalDays)
             throw new IllegalArgumentException("Số ngày không được vượt quá tổng số ngày của tour (" + totalDays + ")");
 
         if (request.getScheduleDescription() == null || request.getScheduleDescription().isBlank())
             throw new IllegalArgumentException("Mô tả lịch trình không được để trống");
-        
-        if (request.getScheduleDescription().trim().length() < 10) 
+
+        if (request.getScheduleDescription().trim().length() < 10)
             throw new IllegalArgumentException("Mô tả lịch trình phải có ít nhất 10 ký tự");
-        
-        if (request.getScheduleDescription().trim().length() > 2000) 
+
+        if (request.getScheduleDescription().trim().length() > 2000)
             throw new IllegalArgumentException("Mô tả lịch trình không được vượt quá 2000 ký tự");
     }
 
 
     private void validateUpdateSchedule(UpdateScheduleRequest request, Integer totalDays) {
         if (request.getDayNumber() != null) {
-            if (request.getDayNumber() <= 0) 
+            if (request.getDayNumber() <= 0)
                 throw new IllegalArgumentException("Số ngày phải là số nguyên dương");
-            
-            if (request.getDayNumber() > totalDays) 
+
+            if (request.getDayNumber() > totalDays)
                 throw new IllegalArgumentException("Số ngày không được vượt quá tổng số ngày của tour (" + totalDays + ")");
-            
+
         }
 
         if (request.getScheduleDescription() != null) {
-            if (request.getScheduleDescription().isBlank()) 
+            if (request.getScheduleDescription().isBlank())
                 throw new IllegalArgumentException("Mô tả lịch trình không được để trống");
-            
-            if (request.getScheduleDescription().trim().length() < 10) 
+
+            if (request.getScheduleDescription().trim().length() < 10)
                 throw new IllegalArgumentException("Mô tả lịch trình phải có ít nhất 10 ký tự");
-               
-            if (request.getScheduleDescription().trim().length() > 2000) 
+
+            if (request.getScheduleDescription().trim().length() > 2000)
                 throw new IllegalArgumentException("Mô tả lịch trình không được vượt quá 200 ký tự");
         }
-        
+
     }
 }
 

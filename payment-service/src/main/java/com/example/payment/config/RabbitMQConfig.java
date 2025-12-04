@@ -8,11 +8,11 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-    
+
     public static final String PAYMENT_EXCHANGE = "payment.exchange";
     public static final String PAYMENT_CHARGE_QUEUE = "payment.charge.queue";
     public static final String PAYMENT_EVENTS_QUEUE = "payment.events.queue";
-    
+
     public static final String ROUTING_KEY_CHARGE = "payment.charge";
     public static final String ROUTING_KEY_COMPLETED = "payment.completed";
     public static final String ROUTING_KEY_FAILED = "payment.failed";

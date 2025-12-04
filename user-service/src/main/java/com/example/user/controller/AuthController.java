@@ -197,7 +197,7 @@ public class AuthController {
     @PostMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestBody EmailVerificationRequest request) {
         try {
-            logger.info("Received verify-email request - email: '{}', code: '{}', code length: {}", 
+            logger.info("Received verify-email request - email: '{}', code: '{}', code length: {}",
                 request.getEmail(), request.getCode(), request.getCode() != null ? request.getCode().length() : 0);
             boolean verified = emailVerificationService.verifyCode(request.getEmail(), request.getCode());
             if (verified) {
@@ -235,7 +235,7 @@ public class AuthController {
     public ResponseEntity<?> checkEmailVerified(@RequestParam String email) {
         try {
             boolean verified = emailVerificationService.isEmailVerified(email);
-            return ResponseEntity.ok(new EmailVerificationResponse(verified, 
+            return ResponseEntity.ok(new EmailVerificationResponse(verified,
                 verified ? "Email is verified" : "Email is not verified"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -259,7 +259,7 @@ public class AuthController {
                 request.getPaymentMethod(),
                 request.getPaymentTime()
             );
-            
+
             return ResponseEntity.ok(new EmailVerificationResponse(true, "Booking confirmation email sent successfully"));
         } catch (Exception e) {
             logger.error("Error sending booking confirmation email", e);
@@ -281,7 +281,7 @@ public class AuthController {
                 request.getDepartureDate(),
                 request.getPaymentMethod()
             );
-            
+
             return ResponseEntity.ok(new EmailVerificationResponse(true, "Booking invoice email sent successfully"));
         } catch (Exception e) {
             logger.error("Error sending booking invoice email", e);

@@ -16,7 +16,7 @@ public class CreateTourRequest {
     private BigDecimal adultPrice;
     private BigDecimal childPrice;
     private String heroImageUrl;
-    private List<String> imageUrls; // Support multiple images
+    private List<String> imageUrls;
     private List<TourScheduleRequest> schedules;
 
     public String getTourName() {

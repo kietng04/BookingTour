@@ -4,9 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-/**
- * Event DTO for booking confirmation email notification
- */
+
 public class BookingConfirmedEvent implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -23,7 +21,7 @@ public class BookingConfirmedEvent implements Serializable {
     private String paymentMethod;
     private String bookingDate;
 
-    // Constructors
+
     public BookingConfirmedEvent() {
     }
 
@@ -43,7 +41,7 @@ public class BookingConfirmedEvent implements Serializable {
         this.bookingDate = bookingDate;
     }
 
-    // Getters and Setters
+
     public Long getBookingId() {
         return bookingId;
     }

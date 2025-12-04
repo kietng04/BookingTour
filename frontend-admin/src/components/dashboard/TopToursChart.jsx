@@ -19,14 +19,14 @@ const TopToursChart = ({ data }) => {
           <p className="font-semibold text-slate-900 mb-2">{tour.tourName}</p>
           <div className="space-y-1 text-sm">
             <p className="text-slate-600">
-              Revenue: <span className="font-semibold text-primary-600">{formatCurrency(tour.revenue)}</span>
+              Doanh thu: <span className="font-semibold text-primary-600">{formatCurrency(tour.revenue)}</span>
             </p>
             <p className="text-slate-600">
-              Bookings: <span className="font-semibold">{tour.bookingCount}</span>
+              Số lượng đặt: <span className="font-semibold">{tour.bookingCount}</span>
             </p>
             {tour.occupancyRate !== undefined && tour.occupancyRate > 0 && (
               <p className="text-slate-600">
-                Occupancy: <span className="font-semibold">{tour.occupancyRate.toFixed(1)}%</span>
+                Tỷ lệ lấp đầy: <span className="font-semibold">{tour.occupancyRate.toFixed(1)}%</span>
               </p>
             )}
           </div>
@@ -45,8 +45,8 @@ const TopToursChart = ({ data }) => {
     <Card className="h-[400px]" padding="p-0">
       <div className="px-6 pt-6 pb-4">
         <div>
-          <p className="text-xs uppercase tracking-widest text-slate-400">Top Performers</p>
-          <h3 className="text-lg font-semibold text-slate-900">Best Selling Tours</h3>
+          <p className="text-xs uppercase tracking-widest text-slate-400">Tour bán chạy nhất</p>
+          <h3 className="text-lg font-semibold text-slate-900">Top 5 Tour doanh thu cao</h3>
         </div>
       </div>
       {data && data.length > 0 ? (
@@ -80,7 +80,7 @@ const TopToursChart = ({ data }) => {
         </ResponsiveContainer>
       ) : (
         <div className="flex items-center justify-center h-full pb-20">
-          <p className="text-sm text-slate-400">No tour data available</p>
+          <p className="text-sm text-slate-400">Không có dữ liệu tour</p>
         </div>
       )}
     </Card>

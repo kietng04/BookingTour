@@ -65,7 +65,6 @@ const TourCreate = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-slate-900">Tạo tour</h1>
-        <p className="text-sm text-slate-500">Form này phản ánh validation của backend. Khi submit sẽ gửi tới POST /tours.</p>
       </div>
       {error && (
         <Card className="border-danger/30 bg-danger/10 p-4 text-danger text-sm">{error}</Card>

@@ -37,56 +37,40 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Integer countBookedSeats(@Param("departureId") Long departureId);
 
 
-    /**
-     * Sum total revenue by status and date range
-     */
+
     @Query("SELECT COALESCE(SUM(b.totalAmount), 0) FROM Booking b WHERE b.status = :status AND b.createdAt BETWEEN :startDate AND :endDate")
     BigDecimal sumRevenueByStatusAndDateRange(@Param("status") Booking.BookingStatus status,
                                                @Param("startDate") LocalDateTime startDate,
                                                @Param("endDate") LocalDateTime endDate);
 
-    /**
-     * Sum total revenue in date range (all statuses)
-     */
+
     @Query("SELECT COALESCE(SUM(b.totalAmount), 0) FROM Booking b WHERE b.createdAt BETWEEN :startDate AND :endDate")
     BigDecimal sumRevenueByDateRange(@Param("startDate") LocalDateTime startDate,
                                       @Param("endDate") LocalDateTime endDate);
 
-    /**
-     * Count bookings by status
-     */
+
     @Query("SELECT COUNT(b) FROM Booking b WHERE b.status = :status")
     Long countByStatus(@Param("status") Booking.BookingStatus status);
 
-    /**
-     * Count bookings by status and date range
-     */
+
     @Query("SELECT COUNT(b) FROM Booking b WHERE b.status = :status AND b.createdAt BETWEEN :startDate AND :endDate")
     Long countByStatusAndDateRange(@Param("status") Booking.BookingStatus status,
                                     @Param("startDate") LocalDateTime startDate,
                                     @Param("endDate") LocalDateTime endDate);
 
-    /**
-     * Count all bookings in date range
-     */
+
     @Query("SELECT COUNT(b) FROM Booking b WHERE b.createdAt BETWEEN :startDate AND :endDate")
     Long countByDateRange(@Param("startDate") LocalDateTime startDate,
                            @Param("endDate") LocalDateTime endDate);
 
-    /**
-     * Get top tours by revenue
-     * Returns array: [0]=tourId, [1]=totalRevenue, [2]=bookingCount
-     */
+
     @Query("SELECT b.tourId, COALESCE(SUM(b.totalAmount), 0), COUNT(b) " +
            "FROM Booking b WHERE b.status = 'CONFIRMED' " +
            "GROUP BY b.tourId " +
            "ORDER BY SUM(b.totalAmount) DESC")
     List<Object[]> findTopToursByRevenue(Pageable pageable);
 
-    /**
-     * Get revenue trends by date
-     * Returns array: [0]=date, [1]=revenue
-     */
+
     @Query("SELECT CAST(b.createdAt AS date), COALESCE(SUM(b.totalAmount), 0) " +
            "FROM Booking b " +
            "WHERE b.status = 'CONFIRMED' AND b.createdAt BETWEEN :startDate AND :endDate " +
@@ -95,17 +79,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Object[]> getRevenueTrendsByDay(@Param("startDate") LocalDateTime startDate,
                                           @Param("endDate") LocalDateTime endDate);
 
-    /**
-     * Count distinct users who made bookings in date range
-     */
+
     @Query("SELECT COUNT(DISTINCT b.userId) FROM Booking b WHERE b.createdAt BETWEEN :startDate AND :endDate")
     Long countDistinctUsersByDateRange(@Param("startDate") LocalDateTime startDate,
                                         @Param("endDate") LocalDateTime endDate);
 
-    /**
-     * Get booking count by status
-     * Returns array: [0]=status, [1]=count
-     */
+
     @Query("SELECT b.status, COUNT(b) FROM Booking b GROUP BY b.status")
     List<Object[]> countByStatusGrouped();
 }

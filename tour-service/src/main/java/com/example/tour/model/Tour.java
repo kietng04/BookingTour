@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"images", "departures", "discounts", "logs"}) // xử lý vòng lặp đệ quy do quan hệ
+@ToString(exclude = {"images", "departures", "discounts", "logs"})
 @Table(name = "tours")
 public class Tour {
 

@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Table(name="regions")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Region {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="region_id")

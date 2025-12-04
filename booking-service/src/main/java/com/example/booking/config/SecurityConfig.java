@@ -22,14 +22,14 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+
                         .requestMatchers("/actuator/**").permitAll()
-                        
-                        // All booking endpoints require authentication
+
+
                         .requestMatchers("/bookings/**").authenticated()
                         .requestMatchers("/export/**").authenticated()
-                        
-                        // All other requests require authentication
+
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

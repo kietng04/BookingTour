@@ -60,7 +60,7 @@ public class ExportServiceImpl implements ExportService {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Bookings");
 
-            // Create header style
+
             CellStyle headerStyle = workbook.createCellStyle();
             org.apache.poi.ss.usermodel.Font headerFont = workbook.createFont();
             headerFont.setBold(true);
@@ -69,7 +69,7 @@ public class ExportServiceImpl implements ExportService {
             headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
             headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
-            // Header row
+
             Row headerRow = sheet.createRow(0);
             String[] columns = {"ID", "Tour Name", "User Email", "Departure Date", "Seats", "Total Amount", "Status", "Created At"};
 
@@ -79,12 +79,12 @@ public class ExportServiceImpl implements ExportService {
                 cell.setCellStyle(headerStyle);
             }
 
-            // Data rows
+
             int rowNum = 1;
             for (Booking booking : bookings) {
                 Row row = sheet.createRow(rowNum++);
 
-                // Fetch tour name and user email
+
                 String tourName = getTourName(booking.getTourId());
                 String userEmail = getUserEmail(booking.getUserId());
 
@@ -99,7 +99,7 @@ public class ExportServiceImpl implements ExportService {
                 row.createCell(7).setCellValue(booking.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
             }
 
-            // Auto-size columns
+
             for (int i = 0; i < columns.length; i++) {
                 sheet.autoSizeColumn(i);
             }
@@ -124,11 +124,11 @@ public class ExportServiceImpl implements ExportService {
 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-            // Sheet 1: Summary
+
             Sheet summarySheet = workbook.createSheet("Summary");
             int rowNum = 0;
 
-            // Title
+
             Row titleRow = summarySheet.createRow(rowNum++);
             Cell titleCell = titleRow.createCell(0);
             titleCell.setCellValue("DASHBOARD STATISTICS");
@@ -143,7 +143,7 @@ public class ExportServiceImpl implements ExportService {
             summarySheet.createRow(rowNum++).createCell(0).setCellValue("Period: " + startDate + " to " + endDate);
             rowNum++;
 
-            // Revenue Stats
+
             summarySheet.createRow(rowNum++).createCell(0).setCellValue("REVENUE STATISTICS");
             summarySheet.createRow(rowNum++).createCell(0).setCellValue("Total Revenue: " +
                 formatCurrency(stats.getRevenue().getTotal()) + " VNĐ");
@@ -153,7 +153,7 @@ public class ExportServiceImpl implements ExportService {
                 formatCurrency(stats.getRevenue().getPending()) + " VNĐ");
             rowNum++;
 
-            // Booking Stats
+
             summarySheet.createRow(rowNum++).createCell(0).setCellValue("BOOKING STATISTICS");
             summarySheet.createRow(rowNum++).createCell(0).setCellValue("Total Bookings: " +
                 stats.getBookings().getTotal());
@@ -166,7 +166,7 @@ public class ExportServiceImpl implements ExportService {
 
             summarySheet.autoSizeColumn(0);
 
-            // Sheet 2: Revenue Trends
+
             Sheet trendsSheet = workbook.createSheet("Revenue Trends");
             Row headerRow = trendsSheet.createRow(0);
             headerRow.createCell(0).setCellValue("Date");
@@ -182,7 +182,7 @@ public class ExportServiceImpl implements ExportService {
             trendsSheet.autoSizeColumn(0);
             trendsSheet.autoSizeColumn(1);
 
-            // Sheet 3: Top Tours
+
             Sheet toursSheet = workbook.createSheet("Top Tours");
             Row tourHeaderRow = toursSheet.createRow(0);
             tourHeaderRow.createCell(0).setCellValue("Tour ID");
@@ -215,7 +215,7 @@ public class ExportServiceImpl implements ExportService {
         }
     }
 
-    // Helper methods
+
     private String getTourName(Long tourId) {
         try {
             String url = tourServiceUrl + "/tours/" + tourId;

@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PaymentEventPublisher {
-    
+
     private static final Logger log = LoggerFactory.getLogger(PaymentEventPublisher.class);
-    
+
     @Autowired
     private RabbitTemplate rabbitTemplate;
-    
+
     public void publishResult(PaymentResultMessage message, String routingKey) {
         log.info("[PAYMENT-SERVICE] Publishing {} event: {}", routingKey, message);
         rabbitTemplate.convertAndSend(

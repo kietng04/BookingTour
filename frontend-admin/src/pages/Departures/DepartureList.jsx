@@ -225,9 +225,8 @@ const DepartureList = () => {
             </p>
             <div className="w-full bg-slate-200 rounded-full h-1.5">
               <div
-                className={`h-full rounded-full ${
-                  availabilityPercent > 50 ? 'bg-green-500' : 'bg-amber-500'
-                }`}
+                className={`h-full rounded-full ${availabilityPercent > 50 ? 'bg-green-500' : 'bg-amber-500'
+                  }`}
                 style={{ width: `${availabilityPercent}%` }}
               />
             </div>
@@ -282,17 +281,14 @@ const DepartureList = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Departures</h1>
-          <p className="text-sm text-slate-500">
-            Manage tour departures and track availability
-          </p>
+          <h1 className="text-2xl font-semibold text-slate-900">Chuyến đi</h1>
         </div>
         <Button
           onClick={handleAddDeparture}
           className="flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
-          Add Departure
+          Thêm chuyến đi
         </Button>
       </div>
 

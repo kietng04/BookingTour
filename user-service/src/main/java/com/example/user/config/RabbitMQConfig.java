@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    // Email notification constants (must match booking-service)
+
     public static final String EMAIL_EXCHANGE = "email.exchange";
     public static final String EMAIL_BOOKING_CONFIRMED_QUEUE = "email.booking.confirmed.queue";
     public static final String EMAIL_BOOKING_CONFIRMED_KEY = "email.booking.confirmed";

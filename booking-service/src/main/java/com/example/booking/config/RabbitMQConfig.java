@@ -33,7 +33,7 @@ public class RabbitMQConfig {
     public static final String TOUR_SEAT_FAILED_KEY = "tour.seat.reservationFailed";
     public static final String TOUR_SEAT_RELEASED_KEY = "tour.seat.released";
 
-    // Email notification
+
     public static final String EMAIL_EXCHANGE = "email.exchange";
     public static final String EMAIL_BOOKING_CONFIRMED_QUEUE = "email.booking.confirmed.queue";
     public static final String EMAIL_BOOKING_CONFIRMED_KEY = "email.booking.confirmed";
@@ -72,7 +72,7 @@ public class RabbitMQConfig {
     public Binding bindingPaymentFailed(Queue paymentEventsQueue, DirectExchange paymentExchange) {
 
         return BindingBuilder.bind(paymentEventsQueue).to(paymentExchange).with(ROUTING_KEY_FAILED);
-        
+
     }
 
     @Bean
@@ -121,7 +121,7 @@ public class RabbitMQConfig {
                 .with(TOUR_SEAT_RELEASED_KEY);
     }
 
-    // Email notification beans
+
     @Bean
     public DirectExchange emailExchange() {
         return new DirectExchange(EMAIL_EXCHANGE);

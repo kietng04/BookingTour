@@ -11,12 +11,12 @@ import com.example.booking.dto.PaymentChargeMessage;
 
 @Component
 public class PaymentCommandPublisher {
-    
+
     private static final Logger log = LoggerFactory.getLogger(PaymentCommandPublisher.class);
-    
+
     @Autowired
     private RabbitTemplate rabbitTemplate;
-    
+
     public void publishChargeRequest(PaymentChargeMessage message) {
         log.info("[BOOKING-SERVICE] Publishing payment.charge: {}", message);
         rabbitTemplate.convertAndSend(

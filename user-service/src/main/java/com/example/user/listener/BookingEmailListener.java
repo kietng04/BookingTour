@@ -13,9 +13,7 @@ import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-/**
- * RabbitMQ listener for booking confirmation email notifications
- */
+
 @Component
 public class BookingEmailListener {
 
@@ -25,15 +23,13 @@ public class BookingEmailListener {
     @Autowired
     private EmailService emailService;
 
-    /**
-     * Listen for booking confirmed events and send confirmation email
-     */
+
     @RabbitListener(queues = RabbitMQConfig.EMAIL_BOOKING_CONFIRMED_QUEUE)
     public void handleBookingConfirmed(BookingConfirmedEvent event) {
         log.info("Received booking confirmed event for booking {}", event.getBookingId());
 
         try {
-            // Format data for email
+
             String bookingId = String.valueOf(event.getBookingId());
             String customerName = event.getUserName();
             String tourName = event.getTourName();
@@ -44,9 +40,9 @@ public class BookingEmailListener {
             String paymentMethod = event.getPaymentMethod() != null ? event.getPaymentMethod() : "MOMO";
             String paymentTime = event.getBookingDate();
             String contactEmail = event.getUserEmail();
-            String contactPhone = "N/A"; // Not available in event
+            String contactPhone = "N/A";
 
-            // Send confirmation email
+
             emailService.sendBookingConfirmationEmail(
                     event.getUserEmail(),
                     customerName,
@@ -65,13 +61,11 @@ public class BookingEmailListener {
 
         } catch (Exception e) {
             log.error("Failed to send booking confirmation email for booking {}", event.getBookingId(), e);
-            // Don't throw exception to avoid message requeue
+
         }
     }
 
-    /**
-     * Format currency amount to Vietnamese Dong
-     */
+
     private String formatCurrency(java.math.BigDecimal amount) {
         if (amount == null) return "0";
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));

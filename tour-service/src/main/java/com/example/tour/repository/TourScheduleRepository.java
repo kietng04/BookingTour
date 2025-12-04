@@ -10,9 +10,9 @@ import java.util.List;
 public interface TourScheduleRepository extends JpaRepository<TourSchedule, Long> {
 
     List<TourSchedule> findByTourIdOrderByDayNumber(Long tourId);
-    
+
     boolean existsByTourIdAndDayNumber(Long tourId, Integer dayNumber);
-    
+
     TourSchedule findByTourIdAndDayNumber(Long tourId, Integer dayNumber);
 }
 

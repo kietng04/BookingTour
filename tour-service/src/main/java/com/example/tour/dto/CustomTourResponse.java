@@ -21,7 +21,7 @@ public class CustomTourResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Constructor from entity
+
     public CustomTourResponse(CustomTour customTour) {
         this.id = customTour.getId();
         this.userId = customTour.getUserId();
@@ -38,11 +38,11 @@ public class CustomTourResponse {
         this.updatedAt = customTour.getUpdatedAt();
     }
 
-    // Default constructor
+
     public CustomTourResponse() {
     }
 
-    // Getters and Setters
+
     public Long getId() {
         return id;
     }

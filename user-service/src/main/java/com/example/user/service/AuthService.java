@@ -58,7 +58,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFullName(request.getFullName());
         user.setPhoneNumber(request.getPhoneNumber());
-        user.setActive(false); // Chưa kích hoạt cho đến khi verify email
+        user.setActive(false);
 
         User savedUser = userRepository.save(user);
         logger.info("Created new user: {} with email: {}", savedUser.getUsername(), savedUser.getEmail());
@@ -71,7 +71,7 @@ public class AuthService {
         }
 
         return new RegisterResponse(
-                null, // Không có token
+                null,
                 savedUser.getUsername(),
                 savedUser.getEmail(),
                 "Registration successful! Please check your email to verify your account.",
@@ -90,16 +90,16 @@ public class AuthService {
             throw new RuntimeException("Invalid username or password!");
         }
 
-        // Nếu là admin thì luôn cho phép đăng nhập, bỏ qua kiểm tra active và xác thực email
+
         boolean isAdmin = "admin".equalsIgnoreCase(user.getUsername()) || "admin@gmail.com".equalsIgnoreCase(user.getEmail());
         if (!isAdmin) {
             if (user.getActive() == null || !user.getActive()) {
-                // Check if email is verified
+
                 if (!emailVerificationService.isEmailVerified(user.getEmail())) {
                     throw new RuntimeException("Please verify your email before logging in. Check your inbox for verification code.");
                 }
 
-                // If email is verified but user is still inactive, it means admin disabled the account
+
                 throw new RuntimeException("Your account has been disabled. Please contact administrator.");
             }
         }
@@ -118,9 +118,7 @@ public class AuthService {
         );
     }
 
-    /**
-     * Kích hoạt tài khoản sau khi verify email thành công
-     */
+
     public void activateUserAccount(String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isPresent()) {
@@ -131,11 +129,9 @@ public class AuthService {
         }
     }
 
-    /**
-     * Gửi email xác nhận đặt tour
-     */
-    public void sendBookingConfirmationEmail(String toEmail, String customerName, 
-                                           String bookingId, String tourName, 
+
+    public void sendBookingConfirmationEmail(String toEmail, String customerName,
+                                           String bookingId, String tourName,
                                            String departureDate, String numberOfPeople,
                                            String contactEmail, String contactPhone,
                                            String totalAmount, String paymentMethod,
@@ -145,29 +141,25 @@ public class AuthService {
                 totalAmount, paymentMethod, paymentTime);
     }
 
-    /**
-     * Gửi email invoice đặt tour (sau khi thanh toán thành công)
-     */
-    public void sendBookingInvoiceEmail(String toEmail, String fullName, 
-                                       Long bookingId, String tourName, 
+
+    public void sendBookingInvoiceEmail(String toEmail, String fullName,
+                                       Long bookingId, String tourName,
                                        Integer numSeats, java.math.BigDecimal totalAmount,
                                        String departureDate, String paymentMethod) {
         emailService.sendBookingInvoiceEmail(toEmail, fullName, bookingId, tourName,
                 numSeats, totalAmount, departureDate, paymentMethod);
     }
 
-    /**
-     * Create login response after successful email verification
-     */
+
     public LoginResponse createLoginResponseAfterVerification(String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
             throw new RuntimeException("User not found");
         }
-        
+
         User user = userOpt.get();
         String token = jwtUtil.generateToken(user.getUsername(), user.getEmail());
-        
+
         return new LoginResponse(
             token,
             user.getUsername(),

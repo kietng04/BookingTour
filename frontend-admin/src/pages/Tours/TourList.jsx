@@ -44,7 +44,6 @@ const TourList = () => {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-slate-900">Tour du lịch</h1>
-            <p className="text-sm text-slate-500">Quản lý danh mục, tồn kho và giá cả đồng bộ cùng API backend.</p>
           </div>
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => { setKeyword(''); setStatus(''); setPage(0); }}>
